@@ -1,18 +1,8 @@
 open HolKernel bossLib boolLib Parse;
 open wordsTheory wordsLib;
-open SPI_stateTheory board_memTheory;
+open SPI_stateTheory;
 
-(* This script defines transmit automaton of SPI bus. *)
-(* Ning Dong, June 2020. *)
 val _ = new_theory "SPI_tx";
-
-(* tx buffer is in the board ram: tx_state -> bool *)
-val TX_BUFFER_IN_BOARD_RAM_def = Define `
-TX_BUFFER_IN_BOARD_RAM (txs:tx_state) =
-let start_pa = txs.tx_buffer_pa
-and length = n2w txs.tx_left_length: word32
-in !a. a <+ length ==> 
-((BOARD_RAM_START <=+ start_pa + a) /\ (start_pa + a <+ BOARD_RAM_END))`
 
 (* tx_channel_enabled_op: spi_state -> spi_state *)
 val tx_channel_enabled_op_def = Define `
@@ -24,13 +14,11 @@ tx := spi.tx with state := tx_issue_mem_req |>`
 (* tx_issue_mem_req_op: spi_state -> spi_state * mem_req option *)
 val tx_issue_mem_req_op_def = Define `
 tx_issue_mem_req_op (spi:spi_state) =
-let req = <|pa := spi.tx.tx_buffer_pa; v := NONE|> and
-spi = spi with tx := spi.tx with 
-<|state := tx_mem_reply; (* waiting for memory reply *)
+let req = <|pa := spi.tx.tx_buffer_pa; v := NONE|> in
+if (CHECK_TXS_BIT spi) /\ (BUFFER_IN_BOARD_RAM spi.tx.tx_buffer_pa spi.tx.tx_left_length) 
+then (spi with tx := spi.tx with  <|state := tx_mem_reply; (* waiting for memory reply *)
 tx_buffer_pa := spi.tx.tx_buffer_pa + 1w; (* go to next pa *)
-tx_left_length := spi.tx.tx_length - 1 (* left_length-- *)|>
-in
-if (TX_BUFFER_IN_BOARD_RAM spi.tx) then (spi, SOME req)
+tx_left_length := spi.tx.tx_left_length - 1 (* left_length-- *)|>, SOME req)
 else (spi with err := T, NONE)`
 
 (* TX_NO_LEFT_LENGTH: tx_state -> bool *)
