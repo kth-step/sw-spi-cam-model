@@ -87,10 +87,6 @@ case spi.init.state of
   else spi with err := T
   | init_done => spi with err := T`
 
-(*if (v <=+ 2w) \/ (spi.tx.state <> tx_idle) \/ (spi.rx.state <> rx_idle) then spi with err := T 
-  else spi with <|regs := spi.regs with
-  CH0CONF := spi.regs.CH0CONF with WL := v|>`*)
-
 (* write a value to spi.regs.CH0CONF to set mode, 
    including IS, DPE1, DPE0, TRM, EPOL, POL, PHA bits *)
 val write_CH0CONF_mode_def = Define `
