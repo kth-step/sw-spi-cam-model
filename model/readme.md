@@ -1,4 +1,4 @@
-This is the formal model of an SPI driver with a camera. The code follows Jonas NIC model's style.
+This is the formal model of an SPI driver with a camera(TODO). The code follows Jonas NIC model's style.
 
 ### Files
 - `board_memScript.sml` defines physical addresses of SPI registers and board RAM region. 
