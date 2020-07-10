@@ -1,5 +1,14 @@
 In order to fix the problem for SPI driver and controller, I create this folder for the updated model.
 
+### Update
+
+2020.7.10: update `SPI_stateScript.sml`, `write_SPIregsScript.sml` and `read_SPIregsScript.sml`.
+
+- Rewrite the SPI controller state, include init, tx, rx, xfer states. Still need to figure out the internel states of tx, rx, xfer, e.g. remove memory request steps of these states.
+- The write_SPI_regs provides the interface to update SPI state, spi -> spi' through write_SPI_regs(pa, v).
+- read_SPI_regs: spi -> spi' through read_SPI_regs(pa).
+- fix the mistake to clear TXS and RXS bit.
+
 ### Files
 - `board_memScript.sml`: not changed, defines physical addresses of SPI registers and board RAM region.
 - `SPI_stateScript.sml`: defines the datatypes for SPI controller and driver. Basiclly, the SPI controller model includes SPI registers and an error flag, the driver model includes 4 automatons(init tx rx xfer).
