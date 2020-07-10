@@ -38,16 +38,22 @@ build_CH0STAT (CH0STAT:ch0stat_bits) =
 EVAL ``(1w:word1 @@ (1w:word1 @@ (1w:word1 @@ 3w:word2):word3):word4):word32`` 
  *)
 
-(* read the value of RX0 with certain word-length*)
+(* read the value of RX0 with certain word-length
+ * read_RX0: env -> spi_state -> spi_state * word32
+ *)
 val read_RX0_def = Define `
-read_RX0 (spi:spi_state) =
+read_RX0 (env:environment) (spi:spi_state) =
 let wl = (w2n spi.regs.CH0CONF.WL) + 1 in
-(wl >< 0) spi.regs.RX0:word32`
+if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) then
+(spi with regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w,
+(wl >< 0) spi.regs.RX0:word32)
+else (spi with err := T, env.read_reg)`
 
-(* read_register returns a new spi state and the value of pa *)
+(* read_register returns a new spi state and the value of pa
+ * read_SPI_regs: environment -> word32 -> spi_state -> spi_state * word32
+ *)
 val read_SPI_regs_def = Define `
-read_SPI_regs (env:environment) (pa:word32) 
-(spi:spi_state) (driver:spi_driver) =
+read_SPI_regs (env:environment) (pa:word32) (spi:spi_state) =
 if spi.err  then (spi, env.read_reg)
 else if ~(pa IN SPI0_PA_RANGE) then (spi with err := T, env.read_reg)
 (* most regs can be read at any time *)
@@ -59,10 +65,7 @@ else if pa = SPI0_CH0STAT then (spi, build_CH0STAT spi.regs.CH0STAT)
 else if pa = SPI0_CH0CTRL then (spi, w2w spi.regs.CH0CTRL)
 else if pa = SPI0_TX0 then (spi, spi.regs.TX0)
 (* a read for RX0 is vaild when RXS = 1 *)
-else if pa = SPI0_RX0 /\ (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 3w) 
-then (spi, read_RX0 spi)
-else if pa = SPI0_RX0 /\ (~(CHECK_RXS_BIT spi) \/ (spi.regs.CH0CONF.WL <=+ 3w))
-then (spi with err := T, env.read_reg)
+else if pa = SPI0_RX0 then (read_RX0 env spi)
 (* other addresses in SPI are not modeled, return an arbitrary value *)
 else (spi, env.read_reg)`
 
