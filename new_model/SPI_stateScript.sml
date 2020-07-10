@@ -3,6 +3,8 @@ open wordsLib wordsTheory board_memTheory;
 
 val _ = new_theory "SPI_state";
 
+(* TODO: rewrite tx, rx, xfer states, they should not include memory request steps *)
+
 (* 1st part: spi_state, the SPI controller contains registers, 
    an error flag and automaton's states *)
 
