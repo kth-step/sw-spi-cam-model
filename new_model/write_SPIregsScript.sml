@@ -153,10 +153,10 @@ if (spi.init.state = init_done) /\ (spi.tx.state = tx_conf_ready) /\
    (spi.rx.state = rx_idle) /\ (spi.xfer.state = xfer_idle) /\ (v = 1w) 
 then spi with <|regs := spi.regs with CH0CTRL := 1w; 
      tx := spi.tx with state := tx_channel_enabled |>
-else if (spi.init.state = init_done) /\ (spi.tx.state = tx_disable_channel) /\
+else if (spi.init.state = init_done) /\ (spi.tx.state = tx_trans_check) /\
      (spi.rx.state = rx_idle) /\ (spi.xfer.state = xfer_idle) /\ (v = 0w)
 then spi with <|regs := spi.regs with CH0CTRL := 0w;
-     tx := spi.tx with state := tx_reset_conf |>
+     tx := spi.tx with state := tx_channel_disabled |>
 else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
         (spi.rx.state = rx_conf_ready) /\ (spi.xfer.state = xfer_idle) 
         /\ (v = 1w)
@@ -180,7 +180,7 @@ then spi with <|regs := spi.regs with CH0CTRL := 0w;
 else spi with err := T`
 
 
-(* write a value to spi.regs.CH0CONF to start and finish the tx process, vaild when TRM = 2.
+(* write a value to spi.regs.CH0CONF to start and finish the tx automaton, vaild when TRM = 2.
  * write_CH0CONF_tx: word32 -> spi_state -> spi_state
  *)
 val write_CH0CONF_tx_def = Define `
@@ -196,12 +196,13 @@ case spi.tx.state of
     else spi with err := T
   | tx_conf_ready => spi with err := T
   | tx_channel_enabled => spi with err := T
-  | tx_issue_mem_req => spi with err := T
-  | tx_mem_reply => spi with err := T
-  | tx_done => spi with err := T
-  | tx_disable_channel => spi with err := T
-  | tx_reset_conf => if (spi.init.state = init_done) /\ (spi.rx.state = rx_idle)
-                         /\ (spi.xfer.state = xfer_idle) /\ (v2 = 0w) then
+  | tx_ready_for_trans => spi with err := T
+  | tx_trans_data => spi with err := T
+  | tx_trans_done => spi with err := T
+  | tx_trans_check => spi with err := T 
+  | tx_channel_disabled => 
+    if (spi.init.state = init_done) /\ (spi.rx.state = rx_idle)
+    /\ (spi.xfer.state = xfer_idle) /\ (v2 = 0w) then
     spi with <| regs := spi.regs with CH0CONF := spi.regs.CH0CONF with FORCE := 0w;
     tx := spi.tx with state := tx_idle |> 
     else spi with err := T`
@@ -264,9 +265,11 @@ case spi.xfer.state of
 val write_TX0_def = Define `
 write_TX0 (value:word32) (spi:spi_state) =
 let wl = (w2n spi.regs.CH0CONF.WL) + 1 in
-if (CHECK_TXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) then
-spi with regs := spi.regs with <|CH0STAT := spi.regs.CH0STAT with TXS := 0w;
-TX0 := ((wl >< 0) value:word32)|>
+if (CHECK_TXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) 
+/\ (spi.tx.state = tx_ready_for_trans) then
+spi with <|regs := spi.regs with <|CH0STAT := spi.regs.CH0STAT with TXS := 0w;
+TX0 := ((wl >< 0) value:word32)|>;
+tx := spi.tx with state := tx_trans_data|>
 else spi with err := T`
 
 (* write_SPI_regs_def:word32 -> word32 -> spi_state -> spi_state *)
@@ -285,7 +288,7 @@ else if (pa = SPI0_CH0CONF) /\ ((17 >< 16) value:word2 <> 0w)
 then (write_CH0CONF value spi)
 else if (pa = SPI0_CH0CONF) /\ (value = 0w \/ ((5 >< 2) value:word4 <> 0w))
 then (write_CH0CONF_speed value spi)
-else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_reset_conf)) 
+else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)) 
 then (write_CH0CONF_tx value spi)
 else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_reset_conf)) 
 then (write_CH0CONF_rx value spi)

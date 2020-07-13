@@ -3,15 +3,13 @@ open wordsLib wordsTheory board_memTheory;
 
 val _ = new_theory "SPI_state";
 
-(* TODO: rewrite tx, rx, xfer states, they should not include memory request steps *)
-
 (* 1st part: spi_state, the SPI controller contains registers, 
    an error flag and automaton's states *)
 
 (* SPI registers, only related registers and bits are included. *)
 (* Bits in SYSCONFIG register *)
 val _ = Datatype `sysconfig_bits = <|
-SIDLEMODE: word2; (* smart-idle mode *)
+SIDLEMODE: word2; (* Smart-idle mode *)
 SOFTRESET: word1; (* Software reset *)
 AUTOIDLE: word1 (* Internal OCP clock gating strategy *) |>`
 
@@ -66,8 +64,8 @@ ch0conf_speed_done: bool |>`
 
 (* spi controller transmit automaton *)
 val _ = Datatype `tx_general_state =
-| tx_idle | tx_conf_ready | tx_channel_enabled | tx_issue_mem_req
-| tx_mem_reply | tx_done | tx_disable_channel | tx_reset_conf`
+| tx_idle | tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
+| tx_trans_data | tx_trans_done | tx_trans_check | tx_channel_disabled`
 
 val _ = Datatype `tx_state = <|
 state: tx_general_state |>`
