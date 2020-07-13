@@ -1,6 +1,7 @@
 In order to fix the problem for SPI driver and controller, I create this folder for the updated model.
 
 ### Update
+2020.7.13: update two new automatons, `SPI_initScript.sml` and `SPI_txScript.sml`, make changes in the `SPI_stateScript.sml` for new automatons.
 
 2020.7.10: update `SPI_stateScript.sml`, `write_SPIregsScript.sml` and `read_SPIregsScript.sml`.
 
