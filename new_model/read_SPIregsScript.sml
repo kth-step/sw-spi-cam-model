@@ -44,8 +44,15 @@ EVAL ``(1w:word1 @@ (1w:word1 @@ (1w:word1 @@ 3w:word2):word3):word4):word32``
 val read_RX0_def = Define `
 read_RX0 (env:environment) (spi:spi_state) =
 let wl = (w2n spi.regs.CH0CONF.WL) + 1 in
-if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) then
-(spi with regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w,
+if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) /\ 
+(spi.rx.state = rx_data_ready) then
+(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
+rx := spi.rx with state := rx_receive_check |>,
+(wl >< 0) spi.regs.RX0:word32)
+else if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) /\
+(spi.xfer.state = xfer_data_ready) then
+(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
+xfer := spi.xfer with state := xfer_check |>,
 (wl >< 0) spi.regs.RX0:word32)
 else (spi with err := T, env.read_reg)`
 

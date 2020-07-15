@@ -18,15 +18,17 @@ tx := spi.tx with state := tx_ready_for_trans |>`
  *)
 val tx_trans_data_op_def = Define `
 tx_trans_data_op (spi:spi_state) =
-spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-(* Data is transferred from TX0 to the shift register (the wire) *)
-with <|EOT := 0w; TXS := 1w|>;  
+spi with <| (* Data is transferred from TX0 to the shift register (the wire) *)
+SHIFT_REG := spi.regs.TX0;
+regs := spi.regs with CH0STAT := spi.regs.CH0STAT
+with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)  
 tx := spi.tx with state := tx_trans_done |>`
 
 (* SPI controller's operation when the data 
  * is transferred to the slave over the wire. (shift Reg -> slave)
  * tx_trans_done_op: spi_state -> spi_state
  *)
+(* update the env with SHIFT_REG := spi.SHIFT_REG *)
 val tx_trans_done_op_def = Define `
 tx_trans_done_op (spi:spi_state) =
 spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
@@ -34,9 +36,6 @@ spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with EOT := 1w;
 tx := spi.tx with state := tx_trans_check |>`
 
-(* CHECK_EOT_BIT_def: spi_state -> bool *)
-val CHECK_EOT_BIT_def = Define `
-CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
 (* SPI controller's operation after EOT bit is set to 1.
  * tx_trans_check_op: spi_state -> spi_state

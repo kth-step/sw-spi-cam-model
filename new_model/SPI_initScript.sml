@@ -4,7 +4,9 @@ open SPI_stateTheory board_memTheory;
 
 val _ = new_theory "SPI_init";
 
-(* SPI controller performs reset operation. *)
+(* SPI controller performs reset operation.
+ * init_reset_op: spi_state -> spi_state
+ *)
 val init_reset_op_def = Define `
 init_reset_op (spi:spi_state) = 
 spi with <| regs := spi.regs with 
@@ -12,7 +14,7 @@ spi with <| regs := spi.regs with
       SYSSTATUS := 1w (* means reset is done *)|>;
    init := spi.init with state := init_setregs (* enter to next init step *) |>`
 
-(* This function shows initialization operations of SPI controller, spi -> spi' through init.
+(* This function shows initialization operations of SPI controller, spi -> spi'.
  * spi_init_operations: spi_state -> spi_state
  *)
 val spi_init_operations_def = Define `

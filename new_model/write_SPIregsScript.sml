@@ -4,15 +4,15 @@ open SPI_stateTheory board_memTheory;
 
 val _ = new_theory "write_SPIregs";
 
-(* write a value(1) to spi.regs.SYSCONFIG.SOFTRESET, start the reset process 
+(* write a value(1) to spi.regs.SYSCONFIG.SOFTRESET, start the reset process.
  * write_SOFTRESET: word32 -> spi_state -> spi_state
  *)
 val write_SOFTRESET_def = Define `
 write_SOFTRESET (value:word32) (spi:spi_state) =
 let v = (1 >< 1) value :word1 in
 case spi.init.state of
-| init_start => if v = 0w then spi with err := T
-  else  spi with <|regs := spi.regs with 
+| init_start => if v = 0w then spi
+  else spi with <|regs := spi.regs with 
         SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 1w;
         init := spi.init with 
         <|state := init_reset; 
@@ -24,7 +24,7 @@ case spi.init.state of
 | init_reset => spi with err := T
 | init_setregs => spi with err := T
 | init_done => 
-  if ((v = 1w) /\ (spi.tx.state <> tx_idle \/ spi.rx.state <> rx_idle)) 
+  if ((v = 1w) /\ (spi.tx.state <> tx_idle \/ spi.rx.state <> rx_idle \/ spi.xfer.state <> xfer_idle)) 
   then spi with err:= T
   else if v = 1w then 
   spi with <| regs := spi.regs with 
@@ -52,7 +52,8 @@ case spi.init.state of
     SYSCONFIG := spi.regs.SYSCONFIG with <|SIDLEMODE := 2w; AUTOIDLE := 1w|>;
     init := spi.init with 
     <|sysconfig_mode_done := T;
-      state := if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+      state := 
+      if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
       /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done 
       /\ spi.init.ch0conf_speed_done) then init_done else init_setregs|> |> 
     else spi with err := T
@@ -73,7 +74,8 @@ case spi.init.state of
     spi with <| regs := spi.regs with MODULCTRL := spi.regs.MODULCTRL with
     <|SYSTEM_TEST := 0w; MS := 0w; SINGLE := 1w|>;
     init := spi.init with <| modulctrl_bus_done := T;
-    state := if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    state := 
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
     /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done 
     /\ spi.init.ch0conf_speed_done) then init_done else init_setregs|> |> 
     else spi with err := T
@@ -92,7 +94,8 @@ case spi.init.state of
     spi with <| regs := spi.regs with 
     CH0CONF := spi.regs.CH0CONF with WL := v;
     init := spi.init with <|ch0conf_wordlen_done := T;
-    state := if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    state := 
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
     /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done 
     /\ spi.init.ch0conf_speed_done) then init_done else init_setregs |> |> 
     else spi with err := T
@@ -163,20 +166,20 @@ else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
 then spi with <|regs := spi.regs with CH0CTRL := 1w;
      rx := spi.rx with state := rx_channel_enabled |>
 else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
-        (spi.rx.state = rx_disable_channel) /\ (spi.xfer.state = xfer_idle)
+        (spi.rx.state = rx_receive_check) /\ (spi.xfer.state = xfer_idle)
         /\ (v = 0w)
 then spi with <|regs := spi.regs with CH0CTRL := 0w;
-     rx := spi.rx with state := rx_reset_conf |>
+     rx := spi.rx with state := rx_channel_disabled |>
 else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
         (spi.rx.state = rx_idle) /\ (spi.xfer.state = xfer_conf_ready) 
         /\ (v = 1w)
 then spi with <|regs := spi.regs with CH0CTRL := 1w;
      xfer := spi.xfer with state := xfer_channel_enabled |>
 else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
-        (spi.rx.state = rx_idle) /\ (spi.xfer.state = xfer_disable_channel)
+        (spi.rx.state = rx_idle) /\ (spi.xfer.state = xfer_check)
         /\ (v = 0w)
 then spi with <|regs := spi.regs with CH0CTRL := 0w;
-     xfer := spi.xfer with state := xfer_reset_conf |>
+     xfer := spi.xfer with state := xfer_channel_disabled |>
 else spi with err := T`
 
 
@@ -223,10 +226,11 @@ case spi.rx.state of
     else spi with err := T
   | rx_conf_ready => spi with err := T
   | rx_channel_enabled => spi with err := T
-  | rx_issue_write_mem_req => spi with err := T
-  | rx_check => spi with err := T
-  | rx_disable_channel => spi with err := T
-  | rx_reset_conf => if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle)
+  | rx_receive_data => spi with err := T
+  | rx_update_RX0 => spi with err := T
+  | rx_data_ready => spi with err := T
+  | rx_receive_check => spi with err := T
+  | rx_channel_disabled => if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle)
                         /\ (spi.xfer.state = xfer_idle) /\ (v2 = 0w) then
     spi with <|regs := spi.regs with CH0CONF := spi.regs.CH0CONF with FORCE := 0w;
     rx := spi.rx with state := rx_idle |> 
@@ -246,14 +250,14 @@ case spi.xfer.state of
    with  <|TRM := 0w; FORCE := 1w |>;
    xfer := spi.xfer with state := xfer_conf_ready |> 
    else spi with err := T
-  | xfer_conf_enabled => spi with err := T
+  | xfer_conf_ready => spi with err := T
   | xfer_channel_enabled => spi with err := T
-  | xfer_issue_mem_req => spi with err := T
-  | xfer_mem_reply => spi with err := T
-  | xfer_issue_write_mem_req => spi with err := T
+  | xfer_ready_for_trans => spi with err := T
+  | xfer_exchange_data=> spi with err := T
+  | xfer_update_RX0 => spi with err := T
+  | xfer_data_ready => spi with err := T
   | xfer_check => spi with err := T
-  | xfer_disable_channel => spi with err := T
-  | xfer_reset_conf => if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) 
+  | xfer_channel_disabled => if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) 
                        /\ (spi.rx.state = rx_idle) /\ (v2 = 0w) then
     spi with <|regs := spi.regs with CH0CONF := spi.regs.CH0CONF  with FORCE := 0w;
     xfer := spi.xfer with state := xfer_idle |> 
@@ -270,6 +274,11 @@ if (CHECK_TXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w)
 spi with <|regs := spi.regs with <|CH0STAT := spi.regs.CH0STAT with TXS := 0w;
 TX0 := ((wl >< 0) value:word32)|>;
 tx := spi.tx with state := tx_trans_data|>
+else if (CHECK_TXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) 
+/\ (spi.xfer.state = xfer_ready_for_trans) then
+spi with <|regs := spi.regs with <|CH0STAT := spi.regs.CH0STAT with TXS := 0w;
+TX0 := ((wl >< 0) value:word32)|>;
+xfer := spi.xfer with state := xfer_trans_data|>
 else spi with err := T`
 
 (* write_SPI_regs_def:word32 -> word32 -> spi_state -> spi_state *)
@@ -290,9 +299,9 @@ else if (pa = SPI0_CH0CONF) /\ (value = 0w \/ ((5 >< 2) value:word4 <> 0w))
 then (write_CH0CONF_speed value spi)
 else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)) 
 then (write_CH0CONF_tx value spi)
-else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_reset_conf)) 
+else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)) 
 then (write_CH0CONF_rx value spi)
-else if (pa = SPI0_CH0CONF) /\ ((((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) \/ (value = 0w /\ spi.xfer.state = xfer_reset_conf)) 
+else if (pa = SPI0_CH0CONF) /\ ((((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) \/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled)) 
 then (write_CH0CONF_xfer value spi)
 else if (pa = SPI0_CH0CTRL) then (write_CH0CTRL value spi)
 else if (pa = SPI0_TX0) then (write_TX0 value spi)
