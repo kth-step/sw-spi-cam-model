@@ -25,7 +25,7 @@ with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)
 tx := spi.tx with state := tx_trans_done |>`
 
 (* SPI controller's operation when the data 
- * is transferred to the slave over the wire. (shift Reg -> slave)
+ * is transferred to the slave over the wire. (shift Reg -> slave shift Reg)
  * tx_trans_done_op: spi_state -> spi_state
  *)
 (* update the env with SHIFT_REG := spi.SHIFT_REG *)
