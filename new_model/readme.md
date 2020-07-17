@@ -6,7 +6,7 @@ SPI tx:
 <img src="https://user-images.githubusercontent.com/34090109/87311797-00b97180-c520-11ea-9830-dfbe0787af1a.jpg" width="90%"></img> 
 
 ### Update
-2020.7.17: add other two automatons, `SPI_rxScript.sml` and `SPI_xferScript.sml`.
+2020.7.17: add other two automatons, `SPI_rxScript.sml` and `SPI_xferScript.sml`. Upload the scheduler and SPI model.
 
 2020.7.13: update two new automatons, `SPI_initScript.sml` and `SPI_txScript.sml`, make changes in the `SPI_stateScript.sml` for new automatons.
 - SPI_init: not changed, only reset operation by the hardware itself.
