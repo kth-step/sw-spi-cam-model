@@ -7,19 +7,19 @@ val _ = new_theory "board_mem";
 (* Physical start address of RAM on board *)
 val BOARD_RAM_START_def = Define `BOARD_RAM_START = 0x80000000w:word32`
 
-(* Physical end address (exclusive) of RAM on board *)
+(* Physical ending address (exclusive) of RAM on board *)
 val BOARD_RAM_END_def = Define `BOARD_RAM_END = 0xA0000000w:word32`
 
-(* Physical start addresses of SPI0 registers on board *)
+(* Physical start addresses of SPI0 memory-mapped registers on board *)
 val SPI0_START_def = Define `SPI0_START = 0x48030000w:word32`
 
-(* Physical end address (exclusive) of SPI0 registers on board *)
+(* Physical end address (exclusive) of SPI0 memory-mapped registers on board *)
 val SPI0_END_def = Define `SPI0_END = 0x48031000w:word32`
 
 (* Physical address range of SPI0 *)
 val SPI0_PA_RANGE_def = Define `SPI0_PA_RANGE = {x| SPI0_START <=+ x /\ x <+ SPI0_END}`
 
-(* Physical addresses of SPI0 registers that are used in the model *)
+(* Physical addresses of SPI0 memory-mapped registers that are used in the model *)
 (* SPI0_SYSCONFIG: system configuration register *)
 val SPI0_SYSCONFIG_def = Define `SPI0_SYSCONFIG = 0x48030110w:word32`
 

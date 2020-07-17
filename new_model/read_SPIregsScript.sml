@@ -7,14 +7,14 @@ val _ = new_theory "read_SPIregs";
 (* concat sysconfig bits into a 32-bits word *)
 val build_SYSCONFIG_def = Define `
 build_SYSCONFIG (SYSCONFIG:sysconfig_bits) =
-(* during read, bit SOFRRESET always returns 0 *)
+(* During reads bit SOFRRESET always returns 0 *)
 let v1 = (0w:word2 @@ SYSCONFIG.AUTOIDLE): word3 in
 (SYSCONFIG.SIDLEMODE @@ v1) :word32`
 
 (* concat modulctrl bits into a 32-bits word *)
 val build_MODULCTRL_def = Define `
 build_MODULCTRL (MODULCTRL:modulctrl_bits) =
-(MODULCTRL.MS @@ ((0w:word1 @@ MODULCTRL.SINGLE):word2)):word32`
+(MODULCTRL.MS @@ ((0w:word1 @@ MODULCTRL.SINGLE):word2)) :word32`
 
 (* concat ch0conf bits into a 32-bits word*)
 val build_CH0CONF_def = Define `
@@ -27,7 +27,7 @@ v2 = ((((0w:word2 @@ CH0CONF.TRM):word4) @@
 ((CH0CONF.CLKD @@ 
 ((CH0CONF.POL @@ CH0CONF.PHA)
 :word2)):word6)):word7)):word12)):word16) in
-(v1 @@ v2):word32`
+(v1 @@ v2) :word32`
 
 (* concat ch0stat bits into a 32-bits word *)
 val build_CH0STAT_def = Define `
@@ -61,8 +61,10 @@ else (spi with err := T, env.read_reg)`
  *)
 val read_SPI_regs_def = Define `
 read_SPI_regs (env:environment) (pa:word32) (spi:spi_state) =
+(* check spi error flag *)
 if spi.err  then (spi, env.read_reg)
-else if ~(pa IN SPI0_PA_RANGE) then (spi with err := T, env.read_reg)
+(* pa is not in the SPI region, no changes *)
+else if ~(pa IN SPI0_PA_RANGE) then (spi, env.read_reg)
 (* most regs can be read at any time *)
 else if pa = SPI0_SYSCONFIG then (spi, build_SYSCONFIG spi.regs.SYSCONFIG)
 else if pa = SPI0_SYSSTATUS then (spi, w2w spi.regs.SYSSTATUS)

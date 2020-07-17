@@ -4,15 +4,16 @@ open SPI_stateTheory board_memTheory;
 
 val _ = new_theory "write_SPIregs";
 
-(* write a value(1) to spi.regs.SYSCONFIG.SOFTRESET, start the reset process.
+(* write a value(1) to spi.regs.SYSCONFIG.SOFTRESET, start to reset SPI hardware.
  * write_SOFTRESET: word32 -> spi_state -> spi_state
  *)
 val write_SOFTRESET_def = Define `
 write_SOFTRESET (value:word32) (spi:spi_state) =
 let v = (1 >< 1) value :word1 in
 case spi.init.state of
-| init_start => if v = 0w then spi
-  else spi with <|regs := spi.regs with 
+| init_start => if v = 0w then spi (* write 0, then SPI no changes*)
+  else (* v = 1w, start a module reset *)
+      spi with <|regs := spi.regs with 
         SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 1w;
         init := spi.init with 
         <|state := init_reset; 
@@ -24,7 +25,8 @@ case spi.init.state of
 | init_reset => spi with err := T
 | init_setregs => spi with err := T
 | init_done => 
-  if ((v = 1w) /\ (spi.tx.state <> tx_idle \/ spi.rx.state <> rx_idle \/ spi.xfer.state <> xfer_idle)) 
+  if ((v = 1w) /\ (spi.tx.state <> tx_idle \/ spi.rx.state <> rx_idle \/ spi.xfer.state <>
+  xfer_idle)) 
   then spi with err:= T
   else if v = 1w then 
   spi with <| regs := spi.regs with 
@@ -59,7 +61,7 @@ case spi.init.state of
     else spi with err := T
   | init_done => spi with err := T`
 
-(* write a value to spi.regs.MODULCTRL, set to a single-channel master mode
+(* write a value to spi.regs.MODULCTRL, set to a single-channel master mode.
  * write_MODULCTRL: word32 -> spi_state -> spi_state
  *)
 val write_MODULCTRL_def = Define `
@@ -101,8 +103,8 @@ case spi.init.state of
     else spi with err := T
   | init_done => spi with err := T`
 
-(* write a value to spi.regs.CH0CONF to set mode, 
- * including IS, DPE1, DPE0, TRM, EPOL, POL, PHA bits.
+(* write a value to spi.regs.CH0CONF to set common bits, 
+ * including IS, DPE1, DPE0, TRM, EPOL, POL, PHA.
  * write_CH0CONF: word32 -> spi_state -> spi_state
  *)
 val write_CH0CONF_def = Define `
@@ -146,7 +148,7 @@ case spi.init.state of
      /\ spi.init.ch0conf_speed_done) then init_done else init_setregs |> |>
   | init_done => spi with err := T`
 
-(* enable or disable the SPI channel 0 for tx, rx and xfer
+(* enable or disable the SPI channel 0 for tx, rx and xfer automatons.
  * write_CH0CTRL: word32 -> spi_state -> spi_state
  *)
 val write_CH0CTRL_def = Define `
@@ -263,6 +265,23 @@ case spi.xfer.state of
     xfer := spi.xfer with state := xfer_idle |> 
     else spi with err := T`
 
+(* write_CH0CONF_comb: word32 -> spi_state -> spi_state *)
+val write_CH0CONF_comb_def = Define `
+write_CH0CONF_comb (value:word32) (spi:spi_state) =
+let spi = if ((11 >< 7) value:word5 <> 0w) 
+then (write_CH0CONF_WL value spi) else spi in
+let spi = if ((17 >< 16) value:word2 <> 0w) 
+then (write_CH0CONF value spi) else spi in
+let spi = if (value = 0w \/ ((5 >< 2) value:word4 <> 0w)) 
+then (write_CH0CONF_speed value spi) else spi in
+let spi = if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)
+then (write_CH0CONF_tx value spi) else spi in
+let spi = if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)
+then (write_CH0CONF_rx value spi) else spi in
+if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) 
+\/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled) then
+(write_CH0CONF_xfer value spi) else spi`
+
 (* write_TX0: word32 -> spi_state -> spi_state
  * clear the TXS bit when write a byte to TX0 register.
  *)
@@ -281,32 +300,19 @@ TX0 := ((wl >< 0) value:word32)|>;
 xfer := spi.xfer with state := xfer_trans_data|>
 else spi with err := T`
 
-(* write_CH0CONF_comb: word32 -> spi_state -> spi_state *)
-val write_CH0CONF_comb_def = Define `
-write_CH0CONF_comb (value:word32) (spi:spi_state) =
-let spi = if ((11 >< 7) value:word5 <> 0w) 
-then (write_CH0CONF_WL value spi) else spi in
-let spi = if ((17 >< 16) value:word2 <> 0w) 
-then (write_CH0CONF value spi) else spi in
-let spi = if (value = 0w \/ ((5 >< 2) value:word4 <> 0w)) 
-then (write_CH0CONF_speed value spi) else spi in
-let spi = if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)
-then (write_CH0CONF_tx value spi) else spi in
-let spi = if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)
-then (write_CH0CONF_rx value spi) else spi in
-if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) 
-\/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled) then
-(write_CH0CONF_xfer value spi) else spi`
+(* When PA = SPI0_SYSCONFIG, call functions according to the value.
+ * write_SYSCONFIG_comb: word32 -> spi_state -> spi_state *)
+val write_SYSCONFIG_comb_def = Define `
+write_SYSCONFIG_comb (value:word32) (spi:spi_state) =
+let spi = if ((1 >< 1) value:word1 = 1w) then (write_SOFTRESET value spi) else spi in
+if ((0 >< 0) value:word1 = 1w) then (write_SYSCONFIG value spi) else spi`
 
 (* write_SPI_regs_def: word32 -> word32 -> spi_state -> spi_state *)
 val write_SPI_regs_def = Define `
 write_SPI_regs (pa:word32) (value:word32) (spi:spi_state) =
 if spi.err then spi
-else if ~(pa IN SPI0_PA_RANGE) then spi with err := T
-else if (pa = SPI0_SYSCONFIG) /\ (value = 2w) 
-then (write_SOFTRESET value spi)
-else if (pa = SPI0_SYSCONFIG) /\ ((0 >< 0) value:word1 = 1w) 
-then (write_SYSCONFIG value spi)
+else if ~(pa IN SPI0_PA_RANGE) then spi
+else if (pa = SPI0_SYSCONFIG) then (write_SYSCONFIG_comb value spi)
 else if (pa = SPI0_MODULCTRL) then (write_MODULCTRL value spi)
 else if (pa = SPI0_CH0CONF) then (write_CH0CONF_comb value spi)
 else if (pa = SPI0_CH0CTRL) then (write_CH0CTRL value spi)

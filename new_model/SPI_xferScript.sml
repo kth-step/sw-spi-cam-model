@@ -22,7 +22,7 @@ xfer := spi.xfer with state := xfer_ready_for_trans |>`
 val xfer_trans_data_op_def = Define `
 xfer_trans_data_op (spi:spi_state) =
 spi with <| (* TX0 -> shift register *)
-SHIFT_REG := spi.regs.TX0;
+SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with <| EOT := 0w; TXS := 1w |>;
 xfer := spi.xfer with state := xfer_exchange_data |>`
@@ -46,7 +46,7 @@ val xfer_update_RX0_op_def = Define `
 xfer_update_RX0_op (spi:spi_state) =
 spi with <| regs := spi.regs with
 (* shift register -> RX0 *)
-<|RX0 := spi.SHIFT_REG;
+<|RX0 := w2w spi.SHIFT_REG;
 CH0STAT := spi.regs.CH0STAT with RXS := 1w |>;
 xfer := spi.xfer with state := xfer_data_ready |>`
 

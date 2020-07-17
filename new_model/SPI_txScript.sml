@@ -19,7 +19,7 @@ tx := spi.tx with state := tx_ready_for_trans |>`
 val tx_trans_data_op_def = Define `
 tx_trans_data_op (spi:spi_state) =
 spi with <| (* Data is transferred from TX0 to the shift register (the wire) *)
-SHIFT_REG := spi.regs.TX0;
+SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)  
 tx := spi.tx with state := tx_trans_done |>`

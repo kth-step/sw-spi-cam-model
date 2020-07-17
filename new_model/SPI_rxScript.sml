@@ -30,7 +30,7 @@ val rx_update_RX0_op_def = Define `
 rx_update_RX0_op (spi:spi_state) =
 spi with <| regs := spi.regs with
 (* a received word is transferred from shift register to RX0 *)
-<|RX0 := spi.SHIFT_REG;
+<|RX0 := w2w spi.SHIFT_REG;
 CH0STAT := spi.regs.CH0STAT with RXS := 1w |>;
 rx := spi.rx with state := rx_data_ready |>`
 

@@ -1,9 +1,10 @@
 open HolKernel bossLib boolLib Parse;
-open wordsLib wordsTheory board_memTheory;
+open wordsLib wordsTheory;
+open board_memTheory;
 
 val _ = new_theory "SPI_state";
 
-(* 1st part: spi_state, the SPI controller contains registers, 
+(* spi_state, the SPI controller's state that contains registers, 
    an error flag and automaton's states *)
 
 (* SPI registers, only related registers and bits are included. *)
@@ -23,7 +24,7 @@ SINGLE: word1 (* Single/multi channel, master mode only *)|>`
 val _ = Datatype `ch0conf_bits = <|
 PHA: word1; (* SPICLK phase *)
 POL: word1; (* SPICLK polarity *)
-CLKD: word4; (* Frequency divider for SPICLK, only when master mode *)
+CLKD: word4; (* Frequency divider for SPICLK, only valid in master mode *)
 EPOL: word1; (* SPIEN polarity *)
 WL: word5; (* SPI word length *)
 TRM: word2; (* Transmit/receive mode *)
@@ -41,14 +42,14 @@ EOT: word1  (* Channel 0 end-of-transfer status *) |>`
 
 (* SPI registers *)
 val _ = Datatype `spi_regs = <|
-SYSCONFIG: sysconfig_bits;
-SYSSTATUS: word1;
-MODULCTRL: modulctrl_bits;
-CH0CONF: ch0conf_bits;
-CH0STAT: ch0stat_bits;
-CH0CTRL: word1;
-TX0: word32;
-RX0: word32 |>`
+SYSCONFIG: sysconfig_bits; (* system configuration register *)
+SYSSTATUS: word1; (* system status register *)
+MODULCTRL: modulctrl_bits; (* module control register *)
+CH0CONF: ch0conf_bits; (* channel 0 configuration register *)
+CH0STAT: ch0stat_bits; (* channel 0 status register *)
+CH0CTRL: word1; (* channel 0 control register *)
+TX0: word32; (* channel 0 transmit buffer register *)
+RX0: word32 (*channel 0 receive buffer register *)|>`
 
 (* spi controller initialization automaton *)
 val _ = Datatype `init_general_state = 
@@ -87,17 +88,18 @@ val _ = Datatype `xfer_general_state =
 val _ = Datatype `xfer_state = <|
 state : xfer_general_state |>`
 
-(* spi_state: spi controller state, only conatins SPI regs and error flag *)
+(* spi_state: spi controller state *)
 val _ = Datatype `spi_state = <|
 err: bool; (* an error flag for SPI state*)
-regs: spi_regs; (* SPI registers*)
-SHIFT_REG : word32; (* Shift register to transfer data, not memory-mapped SPI register *)
+regs: spi_regs; (* SPI registers *)
+SHIFT_REG : word8; (* Shift register to transfer data, not memory-mapped SPI register *)
 init: init_state; (* initialization state *)
 tx: tx_state; (* transmit state *)
 rx: rx_state; (* receive state *)
 xfer: xfer_state (* transfer (transmit and receive) state *) |>`
 
-(* 2nd part: spi_driver, including buffer's physical address and length *)
+(* TODO: SPI driver that issues memory request to SPI registers. *)
+(* spi_driver, including buffer's physical address and length *)
 val _ = Datatype `driver_tx = <|
 tx_buffer_pa: word32;
 tx_left_length: num |>`
@@ -122,28 +124,29 @@ val _ = Datatype `mem_req = <|
 pa: word32;
 v: word8 option |>`
 
-(* shcedule automaton indicates the status of SPI bus *)
+(* shcedule automaton indicates the status of SPI controller *)
 val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
 
 (* Externel environment connected to the SPI bus *)
 val _ = Datatype `environment = <|
-scheduler : schedule;
-SHIFT_REG: word32; (* Slave shift register *)
-read_reg : word32 |>`
+scheduler : schedule; (* SPI bus scheduler *)
+SHIFT_REG: word8; (* Slave shift register *)
+read_reg : word32 (* An arbitrary value *)|>`
 
-(* CHECK_RXS_BIT_def: spi_state -> bool *)
+(* Some simple functions related to the spi_state *)
+(* check SPI register's RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
 val CHECK_RXS_BIT_def = Define `
 CHECK_RXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.RXS = 1w)`
 
-(* CHECK_TXS_BIT_def: spi_state -> bool *)
+(* check SPI register's TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
 val CHECK_TXS_BIT_def = Define `
 CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
 
-(* CHECK_EOT_BIT_def: spi_state -> bool *)
+(* check SPI register's EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
 val CHECK_EOT_BIT_def = Define `
 CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
-(* CHECK if the buffer is in the RAM region: word32 -> num -> bool *)
+(* CHECK if the buffer is in the board RAM region. BUFFER_IN_BOARD_RAM: word32 -> num -> bool *)
 val BUFFER_IN_BOARD_RAM_def = Define `
 BUFFER_IN_BOARD_RAM (buffer_pa:word32) (left_length:num) =
 let start_pa = buffer_pa
