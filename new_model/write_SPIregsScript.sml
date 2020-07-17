@@ -237,7 +237,7 @@ case spi.rx.state of
     else spi with err := T`
 
 (* write the spi.regs.CH0CONF to start and finish the xfer process, vaild when TRM = 0 
- * write_CH0CONF_xfer:word32 -> spi_state -> spi_state
+ * write_CH0CONF_xfer: word32 -> spi_state -> spi_state
  *)
 val write_CH0CONF_xfer_def = Define `
 write_CH0CONF_xfer (value:word32) (spi:spi_state) =
@@ -281,7 +281,24 @@ TX0 := ((wl >< 0) value:word32)|>;
 xfer := spi.xfer with state := xfer_trans_data|>
 else spi with err := T`
 
-(* write_SPI_regs_def:word32 -> word32 -> spi_state -> spi_state *)
+(* write_CH0CONF_comb: word32 -> spi_state -> spi_state *)
+val write_CH0CONF_comb_def = Define `
+write_CH0CONF_comb (value:word32) (spi:spi_state) =
+let spi = if ((11 >< 7) value:word5 <> 0w) 
+then (write_CH0CONF_WL value spi) else spi in
+let spi = if ((17 >< 16) value:word2 <> 0w) 
+then (write_CH0CONF value spi) else spi in
+let spi = if (value = 0w \/ ((5 >< 2) value:word4 <> 0w)) 
+then (write_CH0CONF_speed value spi) else spi in
+let spi = if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)
+then (write_CH0CONF_tx value spi) else spi in
+let spi = if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)
+then (write_CH0CONF_rx value spi) else spi in
+if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) 
+\/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled) then
+(write_CH0CONF_xfer value spi) else spi`
+
+(* write_SPI_regs_def: word32 -> word32 -> spi_state -> spi_state *)
 val write_SPI_regs_def = Define `
 write_SPI_regs (pa:word32) (value:word32) (spi:spi_state) =
 if spi.err then spi
@@ -291,18 +308,7 @@ then (write_SOFTRESET value spi)
 else if (pa = SPI0_SYSCONFIG) /\ ((0 >< 0) value:word1 = 1w) 
 then (write_SYSCONFIG value spi)
 else if (pa = SPI0_MODULCTRL) then (write_MODULCTRL value spi)
-else if (pa = SPI0_CH0CONF) /\ ((11 >< 7) value:word5 <> 0w)
-then (write_CH0CONF_WL value spi)
-else if (pa = SPI0_CH0CONF) /\ ((17 >< 16) value:word2 <> 0w)
-then (write_CH0CONF value spi)
-else if (pa = SPI0_CH0CONF) /\ (value = 0w \/ ((5 >< 2) value:word4 <> 0w))
-then (write_CH0CONF_speed value spi)
-else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)) 
-then (write_CH0CONF_tx value spi)
-else if (pa = SPI0_CH0CONF) /\ (((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)) 
-then (write_CH0CONF_rx value spi)
-else if (pa = SPI0_CH0CONF) /\ ((((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) \/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled)) 
-then (write_CH0CONF_xfer value spi)
+else if (pa = SPI0_CH0CONF) then (write_CH0CONF_comb value spi)
 else if (pa = SPI0_CH0CTRL) then (write_CH0CTRL value spi)
 else if (pa = SPI0_TX0) then (write_TX0 value spi)
 (* RX0 and CH0STAT are read-only *)
