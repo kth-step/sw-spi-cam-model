@@ -34,8 +34,6 @@ SPI init:
 - `SPI_schedulerScript.sml`: indicates SPI hardware internal excution steps.
 - `SPI_modelScript.sml`: shows the SPI hardware model's interface with CPU(issues read/write request to SPI) and its internal operations(according to the scheduler).
 
-So far, the read/write_SPIregs are the interface for the controller and driver interactions. The driver's content would be how to issue the read and write requests to the controller, the controller only concerns how to update regs and error flag according to requests.
-
-The next step I plan to re-define rx, tx and xfer processes belong to the driver following `driver_initScript.sml`'s way.
+The next step I plan to define the SPI slave in the environment and prove basic properties.
 
 ### Problem
