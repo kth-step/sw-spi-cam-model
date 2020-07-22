@@ -255,6 +255,7 @@ case spi.xfer.state of
   | xfer_conf_ready => spi with err := T
   | xfer_channel_enabled => spi with err := T
   | xfer_ready_for_trans => spi with err := T
+  | xfer_trans_data => spi with err := T
   | xfer_exchange_data=> spi with err := T
   | xfer_update_RX0 => spi with err := T
   | xfer_data_ready => spi with err := T
