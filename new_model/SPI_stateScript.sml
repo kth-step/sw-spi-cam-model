@@ -92,13 +92,14 @@ state : xfer_general_state |>`
 val _ = Datatype `spi_state = <|
 err: bool; (* an error flag for SPI state*)
 regs: spi_regs; (* SPI registers *)
-SHIFT_REG : word8; (* Shift register to transfer data, not memory-mapped SPI register *)
+TX_SHIFT_REG : word8; (* Shift register to transmit data, not memory-mapped SPI register *)
+RX_SHIFT_REG : word8; (* Shift register to receive data, not memory-mapped SPI register *)
 init: init_state; (* initialization state *)
 tx: tx_state; (* transmit state *)
 rx: rx_state; (* receive state *)
 xfer: xfer_state (* transfer (transmit and receive) state *) |>`
 
-(* TODO: SPI driver that issues memory request to SPI registers. *)
+(* TODO: SPI driver that issues memory request to SPI controller. *)
 (* spi_driver, including buffer's physical address and length *)
 val _ = Datatype `driver_tx = <|
 tx_buffer_pa: word32;
@@ -122,27 +123,35 @@ d_xfer: driver_xfer |>`
 (* mem_req: memory reuqest *)
 val _ = Datatype `mem_req = <|
 pa: word32;
-v: word8 option |>`
+v: word32 option |>`
 
 (* shcedule automaton indicates the status of SPI controller *)
 val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
 
 (* Externel environment connected to the SPI bus *)
 val _ = Datatype `environment = <|
-scheduler : schedule; (* SPI bus scheduler *)
-SHIFT_REG: word8; (* Slave shift register *)
+scheduler: schedule; (* SPI bus scheduler *)
+SPI_slave : spi_state; (* SPI slave *)
 read_reg : word32 (* An arbitrary value *)|>`
 
+(* Datatype for global labels, used by the relationScript.sml *)
+(* tau means internal transition, TX and RX: SPI devices transmit and receive data, 
+ * WRITE and READ are CPU/driver issued commands to SPI memory-mapped registers.
+ * UPDATE and RETURN are SPI opertations according to CPU's WRITE and READ commands, respectively.
+ *)
+val _ = Datatype `global_lbl_type = tau | TX (word8 option) | RX (word8 option) | Write word32 word32 
+| Update word32 word32 | Read word32 | Return word32 word32 `
+
 (* Some simple functions related to the spi_state *)
-(* check SPI register's RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
+(* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
 val CHECK_RXS_BIT_def = Define `
 CHECK_RXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.RXS = 1w)`
 
-(* check SPI register's TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
+(* check SPI register CH0STAT TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
 val CHECK_TXS_BIT_def = Define `
 CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
 
-(* check SPI register's EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
+(* check SPI register CH0STAT EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
 val CHECK_EOT_BIT_def = Define `
 CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
