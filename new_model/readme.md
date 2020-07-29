@@ -1,5 +1,8 @@
 In order to fix the problem for SPI driver and controller, I create this folder for the updated model.
 
+### Update
+2020.7.29: define the relation for state transition in `SPI_relationScript.sml`.
+
 ### Automaton
 SPI tx:
 
@@ -16,10 +19,6 @@ SPI xfer:
 SPI init:
 
 <img src="https://user-images.githubusercontent.com/34090109/87917189-dc581a80-ca74-11ea-9c14-25bcbcedfb50.jpg" width="90%"></img> 
-
-
-### Update
-2020.7.20: upload the new version of SPI controller model and update the `Readme` text.
 
 
 ### Files
