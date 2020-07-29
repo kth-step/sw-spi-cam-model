@@ -19,7 +19,7 @@ tx_trans_done_op_state (spi:spi_state) (spi':spi_state) =
 let (spi_new, v_option) = tx_trans_done_op spi spi' in spi_new`
 
 val tx_trans_done_op_value_def = Define `
-x_trans_done_op_value (spi:spi_state) (spi':spi_state) =
+tx_trans_done_op_value (spi:spi_state) (spi':spi_state) =
 let (spi_new, v_option) = tx_trans_done_op spi spi' in v_option`
 
 (* relation for spi transition (an SPI device).
@@ -77,15 +77,50 @@ global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2')) /\
 (local_tr (cpu2, spi2) (TX data) (cpu2', spi2')) ==>
 global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2'))`
 
+val SPI_tx_data = store_thm("SPI_tx_data",
+``!spi1 spi1' data spi2.
+(spi1.tx.state = tx_trans_done) /\ (spi1' = tx_trans_done_op_state spi1 spi2) /\
+(spi2.rx.state = rx_receive_data) /\ (spi2.regs.CH0STAT.RXS = 0w) /\
+(data = tx_trans_done_op_value spi1 spi2) ==>
+((spi_tr spi1 (TX data) spi1') /\
+(data = SOME spi1.TX_SHIFT_REG))``,
+REPEAT STRIP_TAC >>
+RW_TAC std_ss [spi_tr_cases] >|
+[EXISTS_TAC ``spi2:spi_state`` >>
+METIS_TAC[],
+RW_TAC std_ss [tx_trans_done_op_value_def,tx_trans_done_op_def]]);
 
 val SPI_rx_data = store_thm("SPI_rx_data",
 ``!spi1 spi1' spi2 data. 
 (data <> NONE) /\ (spi1.rx.state = rx_receive_data) /\ (spi1.regs.CH0STAT.RXS = 0w) /\
-(spi1' = rx_receive_data_op spi1 spi2 data) /\ (spi2.tx.state = tx_trans_done) /\
-(spi_tr spi1 (RX data) spi1') 
-==> (spi1'.RX_SHIFT_REG = THE data)``,
+(spi1' = rx_receive_data_op spi1 spi2 data) /\ (spi2.tx.state = tx_trans_done) ==>
+((spi_tr spi1 (RX data) spi1') /\ (spi1'.RX_SHIFT_REG = THE data))``,
 REPEAT STRIP_TAC >>
-FULL_SIMP_TAC std_ss [spi_tr_cases] >>
-RW_TAC std_ss [rx_receive_data_op_def]);
+RW_TAC std_ss [spi_tr_cases] >|
+[EXISTS_TAC ``spi2:spi_state`` >>
+METIS_TAC[],
+RW_TAC std_ss [rx_receive_data_op_def]]);
+
+val SPI_TX_and_RX_data = store_thm("SPI_TX_and_RX",
+``!cpu1 cpu2 spi1 spi2.
+(spi1.tx.state = tx_trans_done) /\ (spi2.rx.state = rx_receive_data) /\
+(spi2.regs.CH0STAT.RXS = 0w) /\
+(spi1' = tx_trans_done_op_state spi1 spi2) /\
+(data = tx_trans_done_op_value spi1 spi2) /\
+(spi2' = rx_receive_data_op spi2 spi1 data) ==>
+(global_tr (cpu1, spi1, cpu2, spi2) (cpu1, spi1', cpu2, spi2')) /\
+(spi2'.RX_SHIFT_REG = spi1.TX_SHIFT_REG)``,
+REPEAT STRIP_TAC >|
+[`spi_tr spi1 (TX data) spi1'` by METIS_TAC[SPI_tx_data] >>
+`data = SOME spi1.TX_SHIFT_REG` by METIS_TAC[SPI_tx_data] >>
+`data <> NONE` by RW_TAC (std_ss++WORD_ss) [] >>
+`spi_tr spi2 (RX data) spi2'` by METIS_TAC[SPI_rx_data] >>
+`local_tr (cpu1, spi1) (TX data) (cpu1, spi1')` by METIS_TAC[local_tr_cases] >>
+`local_tr (cpu2, spi2) (RX data) (cpu2, spi2')` by METIS_TAC[local_tr_cases] >>
+METIS_TAC[global_tr_cases],
+`data = SOME spi1.TX_SHIFT_REG` by METIS_TAC[SPI_tx_data] >>
+`data <> NONE` by RW_TAC (std_ss++WORD_ss) [] >>
+`spi2'.RX_SHIFT_REG = THE data` by METIS_TAC[SPI_rx_data] >>
+RW_TAC (std_ss++WORD_ss) []]);
 
 val _ = export_theory();
