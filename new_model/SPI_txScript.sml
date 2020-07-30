@@ -33,7 +33,7 @@ val tx_trans_done_op_def = Define `
 tx_trans_done_op (spi:spi_state) (spi':spi_state) =
 if (spi.tx.state = tx_trans_done) /\ (spi'.rx.state = rx_receive_data) /\ (spi'.regs.CH0STAT.RXS = 0w) then
 (spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-(* An SPI word is transferred from the rx shift register to the slave *)
+(* An SPI word is transferred from the TX shift register to the slave *)
 with EOT := 1w|>,
 SOME spi.TX_SHIFT_REG)
 else (spi, NONE)`
