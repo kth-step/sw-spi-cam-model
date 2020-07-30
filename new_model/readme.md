@@ -1,7 +1,11 @@
 In order to fix the problem for SPI driver and controller, I create this folder for the updated model.
 
 ### Update
-2020.7.29: define the relation for state transition in `SPI_relationScript.sml`.
+2020.7.30: 
+
+1. define the relations for SPI system in `SPI_relationScript.sml`, with some lemmas to show the data transition from an SPI device to another.
+
+2. redefine the function `tx_trans_done_op` and `rx_receive_data_op` to show devices interactions.
 
 ### Automaton
 SPI tx:
