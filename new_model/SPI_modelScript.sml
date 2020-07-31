@@ -28,20 +28,25 @@ val spi_transition_autonomous_def = Define `
 spi_transition_autonomous (env:environment) (spi:spi_state) =
 spi_scheduler env spi`
 
-(* SPI hardware transmita a byte to another SPI device with tx mode or xfer mode.
- * spi_transition_transmit_data: spi_state -> spi_state -> spi_state * word8 option
+(* SPI hardware transmita a byte to another SPI device in tx mode.
+ * spi_transition_transmit_data: spi_state -> spi_state * word8 option
  *)
 val spi_transition_transmit_data_def = Define `
-spi_transition_transmit_data (spi:spi_state) (spi':spi_state) =
-if spi.tx.state = tx_trans_done then tx_trans_done_op spi spi'
-else if spi.xfer.state = xfer_exchange_data then xfer_exchange_data_op spi spi'
-else (spi, NONE)`
+spi_transition_transmit_data (spi:spi_state) =
+tx_trans_done_op spi`
+
+(* SPI hardware transmita and receive a byte with another SPI device in xfer mode.
+ * spi_transition_exchange_data: spi_state -> word8 option -> spi_state * word8 option
+ *)
+val spi_transition_exchange_data_def = Define `
+spi_transition_exchange_data (spi:spi_state) (dataIN:word8 option) =
+xfer_exchange_data_op spi dataIN`
 
 (* SPI hardware receives a byte from another SPI device 
- * spi_transition_receive_data: spi_state -> spi_state -> word8 option -> spi_state
+ * spi_transition_receive_data: spi_state -> word8 option -> spi_state
  *)
 val spi_transition_receive_data_def = Define `
-spi_transition_receive_data (spi:spi_state) (spi':spi_state) (data:word8 option) =
-rx_receive_data_op spi spi' data`
+spi_transition_receive_data (spi:spi_state) (data:word8 option) =
+rx_receive_data_op spi data`
 
 val _ = export_theory();

@@ -12,7 +12,23 @@ init_reset_op (spi:spi_state) =
 spi with <| regs := spi.regs with 
    <| SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 0w;
       SYSSTATUS := 1w (* means reset is done *)|>;
-   init := spi.init with state := init_setregs (* enter to next init step *) |>`
+   init := spi.init with state := init_setregs (* enter the next step, set up SPI registers *)|>`
+
+(* Another version: Reset every register to its default value 
+val init_reset_op_def = Define `
+init_reset_op (spi:spi_state) = 
+spi with <|regs := spi.regs with
+   <| SYSCONFIG := spi.regs.SYSCONFIG with <| SIDLEMODE := 0w; SOFTRESET := 0w; AUTOIDLE := 0w|>;
+      SYSSCONFIG := 1w;
+      MODULCTRL := spi.regs.MODULCTRL with <| SYSTEM_TEST := 0w; MS := 1w; SINGLE := 0w |>;
+      CH0CONF := spi.regs.CH0CONF with <| PHA := 0w; POL := 0w; CLKD := 0w; EPOL := 0w;
+      WL := 0w; TRM := 0w; DPE0 := 0w; DPE1 := 1w; IS := 1w; TURBO := 0W; FORCE := 0w |>;
+      CH0STAT := spi.regs.CH0STAT <| RXS := 0w; TXS := 0w; EOT := 0w |>;
+      CH0CTRL := 0w;
+      TX0 := 0w;
+      RX0 := 0w |>;
+   init := spi.init with state := init_setregs |>`
+ *) 
 
 (* This function shows initialization operations of SPI controller, spi -> spi'.
  * spi_init_operations: spi_state -> spi_state
@@ -25,4 +41,4 @@ case spi.init.state of
   | init_setregs => spi with err := T
   | init_done => spi with err := T`
 
-val _ = export_theory()
+val _ = export_theory();

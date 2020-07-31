@@ -13,7 +13,7 @@ spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with TXS := 1w; (* TXS is set to 1 when enable channel 0 *)
 tx := spi.tx with state := tx_ready_for_trans |>`
 
-(* SPI controller's operation if it starts to transmit data. 
+(* SPI controller's operation after CPU writes TX0 register. 
  * TX0 -> TX_SHIFT_REG, SPI internal data transition.
  * tx_trans_data_op: spi_state -> spi_state 
  *)
@@ -24,18 +24,18 @@ regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)  
 tx := spi.tx with state := tx_trans_done |>`
 
-(* SPI controller's operation when the data is transferred to another SPI device.
- * It's not the SPI internal operation, but depends on SPI slave's state.
- * master TX_SHIFT_REG -> slave RX_SHIFT_REG, shows the interactions between master and slave.
- * tx_trans_done_op: spi_state -> spi_state -> spi_state * word8 option
+(* SPI controller's operation when the data is transmitted to another SPI device,
+ * SPI1 TX_SHIFT_REG -> SPI2 RX_SHIFT_REG. 
+ * This function returns a new spi state and the data to be transmitted.
+ * tx_trans_done_op: spi_state -> spi_state * word8 option
  *)
 val tx_trans_done_op_def = Define `
-tx_trans_done_op (spi:spi_state) (spi':spi_state) =
-if (spi.tx.state = tx_trans_done) /\ (spi'.rx.state = rx_receive_data) /\ (spi'.regs.CH0STAT.RXS = 0w) then
+tx_trans_done_op (spi:spi_state) =
+if (spi.tx.state = tx_trans_done) then
 (spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 (* An SPI word is transferred from the TX shift register to the slave *)
 with EOT := 1w;
-tx := spi.tx with state := tx_trans_check|>,
+tx := spi.tx with state := tx_trans_check |>,
 SOME spi.TX_SHIFT_REG)
 else (spi, NONE)`
 

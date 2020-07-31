@@ -72,9 +72,9 @@ let v1 = (0 >< 0) value: word1 and
 case spi.init.state of
   | init_start => spi with err := T 
   | init_reset => spi with err := T
-  | init_setregs => if ((v1 = 1w) /\ (v2 = 0w) /\ (v3 = 0w)) then
+  | init_setregs => if ((v1 = 1w) /\ (v3 = 0w)) then
     spi with <| regs := spi.regs with MODULCTRL := spi.regs.MODULCTRL with
-    <|SYSTEM_TEST := 0w; MS := 0w; SINGLE := 1w|>;
+    <|SYSTEM_TEST := v3; MS := v2; SINGLE := v1|>;
     init := spi.init with <| modulctrl_bus_done := T;
     state := 
     if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 

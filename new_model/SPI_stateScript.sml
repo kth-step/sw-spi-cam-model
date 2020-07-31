@@ -18,7 +18,7 @@ AUTOIDLE: word1 (* Internal OCP clock gating strategy *) |>`
 val _ = Datatype `modulctrl_bits = <|
 SYSTEM_TEST: word1; (* Enable system test mode *)
 MS: word1; (* Master/Slave *)
-SINGLE: word1 (* Single/multi channel, master mode only *)|>`
+SINGLE: word1 (* Single/multi channels, master mode only *)|>`
 
 (* Bits in CH0CONF register *)
 val _ = Datatype `ch0conf_bits = <|
@@ -99,7 +99,7 @@ tx: tx_state; (* transmit state *)
 rx: rx_state; (* receive state *)
 xfer: xfer_state (* transfer (transmit and receive) state *) |>`
 
-(* TODO: SPI driver that issues memory request to SPI controller. *)
+(* TODO: SPI driver that issues memory requests to SPI controller. *)
 (* spi_driver, including buffer's physical address and length *)
 val _ = Datatype `driver_tx = <|
 tx_buffer_pa: word32;
@@ -123,7 +123,7 @@ d_xfer: driver_xfer |>`
 (* mem_req: memory reuqest *)
 val _ = Datatype `mem_req = <|
 pa: word32;
-v: word32 option |>`
+v: word8 option |>`
 
 (* shcedule automaton indicates the status of SPI controller *)
 val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
@@ -131,16 +131,17 @@ val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
 (* Externel environment connected to the SPI bus *)
 val _ = Datatype `environment = <|
 scheduler: schedule; (* SPI bus scheduler *)
-SPI_slave : spi_state; (* SPI slave *)
+(* SPI_slave : spi_state;  SPI slave *)
 read_reg : word32 (* An arbitrary value *)|>`
 
 (* Datatype for global labels, used by the relationScript.sml *)
-(* tau means internal transition, TX and RX: SPI devices transmit and receive data, 
- * WRITE and READ are CPU/driver issued commands to SPI memory-mapped registers.
- * UPDATE and RETURN are SPI opertations according to CPU's WRITE and READ commands, respectively.
+(* tau means internal transition, TX, RX and XFER: SPI devices transmit and receive data, 
+ * Write and Read are CPU/driver-issued commands to SPI memory-mapped registers.
+ * Update and Return are SPI opertations according to CPU Write and Read commands, respectively.
  *)
-val _ = Datatype `global_lbl_type = tau | TX (word8 option) | RX (word8 option) | Write word32 word32 
-| Update word32 word32 | Read word32 | Return word32 word32 `
+val _ = Datatype `global_lbl_type = 
+| tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)
+| Write word32 word32 | Update word32 word32 | Read word32 | Return word32 word32`
 
 (* Some simple functions related to the spi_state *)
 (* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)

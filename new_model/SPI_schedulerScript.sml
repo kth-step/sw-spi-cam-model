@@ -48,6 +48,7 @@ if (RX_ENABLE spi) then spi_rx_operations spi else spi) /\
 (scheduler_cases Transfer spi = 
 if (XFER_ENABLE spi) then spi_xfer_operations spi else spi)`
 
+(* spi_scheduler: environment -> spi_state -> spi_state *)
 val spi_scheduler_def = Define `
 spi_scheduler (env:environment) (spi:spi_state) =
 if spi.err then spi
