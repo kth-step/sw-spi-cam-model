@@ -32,9 +32,7 @@ val xfer_exchange_data_op_value_def = Define `
 xfer_exchange_data_op_value (spi:spi_state) (dataIN: word8 option) =
 let (spi', v_option) = xfer_exchange_data_op spi dataIN in v_option`
 
-(* relation for spi transition (an SPI device).
- * Here spi' is another spi device.
- *)
+(* relation for spi transition (an SPI device). *)
 val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
 (!(spi:spi_state). T ==> spi_tr spi (Update a v) (write_SPI_regs a v spi)) /\
 (!(spi:spi_state). T ==> spi_tr spi (Return a (read_SPI_regs_value env a spi)) (read_SPI_regs_state env a spi)) /\
