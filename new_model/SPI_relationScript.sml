@@ -1,6 +1,6 @@
 open HolKernel bossLib boolLib Parse;
 open wordsTheory wordsLib;
-open SPI_stateTheory; 
+open SPI_stateTheory SPI_schedulerTheory; 
 open write_SPIregsTheory read_SPIregsTheory;
 open SPI_initTheory SPI_txTheory SPI_rxTheory SPI_xferTheory;
 
