@@ -99,27 +99,6 @@ tx: tx_state; (* transmit state *)
 rx: rx_state; (* receive state *)
 xfer: xfer_state (* transfer (transmit and receive) state *) |>`
 
-(* TODO: SPI driver that issues memory requests to SPI controller. *)
-(* spi_driver, including buffer's physical address and length *)
-val _ = Datatype `driver_tx = <|
-tx_buffer_pa: word32;
-tx_left_length: num |>`
-
-val _ = Datatype `driver_rx = <|
-rx_buffer_pa : word32;
-rx_left_length: num |>`
-
-val _ = Datatype `driver_xfer = <|
-tx_buffer_pa : word32;
-rx_buffer_pa : word32;
-left_length : num |>`
-
-(* spi_driver: spi driver state, including init, tx, rx and xfer's buffer information *)
-val _ = Datatype `spi_driver = <|
-d_tx: driver_tx;
-d_rx: driver_rx;
-d_xfer: driver_xfer |>`
-
 (* mem_req: memory reuqest *)
 val _ = Datatype `mem_req = <|
 pa: word32;
