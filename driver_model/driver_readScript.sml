@@ -59,7 +59,7 @@ INIT_RD_ENABLE (dr:driver_state) =
 val TX_RD_ENABLE_def = Define `
 TX_RD_ENABLE (dr:driver_state) =
 ((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_check_txs \/ dr.dr_tx.state = dr_tx_check_eot) /\
+(dr.dr_tx.state = dr_tx_read_txs \/ dr.dr_tx.state = dr_tx_read_eot) /\
 (dr.dr_rx.state = dr_rx_idle) /\
 (dr.dr_xfer.state = dr_xfer_idle))`
 
