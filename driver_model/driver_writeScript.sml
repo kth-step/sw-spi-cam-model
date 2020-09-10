@@ -97,7 +97,7 @@ case dr.dr_init.state of
 val dr_write_ch0conf_speed_def = Define `
 dr_write_ch0conf_speed (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v = 0x00000014w:word32 in
+    v = 0x00000018w:word32 in
 case dr.dr_init.state of
   | dr_init_idle => (NONE, NONE, dr)
   | dr_init_read_req => (NONE, NONE, dr)
