@@ -1,2 +1,1 @@
-INCLUDES = ../spi_model
-
+INCLUDES = ../spi_model ../driver_model
