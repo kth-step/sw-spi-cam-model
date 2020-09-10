@@ -12,14 +12,14 @@ let addr = SPI0_SYSCONFIG:word32 and
     v = 0x00000002w:word32 in
 case dr.dr_init.state of
   | dr_init_idle => (SOME addr, SOME v, 
-    dr with dr_init := dr.dr_init with <| state := dr_init_read_req;
+    dr with dr_init := dr.dr_init with <|state := dr_init_read_req;
     issue_wr_sysconfig := F; issue_wr_modulctrl := F; issue_wr_ch0conf_wl := F;
     issue_wr_ch0conf_mode := F; issue_wr_ch0conf_speed := F |>)
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)
   | dr_init_setting => (NONE, NONE, dr)
   | dr_init_done => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <| state := dr_init_read_req;
+    dr with dr_init := dr.dr_init with <|state := dr_init_read_req;
     issue_wr_sysconfig := F; issue_wr_modulctrl := F; issue_wr_ch0conf_wl := F;
     issue_wr_ch0conf_mode := F; issue_wr_ch0conf_speed := F |>)`
 
@@ -236,5 +236,85 @@ else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_
 then (NONE, NONE, dr with dr_err := T)
 else (NONE, NONE, dr)`
 
+(* INIT_WR_ENABLE:driver_state -> bool
+ * driver is eligible to issue write commands within init state.
+ *)
+val INIT_WR_ENABLE_def = Define `
+INIT_WR_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_idle \/ dr.dr_init.state = dr_init_setting 
+\/ dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* TX_WR_ENABLE:driver_state -> bool
+ * driver is eligible to issue write commands within tx state.
+ *)
+val TX_WR_ENABLE_def = Define `
+TX_WR_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle \/ dr.dr_tx.state = dr_tx_conf_issued \/ 
+dr.dr_tx.state = dr_tx_write_data \/ dr.dr_tx.state = dr_tx_issue_disable \/ 
+dr_tx_issue_disable = dr_tx_reset_conf) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* RX_WR_ENABLE:driver_state -> bool
+ * driver is eligible to issue write commands within rx state.
+ *)
+val RX_WR_ENABLE_def = Define `
+RX_WR_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_idle \/ dr.dr_rx.state = dr_rx_conf_issued \/ 
+dr.dr_rx.state = dr_rx_issue_disable \/ dr.dr_rx.state = dr_rx_reset_conf) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* XFER_WR_ENABLE:driver_state -> bool
+ * driver is eligible to issue write commands within xfer state.
+ *)
+val XFER_WR_ENABLE_def = Define `
+XFER_WR_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_idle \/ dr.dr_xfer.state = dr_xfer_conf_issued \/
+dr.dr_xfer.state = dr_xfer_write_dataO \/ dr.dr_xfer.state = dr_xfer_issue_disable \/
+dr.dr_xfer.state = dr_xfer_reset_conf))`
+
+(* dr_write:driver_state -> word32 option * word32 option * word32 option *)
+val dr_write_def = Define `
+dr_write (dr:driver_state) =
+if dr.dr_err then (NONE, NONE, dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_idle \/ dr.dr_init.state = dr_init_done) 
+then (dr_write_softreset dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_setting) /\ (~ dr.dr_init.issue_wr_sysconfig)
+then (dr_write_sysconfig dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_setting) /\ (~ dr.dr_init.issue_wr_modulctrl)
+then (dr_write_modulctrl dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_setting) /\ (~ dr.dr_init.issue_wr_ch0conf_wl)
+then (dr_write_ch0conf_wl dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_setting) /\ (~ dr.dr_init.issue_wr_ch0conf_mode)
+then (dr_write_ch0conf_wl dr)
+else if (INIT_WR_ENABLE dr) /\ (dr.dr_init.state = dr_init_setting) /\ (~ dr.dr_init.issue_wr_ch0conf_speed)
+then (dr_write_ch0conf_speed dr)
+else if (TX_WR_ENABLE dr) /\ (dr.dr_tx.state = dr_tx_idle \/ dr.dr_tx.state = dr_tx_reset_conf)
+then (dr_write_ch0conf_tx dr)
+else if (TX_WR_ENABLE dr) /\ (dr.dr_tx.state = dr_tx_conf_issued \/ dr.dr_tx.state = dr_tx_issue_disable) 
+then (dr_write_ch0ctrl dr)
+else if (TX_WR_ENABLE dr) /\ (dr.dr_tx.state = dr_tx_write_data)
+then (dr_write_tx0 dr)
+else if (RX_WR_ENABLE dr) /\ (dr.dr_rx.state = dr_rx_idle \/ dr.dr_rx.state = dr_rx_reset_conf)
+then (dr_write_ch0conf_rx dr)
+else if (RX_WR_ENABLE dr) /\ (dr.dr_rx.state = dr_rx_conf_issued \/ dr.dr_rx.state = dr_rx_issue_disable)
+then (dr_write_ch0ctrl dr)
+else if (XFER_WR_ENABLE dr) /\ (dr.dr_xfer.state = dr_xfer_idle \/ dr.dr_xfer.state = dr_xfer_reset_conf)
+then (dr_write_ch0conf_xfer dr)
+else if (XFER_WR_ENABLE dr) /\ (dr.dr_xfer.state = dr_xfer_conf_issued \/ dr.dr_xfer.state = dr_xfer_issue_disable)
+then (dr_write_ch0ctrl dr)
+else if (XFER_WR_ENABLE dr) /\ (dr.dr_xfer.state = dr_xfer_write_dataO)
+then (dr_write_tx0 dr)
+(* other conditions, no write commands issued *)
+else (NONE, NONE, dr)`
 
 val _ = export_theory();

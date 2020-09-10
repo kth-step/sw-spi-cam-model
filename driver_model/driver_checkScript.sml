@@ -76,18 +76,33 @@ case dr.dr_xfer.state of
   | dr_xfer_issue_disable => dr
   | dr_xfer_reset_conf => dr`
 
+(* dr_check_ch0stat:driver_state -> word32 -> driver_state *)
+val dr_check_ch0stat_def = Define `
+dr_check_ch0stat (dr:driver_state) (rep_v:word32) =
+if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state <> dr_tx_idle) /\
+   (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle)
+then (dr_check_tx_ch0stat dr rep_v)
+else if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\
+   (dr.dr_rx.state <> dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle)
+then (dr_check_rx_ch0stat dr rep_v)
+else if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\
+   (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state <> dr_xfer_idle)
+then (dr_check_xfer_ch0stat dr rep_v)
+(* other states cannot process this reply *)
+else dr`
+
 (* dr_check_rx0:driver_state -> word32 -> driver_state *)
 val dr_check_rx0_def = Define `
 dr_check_rx0 (dr:driver_state) (rep_v:word32) =
 let v = (7 >< 0) rep_v:word8 in
 if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_tx.state = dr_tx_idle) /\
-   (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_idle) /\
+   (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.rx_left_length > 0)
 then dr with dr_rx := dr.dr_rx with 
      <|state := dr_rx_read_rxs; rx_data_buf := dr.dr_rx.rx_data_buf ++ [v];
        rx_left_length := dr.dr_rx.rx_left_length - 1|>
 else if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_tx.state = dr_tx_idle) /\
-        (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_idle) /\
+        (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_done) /\
         (dr.dr_rx.rx_left_length = 0)
 then dr with dr_rx := dr.dr_rx with state := dr_rx_issue_disable
 else if (dr.dr_xfer.state = dr_xfer_fetch_dataI) /\ (dr.dr_xfer.xfer_left_length > 0) /\
@@ -100,6 +115,18 @@ else if (dr.dr_xfer.state = dr_xfer_fetch_dataI) /\ (dr.dr_xfer.xfer_left_length
         (dr.dr_rx.state = dr_rx_idle)
 then dr with dr_xfer := dr.dr_xfer with
      <|state := dr_xfer_issue_disable; xfer_dataIN_buf := dr.dr_xfer.xfer_dataIN_buf ++ [v]|>
+else dr`
+
+(* dr_check:driver_state -> word32 -> word32 -> driver_state *)
+val dr_check_def = Define `
+dr_check (dr:driver_state) (rep_ad:word32) (rep_v:word32) =
+(* driver is in an error state *)
+if dr.dr_err then dr
+(* only SYSSTATUS, CHOSTAT, RX0 should be hanled *)
+else if rep_ad = SPI0_SYSSTATUS then (dr_check_sysstatus dr rep_v)
+else if rep_ad = SPI0_CH0STAT then (dr_check_ch0stat dr rep_v)
+else if rep_ad = SPI0_RX0 then (dr_check_rx0 dr rep_v)
+(* address not handled *)
 else dr`
 
 val _ = export_theory();

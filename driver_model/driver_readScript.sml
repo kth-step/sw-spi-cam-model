@@ -47,4 +47,54 @@ else if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\
 then (SOME SPI0_RX0, dr with dr_xfer := dr.dr_xfer with state := dr_xfer_fetch_dataI)
 else (NONE, dr)`
 
+(* INIT_RD_ENABLE: driver_state -> bool *)
+val INIT_RD_ENABLE_def = Define ` 
+INIT_RD_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_read_req) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* TX_RD_ENABLE: driver_state -> bool *)
+val TX_RD_ENABLE_def = Define `
+TX_RD_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_check_txs \/ dr.dr_tx.state = dr_tx_check_eot) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* RX_RD_ENABLE: driver_state -> bool *)
+val RX_RD_ENABLE_def = Define `
+RX_RD_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_read_rxs \/ dr.dr_rx.state = dr_rx_read_rx0) /\
+(dr.dr_xfer.state = dr_xfer_idle))`
+
+(* XFER_RD_ENABLE: driver_state -> bool *)
+val XFER_RD_ENABLE_def = Define `
+XFER_RD_ENABLE (dr:driver_state) =
+((dr.dr_init.state = dr_init_done) /\
+(dr.dr_tx.state = dr_tx_idle) /\
+(dr.dr_rx.state = dr_rx_idle) /\
+(dr.dr_xfer.state = dr_xfer_read_txs \/ dr.dr_xfer.state = dr_xfer_read_rxs \/ 
+dr.dr_xfer.state = dr_xfer_read_rx0))`
+
+(* dr_read: driver_state -> word32 option * driver_state *)
+val dr_read_def = Define `
+dr_read (dr:driver_state) =
+if dr.dr_err then (NONE, dr)
+else if (INIT_RD_ENABLE dr) then (dr_read_sysstatus dr)
+else if (TX_RD_ENABLE dr) /\ (dr.dr_tx.state = dr_tx_read_txs \/ dr.dr_tx.state = dr_tx_read_eot)
+then (dr_read_ch0stat dr)
+else if (RX_RD_ENABLE dr) /\ (dr.dr_rx.state = dr_rx_read_rxs)
+then (dr_read_ch0stat dr)
+else if (RX_RD_ENABLE dr) /\ (dr.dr_rx.state = dr_rx_read_rx0)
+then (dr_read_rx0 dr)
+else if (XFER_RD_ENABLE dr) /\ (dr.dr_xfer.state = dr_xfer_read_txs \/ dr.dr_xfer.state = dr_xfer_read_rxs)
+then (dr_read_ch0stat dr)
+else if (XFER_RD_ENABLE dr) /\ (dr.dr_xfer.state = dr_xfer_read_rx0)
+then (dr_read_rx0 dr)
+else (NONE, dr)`
+
 val _ = export_theory();
