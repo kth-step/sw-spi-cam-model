@@ -120,7 +120,8 @@ read_reg : word32 (* An arbitrary value *)|>`
  *)
 val _ = Datatype `global_lbl_type = 
 | tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)
-| Write word32 word32 | Update word32 word32 | Read word32 | Return word32 word32`
+| Write word32 word32 | Update word32 word32 | Read word32 | Return word32 word32
+| Check word32 word32`
 
 (* Some simple functions related to the spi_state *)
 (* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
