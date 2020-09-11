@@ -7,6 +7,14 @@ This folder is the driver model.
 - `driver_stateScript`: defines datatypes for the driver model.
 - `driver_relationScript`: defines a relation for driver state to descibe the driver state labeled transitions.
 
+### Driver transition relation
+In the `driver_relationScript`, I define a relation for the driver model. First, at any time, if the SPI controller replies a value v for register ad, the driver should check the reply and update itself, or the driver can ignore the reply and keep its state. Second, if the driver is in a state that can issue write request and the request is vaild (<> NONE), then the driver should issue the write request, finally the SPI controller will handle it. Third, the read request is similiar with the write one, but the request only has an address.
+
+Moreover, I think the `local_tr` defined in the spi_model/SPI_relationScript.sml should be updated with the label `check word32 word32`. In details, the SPI controller returns a value v for register ad, then the driver check the reply.
+
+`!(dr:driver_state) (spi:spi_state). (spi_tr spi (Return a v) spi') /\ (dr_tr dr (Check a v) dr') ==> local_tr (dr, spi) tau (dr', spi')`
+
+
 ### Automaton
 There are 4 automatons of the driver model, init, tx, rx and xfer. 
 
