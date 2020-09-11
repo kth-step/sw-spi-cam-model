@@ -9,4 +9,5 @@ This repository is for the formal model and verification of the SPI driver with 
 
 ## Updates
 2020.Sep.11
--upload the driver's model draft.
+
+- upload the driver's model draft.
