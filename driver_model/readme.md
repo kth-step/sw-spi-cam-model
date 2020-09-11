@@ -1,15 +1,11 @@
 This folder is the driver model.
 
 ### Files
--`driver_writeScript`: defines the `dr_write` function and its sub-functions that issue write requests to the SPI hardware according to the driver state.
-
--`driver_readScript`: defines the `dr_read` function and its sub-functions that issue read requests to the SPI hardware according to the driver state.
-
--`driver_checkScript`: defines the `dr_check` function and its sub-funcions. It updates the driver state based on the reply from SPI hardware for previous read request.
-
--`driver_stateScript`: defines datatypes for the driver model.
-
--`driver_relationScript`: defines a relation for driver state to descibe the driver state labeled transitions.
+- `driver_writeScript`: defines the `dr_write` function and its sub-functions that issue write requests to the SPI hardware according to the driver state.
+- `driver_readScript`: defines the `dr_read` function and its sub-functions that issue read requests to the SPI hardware according to the driver state.
+- `driver_checkScript`: defines the `dr_check` function and its sub-funcions. It updates the driver state based on the reply from SPI hardware for previous read request.
+- `driver_stateScript`: defines datatypes for the driver model.
+- `driver_relationScript`: defines a relation for driver state to descibe the driver state labeled transitions.
 
 ### Automaton
 There are 4 automatons of the driver model, init, tx, rx and xfer. 
