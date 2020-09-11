@@ -12,9 +12,9 @@ In the `driver_relationScript`, I define a relation for the driver model. First,
 
 Moreover, I think the `local_tr` defined in the spi_model/SPI_relationScript.sml should be updated with the label `check word32 word32`. In details, the SPI controller returns a value v for register ad, then the driver check the reply.
 
-`(!(dr:driver_state) (spi:spi_state). (spi_tr spi (Return a v) spi') /\ (dr_tr dr (Check a v) dr') ==> local_tr (dr, spi) tau (dr', spi')) /\`
+`(!(dr:driver_state) (spi:spi_state). (spi_tr spi (Return a v) spi') /\ (dr_tr dr (Check a v) dr') ==> local_tr (dr, spi) tau (dr', spi')) /\
 
-`(!(dr:driver_state) (spi:spi_state).  (dr_tr dr (Read a) dr'') /\ (spi_tr spi (Return a v) spi') ==> local_tr (dr, spi) tau (dr', spi'))`
+(!(dr:driver_state) (spi:spi_state).  (dr_tr dr (Read a) dr'') /\ (spi_tr spi (Return a v) spi') ==> local_tr (dr, spi) tau (dr', spi'))`
 
 Or in this way:
 
