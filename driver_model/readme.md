@@ -31,7 +31,7 @@ Driver init (initialize):
 
 Driver tx (transmit):
 
-<img src="https://user-images.githubusercontent.com/34090109/92888871-ff200300-f415-11ea-9b0e-7a77c34e3036.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/93056493-c88ff580-f66c-11ea-8f9d-cc9559fb0586.png" width="90%"></img> 
 
 Driver rx (receive):
 
