@@ -1,11 +1,9 @@
 In order to fix the problem for SPI driver and controller, I create this folder for the updated model.
 
 ### Update
-2020.7.30: 
+2020.9.15: 
 
-1. define the relations for SPI system in `SPI_relationScript.sml`, with some lemmas to show the data transition from an SPI device to another.
-
-2. redefine the function `tx_trans_done_op` and `rx_receive_data_op` to show devices interactions.
+Update readme figures.
 
 ### Automaton
 SPI init:
@@ -35,7 +33,4 @@ SPI xfer:
 - `SPI_xferScript.sml`: define functions of SPI controller for transfer automaton, full-duplex.
 - `SPI_schedulerScript.sml`: indicates SPI hardware internal excution steps.
 - `SPI_modelScript.sml`: shows the SPI hardware model's interface with CPU(issues read/write request to SPI) and its internal operations(according to the scheduler).
-
-The next step I plan to define the SPI slave in the environment and prove basic properties.
-
-### Problem
+- `SPI_relationScript.sml`: define SPI controller state labeled transition relation `spi_tr`.
