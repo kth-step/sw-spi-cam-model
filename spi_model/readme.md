@@ -8,22 +8,21 @@ In order to fix the problem for SPI driver and controller, I create this folder 
 2. redefine the function `tx_trans_done_op` and `rx_receive_data_op` to show devices interactions.
 
 ### Automaton
+SPI init:
+
+<img src="https://user-images.githubusercontent.com/34090109/93185806-2c362380-f73e-11ea-8ecb-d6d09b33f6fd.png" width="90%"></img> 
+
 SPI tx:
 
-<img src="https://user-images.githubusercontent.com/34090109/87311797-00b97180-c520-11ea-9830-dfbe0787af1a.jpg" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/93186028-6d2e3800-f73e-11ea-9722-550d3ca162e4.png" width="90%"></img> 
 
 SPI rx:
 
-<img src="https://user-images.githubusercontent.com/34090109/87920713-ddd81180-ca79-11ea-8db6-773230b96e7d.jpg" width="90%"></img>
+<img src="https://user-images.githubusercontent.com/34090109/93186137-90f17e00-f73e-11ea-9891-83919814bd6a.png" width="90%"></img>
 
 SPI xfer:
 
-<img src="https://user-images.githubusercontent.com/34090109/87921914-89359600-ca7b-11ea-8a15-22db875892c8.jpg" width="90%"></img> 
-
-SPI init:
-
-<img src="https://user-images.githubusercontent.com/34090109/87917189-dc581a80-ca74-11ea-9c14-25bcbcedfb50.jpg" width="90%"></img> 
-
+<img src="https://user-images.githubusercontent.com/34090109/93186238-aebee300-f73e-11ea-82ac-b177c9a83730.png" width="90%"></img> 
 
 ### Files
 - `board_memScript.sml`: defines physical addresses of SPI registers and board RAM region.
