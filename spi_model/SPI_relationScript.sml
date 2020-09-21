@@ -51,6 +51,7 @@ spi_tr spi (RX data) (rx_receive_data_op spi data)) /\
 (!(spi:spi_state). (spi.xfer.state = xfer_exchange_data) ==>
 spi_tr spi (XFER dataIN (xfer_exchange_data_op_value spi dataIN)) (xfer_exchange_data_op_state spi dataIN))`
 
+(*
 (* relation for local transition (an SPI device and a CPU)
  * CPU's datatype could be arm_state or the driver's datatype we defined later.
  *)
@@ -64,7 +65,7 @@ spi_tr spi tau spi' ==> local_tr (cpu, spi) tau (cpu, spi')) /\
 (spi_tr spi (Update a v) spi') ==>
 local_tr (cpu, spi) tau (cpu', spi')) /\
 (!(cpu:'a) (spi:spi_state).
-(cpu_tr cpu (Read a) cpu') /\
+(cpu_tr cpu (Read a v) cpu') /\
 (spi_tr spi (Return a v) spi') ==>
 local_tr (cpu, spi) tau (cpu', spi')) /\
 (!(cpu:'a) (spi:spi_state).
@@ -94,5 +95,6 @@ global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2')) /\
 (local_tr (cpu1, spi1) (XFER data1 data2) (cpu1', spi1')) /\
 (local_tr (cpu2, spi2) (XFER data2 data1) (cpu2', spi2')) ==>
 global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2'))`
+*)
 
 val _ = export_theory();

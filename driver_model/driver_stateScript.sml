@@ -59,6 +59,8 @@ xfer_left_length : num |>`
 (* driver_state: spi driver state, including init, tx, rx and xfer functions state *)
 val _ = Datatype `driver_state = <|
 dr_err: bool;
+dr_last_read_ad: word32 option;
+dr_last_read_v: word32 option;
 dr_init: dr_init_state;
 dr_tx: dr_tx_state;
 dr_rx: dr_rx_state;

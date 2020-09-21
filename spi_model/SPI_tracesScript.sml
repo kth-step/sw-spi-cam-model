@@ -29,7 +29,7 @@ val spi_observable_lbl_def = Define `
 (spi_observable_lbl (XFER _ _) = T) /\
 (spi_observable_lbl (Write _ _) = F) /\
 (spi_observable_lbl (Update _ _) = T) /\
-(spi_observable_lbl (Read _) = F) /\
+(spi_observable_lbl (Read _ _) = F) /\
 (spi_observable_lbl (Return _ _) = T)`
 
 (* spi label trace that filter out internal operations *)

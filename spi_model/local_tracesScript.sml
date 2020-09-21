@@ -29,7 +29,7 @@ val local_observable_lbl_def = Define `
 (local_observable_lbl (XFER _ _) = T) /\
 (local_observable_lbl (Write _ _) = F) /\
 (local_observable_lbl (Update _ _) = F) /\
-(local_observable_lbl (Read _) = F) /\
+(local_observable_lbl (Read _ _) = F) /\
 (local_observable_lbl (Return _ _) = F)`
 
 (* local label trace that filter out internal operations *)
