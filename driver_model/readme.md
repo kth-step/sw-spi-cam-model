@@ -5,7 +5,16 @@ This folder is the driver model.
 - `driver_readScript`: defines the `dr_read` function and its sub-functions that issue read requests to the SPI hardware according to the driver state.
 - `driver_checkScript`: defines the `dr_check` function and its sub-funcions. It updates the driver state based on the reply from SPI hardware for previous read request.
 - `driver_stateScript`: defines datatypes for the driver model.
-- `driver_relationScript`: defines a relation for driver state to descibe the driver state labeled transitions.
+- `driver_relationScript`: defines a relation for driver state to descibe the driver labeled state transitions.
+
+### Driver state transition relation
+driver_tr defines three rules:
+
+1. (dr.dr_last_read_ad = SOME a) /\ (dr.dr_last_read_v) = SOME v ==> dr tau dr'
+
+2. (WR_ENABLE dr) /\ (dr_write_address dr = SOME a) /\ (dr_write_value = SOME v) ==> dr (Write a v) dr'
+
+3. RD_ENABLE dr /\ (dr_read dr.dr_last_read_ad = SOME a) ==> dr (Read a v) dr'
 
 ### Automaton
 There are 4 automatons of the driver model, init, tx, rx and xfer. In the figures, Write means issue a write request to SPI controller, Read means issue a read request, and Check means check the reply for previous read request. rn represents the physical address of an SPI register, v is a value.
