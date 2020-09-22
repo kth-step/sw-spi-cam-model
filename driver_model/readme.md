@@ -14,7 +14,7 @@ driver_tr defines three rules:
 
 2. (WR_ENABLE dr) /\ (dr_write_address dr = SOME a) /\ (dr_write_value = SOME v) ==> dr (Write a v) dr'
 
-3. RD_ENABLE dr /\ (dr_read dr.dr_last_read_ad = SOME a) ==> dr (Read a v) dr'
+3. (RD_ENABLE dr) /\ (dr_read dr.dr_last_read_ad = SOME a) ==> dr (Read a v) dr'
 
 ### Automaton
 There are 4 automatons of the driver model, init, tx, rx and xfer. In the figures, Write means issue a write request to SPI controller, Read means issue a read request, and Check means check the reply for previous read request. rn represents the physical address of an SPI register, v is a value.
