@@ -3,7 +3,7 @@
 This repository is for the formal model and verification of the SPI driver with a camera.
 
 ### TODO
-1. The refinement model of SPI controller will have less states transtions, compared to the basic one. This would be a problem for the proof, since the states of ref model and basic model are not 1to1 corresponding.
+Problem: The refinement model of SPI controller will have less states transtions, compared to the basic one. This would be a problem for the proof, since the states of ref model and basic model are not 1to1 corresponding.
 
 Possible solution: add tau transition to ref model, like `s tau s`.
 
