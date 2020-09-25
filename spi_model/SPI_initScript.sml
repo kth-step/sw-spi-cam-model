@@ -10,9 +10,8 @@ val _ = new_theory "SPI_init";
 val init_reset_op_def = Define `
 init_reset_op (spi:spi_state) = 
 spi with <| regs := spi.regs with 
-   <| SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 0w;
-      SYSSTATUS := 1w (* means reset is done *)|>;
-   init := spi.init with state := init_setregs (* enter the next step, set up SPI registers *)|>`
+      SYSSTATUS := 1w (* means reset is done *);
+    init := spi.init with state := init_setregs (* enter the next step, set up SPI registers *)|>`
 
 (* Another version: Reset every register to its default value 
 val init_reset_op_def = Define `

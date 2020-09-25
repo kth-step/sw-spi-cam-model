@@ -39,11 +39,11 @@ EVAL ``(1w:word1 @@ (1w:word1 @@ (1w:word1 @@ 3w:word2):word3):word4):word32``
  *)
 
 (* read the value of RX0 with certain word-length
- * read_RX0: env -> spi_state -> spi_state * word32
+ * read_RX0: environment -> spi_state -> spi_state * word32
  *)
 val read_RX0_def = Define `
 read_RX0 (env:environment) (spi:spi_state) =
-let wl = (w2n spi.regs.CH0CONF.WL) + 1 in
+let wl = (w2n spi.regs.CH0CONF.WL) in
 if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) /\ 
 (spi.rx.state = rx_data_ready) then
 (spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;

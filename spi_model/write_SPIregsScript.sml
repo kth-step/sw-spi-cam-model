@@ -14,7 +14,8 @@ case spi.init.state of
 | init_start => if v = 0w then spi (* write 0, then SPI no changes*)
   else (* v = 1w, start a module reset *)
       spi with <|regs := spi.regs with 
-        SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 1w;
+        <|SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 0w; (* automatically reset by hardware *)
+        SYSSTATUS := 0w |>;
         init := spi.init with 
         <|state := init_reset; 
           sysconfig_mode_done := F; 
@@ -30,7 +31,8 @@ case spi.init.state of
   then spi with err:= T
   else if v = 1w then 
   spi with <| regs := spi.regs with 
-  SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 1w;
+  <|SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 0w; (* automatically reset by hardware *)
+  SYSSTATUS := 0w |>;
   init := spi.init with 
   <|state := init_reset; 
     sysconfig_mode_done := F; 
@@ -288,7 +290,7 @@ if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w))
  *)
 val write_TX0_def = Define `
 write_TX0 (value:word32) (spi:spi_state) =
-let wl = (w2n spi.regs.CH0CONF.WL) + 1 in
+let wl = (w2n spi.regs.CH0CONF.WL) in
 if (CHECK_TXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) 
 /\ (spi.tx.state = tx_ready_for_trans) then
 spi with <|regs := spi.regs with <|CH0STAT := spi.regs.CH0STAT with TXS := 0w;
@@ -318,10 +320,12 @@ else if (pa = SPI0_MODULCTRL) then (write_MODULCTRL value spi)
 else if (pa = SPI0_CH0CONF) then (write_CH0CONF_comb value spi)
 else if (pa = SPI0_CH0CTRL) then (write_CH0CTRL value spi)
 else if (pa = SPI0_TX0) then (write_TX0 value spi)
-(* RX0 and CH0STAT are read-only *)
+(* SYSSTATUS, RX0, CH0STAT are read-only 
+else if (pa = SPI0_SYSSTATUS) then spi
 else if (pa = SPI0_RX0) then spi
 else if (pa = SPI0_CH0STAT) then spi
-(* write to non-modeled address in SPI, no changes *)
+*)
+(* write to non-modeled or read-only address in SPI, no changes *)
 else spi`
 
 val _ = export_theory();

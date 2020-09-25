@@ -38,8 +38,6 @@ with CH0STAT := spi.regs.CH0STAT with EOT := 1w;
 RX_SHIFT_REG := (THE dataIN);
 xfer := spi.xfer with state := xfer_update_RX0 |>,
 SOME spi.TX_SHIFT_REG)
-else if (spi.xfer.state = xfer_exchange_data) /\ (spi.regs.CH0STAT.RXS = 0w) /\ (dataIN = NONE)
-then (spi, SOME spi.TX_SHIFT_REG)
 else (spi, NONE)`
 
 (* SPI controller handles the received word from shift register to RX0 

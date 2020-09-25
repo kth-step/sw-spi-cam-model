@@ -43,7 +43,7 @@ EOT: word1  (* Channel 0 end-of-transfer status *) |>`
 (* SPI registers *)
 val _ = Datatype `spi_regs = <|
 SYSCONFIG: sysconfig_bits; (* system configuration register *)
-SYSSTATUS: word1; (* system status register *)
+SYSSTATUS: word1; (* system status register, only RESETDONE bit *)
 MODULCTRL: modulctrl_bits; (* module control register *)
 CH0CONF: ch0conf_bits; (* channel 0 configuration register *)
 CH0STAT: ch0stat_bits; (* channel 0 status register *)

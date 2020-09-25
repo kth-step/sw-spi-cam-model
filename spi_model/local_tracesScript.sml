@@ -19,8 +19,10 @@ val (local_exe_rules, local_exe_ind, local_exe_cases) = Hol_reln `
 (R (cpu2,spi2) l2 (cpu3,spi3)) ==>
 local_exe R (e ++[((cpu1,spi1),l1,(cpu2,spi2));((cpu2,spi2),l2,(cpu3,spi3))]))`
 
+(*
 val local_tr_for_exe_def = Define `
 local_tr_for_exe = local_exe local_tr`
+*)
 
 val local_observable_lbl_def = Define `
 (local_observable_lbl tau = F) /\
