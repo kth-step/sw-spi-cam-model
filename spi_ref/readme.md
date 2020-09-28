@@ -21,4 +21,20 @@ The behaviors of the abstract model and the baisc one, from the driver angle, ar
 - `ref_RScript.sml`: define the refinement relation R for `spi_ref_state` and `spi_state`.
 
 ### Automaton
-Figures to add
+Compared to the basic model automatons, the figures below show the differences. In general, automatons are simplified without any tau transitions.
+
+spi_ref init:
+
+<img src="https://user-images.githubusercontent.com/34090109/94441085-9de08980-01a2-11eb-88ce-ff4a826562e3.png" width="90%"></img> 
+
+spi_ref tx:
+
+<img src="https://user-images.githubusercontent.com/34090109/94441583-3840cd00-01a3-11eb-9ce0-d01a84eedb66.png" width="90%"></img> 
+
+spi_ref rx:
+
+<img src="https://user-images.githubusercontent.com/34090109/94442517-5bb84780-01a4-11eb-8f27-b6285c02e27c.png" width="90%"></img> 
+
+spi_ref xfer:
+
+<img src="https://user-images.githubusercontent.com/34090109/94443932-0d0bad00-01a6-11eb-9c66-d6af23bcb6c1.png" width="90%"></img> 
