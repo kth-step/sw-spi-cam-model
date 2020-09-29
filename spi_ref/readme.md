@@ -10,7 +10,7 @@ The behaviors of the abstract model and the baisc one, from the driver angle, ar
 ### Files
 - `spi_refstateScript.sml`: define the datatypes of the `spi_ref` model, mainly remove some internal states of spi automatons.
 
-- `write_refregsScript.sml`: define write-related functions, that shows how the `spi_ref` update itself according to the driver write commands.
+- `write_refregsScript.sml`: define write-related functions that shows how the `spi_ref` updates itself according to the driver write commands.
 
 - `read_refregsScript.sml`: define read-related functions for read commands.
 
