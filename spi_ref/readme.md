@@ -1,7 +1,7 @@
 The refinement of SPI controller model
 
 ### Description
-Based on the spi controller model we defined in folder spi_model, we build an abstract spi controller model `spi_ref`. 
+Based on the spi controller model we defined in the folder /spi_model, we build an abstract spi controller model `spi_ref`. 
 
 It removes most internal operations of SPI, to simplify the model. This model contains an update function `write_refregs`, a return function `read_refregs`, as well as 3 label functions for `TX`, `RX` and `XFER` respectively. 
 Therefore, this model can update itself when driver issue write commands, or return a register's value and update its state for read commands, and more importandly, perform data transition with another spi device using `TX`, `RX` or `XFER` mode. 
