@@ -1,5 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open wordsLib wordsTHeory;
+open wordsLib wordsTheory;
 open abs_invTheory;
 
 val _ = new_theory "spi_abs_preserves_inv"
