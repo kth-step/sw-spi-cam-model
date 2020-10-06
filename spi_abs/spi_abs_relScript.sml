@@ -33,7 +33,6 @@ val (spi_abs_tr_rules, spi_abs_tr_ind, spi_abs_tr_cases) = Hol_reln `
 (!(spi_abs:spi_abs_state). T ==> 
 spi_abs_tr spi_abs (Update a v) (write_abs_spi_regs a v spi_abs)) /\
 (!(spi_abs:spi_abs_state). T ==>
-SPI_abs_tr spi_abs (Return a (read_abs_spi_regs_value env a spi_abs)) (read_abs_spi_regs_state env a spi_abs)) /\
 (!(spi_abs:spi_abs_state). 
 (spi_abs.tx.state = abs_tx_trans_done) /\ (spi_abs.regs.CH0STAT.TXS = 1w) ==>
 spi_abs_tr spi_abs (TX (tx_abs_trans_done_op_value spi_abs)) (tx_abs_trans_done_op_state spi_abs)) /\
