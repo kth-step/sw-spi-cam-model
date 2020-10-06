@@ -1,4 +1,4 @@
-open HolKernal bossLib boolLib Parse;
+open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTHeory;
 open abs_invTheory;
 
