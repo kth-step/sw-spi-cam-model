@@ -32,7 +32,8 @@ xfer := spi.xfer with state := xfer_exchange_data |>`
  *)
 val xfer_exchange_data_op_def = Define `
 xfer_exchange_data_op (spi:spi_state) (dataIN:word8 option) =
-if (spi.xfer.state = xfer_exchange_data) /\ (spi.regs.CH0STAT.RXS = 0w) /\ (dataIN <> NONE) then
+if (spi.xfer.state = xfer_exchange_data) /\ (spi.regs.CH0STAT.TXS = 1w) /\
+(spi.regs.CH0STAT.RXS = 0w) /\ (dataIN <> NONE) then
 (spi with <|regs := spi.regs 
 with CH0STAT := spi.regs.CH0STAT with EOT := 1w;
 RX_SHIFT_REG := (THE dataIN);
@@ -51,14 +52,14 @@ spi with <| regs := spi.regs with
 CH0STAT := spi.regs.CH0STAT with RXS := 1w |>;
 xfer := spi.xfer with state := xfer_data_ready |>`
 
-(* SPI controller operation after the driver issues a read(RsX0) request
+(* SPI controller operation after the driver issues a read(RX0) request
  * xfer_check_op: spi_state -> spi_state
  *)
 val xfer_check_op_def = Define `
 xfer_check_op (spi:spi_state) =
 if (CHECK_TXS_BIT spi) /\ ~(CHECK_RXS_BIT spi) /\ (CHECK_EOT_BIT spi) then
 spi with xfer := spi.xfer with state := xfer_ready_for_trans
-else spi with err := T`
+else spi`
 
 (* This function indicates SPI controller internal operations for xfer mode(full-duplex).
  * spi_xfer_operations: spi_state -> spi_state 

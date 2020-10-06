@@ -36,19 +36,20 @@ let (spi', v_option) = xfer_exchange_data_op spi dataIN in v_option`
 val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
 (!(spi:spi_state). T ==> spi_tr spi (Update a v) (write_SPI_regs a v spi)) /\
 (!(spi:spi_state). T ==> spi_tr spi (Return a (read_SPI_regs_value env a spi)) (read_SPI_regs_state env a spi)) /\
-(!(spi:spi_state). (env.scheduler = Initialize) /\ (INIT_ENABLE spi) ==>
+(!(spi:spi_state). (INIT_ENABLE spi) ==>
 spi_tr spi tau (spi_init_operations spi)) /\
-(!(spi:spi_state). (env.scheduler = Transmit) /\ (TX_ENABLE spi) ==>
+(!(spi:spi_state). (TX_ENABLE spi) ==>
 spi_tr spi tau (spi_tx_operations spi)) /\
-(!(spi:spi_state). (env.scheduler = Receive) /\ (RX_ENABLE spi) ==>
+(!(spi:spi_state). (RX_ENABLE spi) ==>
 spi_tr spi tau (spi_rx_operations spi)) /\
-(!(spi:spi_state). (env.scheduler = Transfer) /\ (XFER_ENABLE spi) ==>
+(!(spi:spi_state). (XFER_ENABLE spi) ==>
 spi_tr spi tau (spi_xfer_operations spi)) /\
-(!(spi:spi_state). (spi.tx.state = tx_trans_done) ==> 
+(!(spi:spi_state). (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) ==> 
 spi_tr spi (TX (tx_trans_done_op_value spi)) (tx_trans_done_op_state spi)) /\
-(!(spi:spi_state). (spi.rx.state = rx_receive_data) ==> 
+(!(spi:spi_state). (spi.rx.state = rx_receive_data) /\ (spi.regs.CH0STAT.RXS = 0w) ==> 
 spi_tr spi (RX data) (rx_receive_data_op spi data)) /\
-(!(spi:spi_state). (spi.xfer.state = xfer_exchange_data) ==>
+(!(spi:spi_state). (spi.xfer.state = xfer_exchange_data) /\ 
+(spi.regs.CH0STAT.TXS = 1w) /\ (spi.regs.CH0STAT.RXS = 0w) ==>
 spi_tr spi (XFER dataIN (xfer_exchange_data_op_value spi dataIN)) (xfer_exchange_data_op_state spi dataIN))`
 
 (*
@@ -96,5 +97,27 @@ global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2')) /\
 (local_tr (cpu2, spi2) (XFER data2 data1) (cpu2', spi2')) ==>
 global_tr (cpu1, spi1, cpu2, spi2) (cpu1', spi1', cpu2', spi2'))`
 *)
+
+(* a relation for two spi controllers to test data interactions *)
+val (spi_cb_tr_rules, spi_cb_tr_ind, spi_cb_tr_cases) = Hol_reln `
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi1 (Update a v) spi1' ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2)) /\
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi1 (Rerurn a v) spi1' ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2)) /\
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi1 tau spi1' ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2)) /\
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi2 (Update a v) spi2' ==>
+spi_cb_tr (spi1, spi2) (spi1, spi2')) /\
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi2 (Rerurn a v) spi2' ==>
+spi_cb_tr (spi1, spi2) (spi1, spi2')) /\
+(!(spi1:spi_state) (spi2:spi_state). spi_tr spi2 tau spi2' ==>
+spi_cb_tr (spi1, spi2) (spi1, spi2')) /\
+(!(spi1:spi_state) (spi2:spi_state). (spi_tr spi1 (TX d) spi1') /\ (spi_tr spi2 (RX d) spi2') ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2')) /\
+(!(spi1:spi_state) (spi2:spi_state). (spi_tr spi1 (RX d) spi1') /\ (spi_tr spi2 (TX d) spi2') ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2')) /\
+(!(spi1:spi_state) (spi2:spi_state). 
+(spi_tr spi1 (XFER d0 d1) spi1') /\ (spi_tr spi2 (XFER d1 d0) spi2') ==>
+spi_cb_tr (spi1, spi2) (spi1', spi2'))`
 
 val _ = export_theory();

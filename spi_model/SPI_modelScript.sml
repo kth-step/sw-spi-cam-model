@@ -23,10 +23,11 @@ read_SPI_regs env pa spi`
 (* SPI hardware internal operations without the interactions with CPU/driver *)
 (* SPI internal operations with a scheduler. 
  * spi_transition_autonomous: environment -> spi_state -> spi_state
- *)
+ 
 val spi_transition_autonomous_def = Define `
 spi_transition_autonomous (env:environment) (spi:spi_state) =
 spi_scheduler env spi`
+*)
 
 (* SPI hardware transmita a byte to another SPI device in tx mode.
  * spi_transition_transmit_data: spi_state -> spi_state * word8 option

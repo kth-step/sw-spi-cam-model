@@ -31,7 +31,7 @@ tx := spi.tx with state := tx_trans_done |>`
  *)
 val tx_trans_done_op_def = Define `
 tx_trans_done_op (spi:spi_state) =
-if (spi.tx.state = tx_trans_done) then
+if (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) then
 (spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 (* An SPI word is transferred from the TX shift register to the slave *)
 with EOT := 1w;
@@ -46,7 +46,7 @@ val tx_trans_check_op_def = Define `
 tx_trans_check_op (spi:spi_state) = 
 if (CHECK_TXS_BIT spi) /\ (CHECK_EOT_BIT spi) then
 spi with tx := spi.tx with state := tx_ready_for_trans
-else spi with err := T`
+else spi`
 
 (* This function indicates SPI controller's internal operations for tx automaton.
  * spi_tx_operations: spi_state -> spi_state -> spi_state * word8 option

@@ -42,7 +42,7 @@ val rx_receive_check_op_def = Define `
 rx_receive_check_op (spi:spi_state) =
 if ~(CHECK_RXS_BIT spi) then
 spi with rx := spi.rx with state := rx_receive_data
-else spi with err := T`
+else spi`
 
 (* This function indicates SPI controller's operations for rx automaton.
  * spi_rx_operations: spi_state -> spi_state
