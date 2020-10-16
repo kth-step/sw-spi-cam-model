@@ -1,4 +1,7 @@
-The refinement of SPI controller model
+This model is wrong since it cannot check the driver behaviours. TOREMOVE Later.
+
+
+The refinement of SPI controller model.
 
 ### Description
 Based on the spi controller model we defined in folder spi_model, we build an abstract spi controller model `spi_ref`. 
