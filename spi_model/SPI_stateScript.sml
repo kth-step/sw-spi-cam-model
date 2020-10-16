@@ -99,10 +99,18 @@ tx: tx_state; (* transmit state *)
 rx: rx_state; (* receive state *)
 xfer: xfer_state (* transfer (transmit and receive) state *) |>`
 
-(* mem_req: memory reuqest *)
-val _ = Datatype `mem_req = <|
-pa: word32;
-v: word8 option |>`
+(* Some simple functions related to the spi_state *)
+(* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
+val CHECK_RXS_BIT_def = Define `
+CHECK_RXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.RXS = 1w)`
+
+(* check SPI register CH0STAT TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
+val CHECK_TXS_BIT_def = Define `
+CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
+
+(* check SPI register CH0STAT EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
+val CHECK_EOT_BIT_def = Define `
+CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
 (* shcedule automaton indicates the status of SPI controller *)
 val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
@@ -122,25 +130,19 @@ val _ = Datatype `global_lbl_type =
 | tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)
 | Write word32 word32 | Update word32 word32 | Read word32 word32 | Return word32 word32`
 
-(* Some simple functions related to the spi_state *)
-(* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
-val CHECK_RXS_BIT_def = Define `
-CHECK_RXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.RXS = 1w)`
+(* mem_req: memory reuqest 
+val _ = Datatype `mem_req = <|
+pa: word32;
+v: word8 option |>`
+*)
 
-(* check SPI register CH0STAT TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
-val CHECK_TXS_BIT_def = Define `
-CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
-
-(* check SPI register CH0STAT EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
-val CHECK_EOT_BIT_def = Define `
-CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
-
-(* CHECK if the buffer is in the board RAM region. BUFFER_IN_BOARD_RAM: word32 -> num -> bool *)
+(* CHECK if the buffer is in the board RAM region. BUFFER_IN_BOARD_RAM: word32 -> num -> bool 
 val BUFFER_IN_BOARD_RAM_def = Define `
 BUFFER_IN_BOARD_RAM (buffer_pa:word32) (left_length:num) =
 let start_pa = buffer_pa
 and length = n2w left_length: word32
 in !a. a <+ length ==> 
 ((BOARD_RAM_START <=+ start_pa + a) /\ (start_pa + a <+ BOARD_RAM_END))`
+*)
 
 val _ = export_theory();

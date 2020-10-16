@@ -24,21 +24,6 @@ regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)  
 tx := spi.tx with state := tx_trans_done |>`
 
-(* SPI controller's operation when the data is transmitted to another SPI device,
- * SPI1 TX_SHIFT_REG -> SPI2 RX_SHIFT_REG. 
- * This function returns a new spi state and the data to be transmitted.
- * tx_trans_done_op: spi_state -> spi_state * word8 option
- *)
-val tx_trans_done_op_def = Define `
-tx_trans_done_op (spi:spi_state) =
-if (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) then
-(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-(* An SPI word is transferred from the TX shift register to the slave *)
-with EOT := 1w;
-tx := spi.tx with state := tx_trans_check |>,
-SOME spi.TX_SHIFT_REG)
-else (spi, NONE)`
-
 (* SPI controller's operation after EOT bit is set to 1.
  * tx_trans_check_op: spi_state -> spi_state
  *)
@@ -62,5 +47,19 @@ case spi.tx.state of
   | tx_trans_done => spi with err := T
   | tx_trans_check => tx_trans_check_op spi
   | tx_channel_disabled => spi with err := T`
+
+(* SPI controller's operation for TX, SPI1 TX_SHIFT_REG -> SPI2 RX_SHIFT_REG. 
+ * This function returns a new spi state and the data to be transmitted.
+ * tx_trans_done_op: spi_state -> spi_state * word8 option
+ *)
+val tx_trans_done_op_def = Define `
+tx_trans_done_op (spi:spi_state) =
+if (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) then
+(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
+(* An SPI word is transferred from the TX shift register to the slave *)
+with EOT := 1w;
+tx := spi.tx with state := tx_trans_check |>,
+SOME spi.TX_SHIFT_REG)
+else (spi, NONE)`
 
 val _ = export_theory();

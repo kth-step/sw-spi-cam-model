@@ -11,7 +11,7 @@ val write_SOFTRESET_def = Define `
 write_SOFTRESET (value:word32) (spi:spi_state) =
 let v = (1 >< 1) value :word1 in
 case spi.init.state of
-| init_start => if v = 0w then spi (* write 0, then SPI no changes*)
+| init_start => if v = 0w then spi (* write 0, then SPI does not change *)
   else (* v = 1w, start a module reset *)
       spi with <|regs := spi.regs with 
         <|SYSCONFIG := spi.regs.SYSCONFIG with SOFTRESET := 0w; (* automatically reset by hardware *)
@@ -38,7 +38,8 @@ case spi.init.state of
     sysconfig_mode_done := F; 
     modulctrl_bus_done:= F; 
     ch0conf_wordlen_done := F; 
-    ch0conf_wordlen_done := F |> |> 
+    ch0conf_mode_done := F;
+    ch0conf_speed_done := F |> |> 
   else spi`
 
 (* write a value to spi.regs.SYSCONFIG, set some bits of SYSCONFIG 
@@ -271,19 +272,21 @@ case spi.xfer.state of
 (* write_CH0CONF_comb: word32 -> spi_state -> spi_state *)
 val write_CH0CONF_comb_def = Define `
 write_CH0CONF_comb (value:word32) (spi:spi_state) =
-let spi = if ((11 >< 7) value:word5 <> 0w) 
-then (write_CH0CONF_WL value spi) else spi in
-let spi = if ((17 >< 16) value:word2 <> 0w) 
-then (write_CH0CONF value spi) else spi in
-let spi = if (value = 0w \/ ((5 >< 2) value:word4 <> 0w)) 
-then (write_CH0CONF_speed value spi) else spi in
-let spi = if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)
-then (write_CH0CONF_tx value spi) else spi in
-let spi = if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)
-then (write_CH0CONF_rx value spi) else spi in
-if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) 
-\/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled) then
-(write_CH0CONF_xfer value spi) else spi`
+if ((11 >< 7) value:word5 <> 0w) 
+then (write_CH0CONF_WL value spi) 
+else if ((17 >< 16) value:word2 <> 0w) 
+then (write_CH0CONF value spi) 
+else if ((5 >< 2) value:word4 <> 0w) 
+then (write_CH0CONF_speed value spi) 
+else if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.tx.state = tx_channel_disabled)
+then (write_CH0CONF_tx value spi) 
+else if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.rx.state = rx_channel_disabled)
+then (write_CH0CONF_rx value spi) 
+else if (((13 >< 12) value:word2 = 0w) /\ ((20 >< 20) value:word1 = 1w)) 
+\/ (value = 0w /\ spi.xfer.state = xfer_channel_disabled) 
+then (write_CH0CONF_xfer value spi) 
+else if (value = 0w) then (write_CH0CONF_speed value spi)
+else spi`
 
 (* write_TX0: word32 -> spi_state -> spi_state
  * clear the TXS bit when write a byte to TX0 register.
@@ -307,8 +310,9 @@ else spi with err := T`
  * write_SYSCONFIG_comb: word32 -> spi_state -> spi_state *)
 val write_SYSCONFIG_comb_def = Define `
 write_SYSCONFIG_comb (value:word32) (spi:spi_state) =
-let spi = if ((1 >< 1) value:word1 = 1w) then (write_SOFTRESET value spi) else spi in
-if ((0 >< 0) value:word1 = 1w) then (write_SYSCONFIG value spi) else spi`
+if ((1 >< 1) value:word1 = 1w) then (write_SOFTRESET value spi) 
+else if ((0 >< 0) value:word1 = 1w) then (write_SYSCONFIG value spi) 
+else spi`
 
 (* write_SPI_regs_def: word32 -> word32 -> spi_state -> spi_state *)
 val write_SPI_regs_def = Define `

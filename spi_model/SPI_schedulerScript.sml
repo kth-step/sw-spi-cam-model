@@ -4,13 +4,13 @@ open SPI_stateTheory SPI_initTheory SPI_txTheory SPI_rxTheory SPI_xferTheory;
 (* SPI sheduler decides the hardware internal operation steps according to its internal states *)
 val _ = new_theory "SPI_scheduler";
 
-(* X_ENABLE means X automaton is enabled for SPI internal operation *)
+(* X_ENABLE means X automaton is enabled for internal operation *)
 val INIT_ENABLE_def = Define `
 INIT_ENABLE (spi:spi_state) =
 ((spi.init.state = init_reset) /\ 
- (spi.tx.state = tx_idle) /\
- (spi.rx.state = rx_idle) /\
- (spi.xfer.state = xfer_idle))`
+(spi.tx.state = tx_idle) /\
+(spi.rx.state = rx_idle) /\
+(spi.xfer.state = xfer_idle))`
 
 val TX_ENABLE_def = Define `
 TX_ENABLE (spi:spi_state) =

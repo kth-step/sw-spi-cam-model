@@ -32,6 +32,25 @@ val xfer_exchange_data_op_value_def = Define `
 xfer_exchange_data_op_value (spi:spi_state) (dataIN: word8 option) =
 let (spi', v_option) = xfer_exchange_data_op spi dataIN in v_option`
 
+(* prerequisite for write commands to spi controller 
+ * SPI_UPDATE_ENABLE: spi_state -> bool
+
+val SPI_UPDATE_ENABLE_def = Define `
+SPI_UPDATE_ENABLE (spi:spi_state) =
+((spi.init.state <> init_reset) /\ (spi.tx.state <> tx_channel_enabled) /\
+(spi.tx.state <> tx_trans_data) /\ (spi.tx.state <> tx_trans_check) /\
+(spi.rx.state <> rx_channel_enabled) /\ (spi.rx.state <> rx_update_RX0) /\
+(spi.rx.state <> rx_receive_check) /\ (spi.xfer.state <> xfer_channel_enabled) /\
+(spi.xfer.state <> xfer_trans_data) /\ (spi.xfer.state <> xfer_update_RX0) /\
+(spi.xfer.state <> xfer_check))`
+ *)
+
+
+(* prerequisite for read commands to spi controller 
+ * SPI_RETURN_ENABLE: word32 -> spi_state -> bool
+ *)
+
+
 (* relation for spi transition (an SPI device). *)
 val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
 (!(spi:spi_state). T ==> spi_tr spi (Update a v) (write_SPI_regs a v spi)) /\
