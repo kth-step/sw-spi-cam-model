@@ -3,9 +3,13 @@
 This repository is for the formal model and verification of the SPI driver with a camera.
 
 ### TODO
-Work about spi_abs should be stopped so far.
+According to the driver and spi combined abstract model, there are 2 steps I think:
 
-Considering the combination of spi and driver models.
+1. Remove interactions of spi and driver, in other words Write/Update, Read/Return.
+
+2. Remove tau operations of spi and driver themselves.
+
+Then, we can get a very abstract model to descride the spi behaviors, based on users view.
 
 (TODO later)
 
