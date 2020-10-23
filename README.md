@@ -11,7 +11,7 @@ According to the driver and spi combined abstract model, there are 2 steps I thi
 
 Then, we can get a very abstract model to descride the spi behaviors, based on users view.
 
-(TODO later)
+(TODO later, maybe not needed)
 
 define an invariant for `spi`, for traces and functional correctness proof.
 
