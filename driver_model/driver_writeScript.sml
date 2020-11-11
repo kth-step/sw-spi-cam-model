@@ -130,7 +130,7 @@ case dr.dr_tx.state of
   | dr_tx_check_eot => (NONE, NONE, dr)    
   | dr_tx_issue_disable => (NONE, NONE, dr)
   | dr_tx_reset_conf => (SOME addr, SOME v2,
-    dr with dr_tx := dr.dr_tx with state := dr_tx_idle)`
+    dr with dr_tx := dr.dr_tx with state := dr_tx_pre)`
 
 (* dr_write_ch0conf_rx: driver_state -> word32 option * word32 option * driver_state *)
 val dr_write_ch0conf_rx_def = Define `
@@ -141,8 +141,7 @@ let addr = SPI0_CH0CONF:word32 and
 case dr.dr_rx.state of
   | dr_rx_idle => (SOME addr, SOME v1, 
     dr with dr_rx := dr.dr_rx with
-    <|state := dr_rx_conf_issued; rx_data_buf := [];
-    rx_left_length := 10 (* Fixed so far, TOCHANGE *)|>)
+    <|state := dr_rx_conf_issued; rx_data_buf := [] |>)
   | dr_rx_conf_issued => (NONE, NONE, dr)
   | dr_rx_read_rxs => (NONE, NONE, dr)
   | dr_rx_check_rxs => (NONE, NONE, dr)
@@ -150,7 +149,7 @@ case dr.dr_rx.state of
   | dr_rx_fetch_data => (NONE, NONE, dr)
   | dr_rx_issue_disable => (NONE, NONE, dr)
   | dr_rx_reset_conf => (SOME addr, SOME v2,
-    dr with dr_rx := dr.dr_rx with state := dr_rx_idle)`
+    dr with dr_rx := dr.dr_rx with state := dr_rx_pre)`
 
 (* dr_write_ch0conf_xfer: driver_state -> word32 option * word32 option * driver_state *)
 val dr_write_ch0conf_xfer_def = Define `
@@ -175,7 +174,7 @@ case dr.dr_xfer.state of
  | dr_xfer_fetch_dataI => (NONE, NONE, dr)
  | dr_xfer_issue_disable => (NONE, NONE, dr)
  | dr_xfer_reset_conf => (SOME addr, SOME v2, 
-   dr with dr_xfer := dr.dr_xfer with state := dr_xfer_idle)`
+   dr with dr_xfer := dr.dr_xfer with state := dr_xfer_pre)`
 
 (* dr_write_ch0ctrl: driver_state -> word32 option * word32 option * driver_state *)
 val dr_write_ch0ctrl_def = Define `
@@ -214,25 +213,25 @@ val dr_write_tx0_def = Define `
 dr_write_tx0 (dr:driver_state) = 
 if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle) /\
-   (dr.dr_tx.tx_left_length > 0)
+   (dr.dr_tx.tx_left_length > 1)
 then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_tx.data_buf):word32),
       dr with dr_tx := dr.dr_tx with 
       <|state := dr_tx_read_txs; data_buf := TL dr.dr_tx.data_buf;
       tx_left_length := dr.dr_tx.tx_left_length - 1|>)
 else if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle) /\
-   (dr.dr_tx.tx_left_length = 0)
+   (dr.dr_tx.tx_left_length = 1)
 then (NONE, NONE, dr with dr_tx := dr.dr_tx with state := dr_tx_read_eot)
 else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_done) /\
     (dr.dr_tx.state = dr_tx_idle) /\ (dr.dr_rx.state = dr_rx_idle) /\
-    (dr.dr_xfer.xfer_left_length > 0)
+    (dr.dr_xfer.xfer_left_length > 1)
 then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_xfer.xfer_dataOUT_buf)),
      dr with dr_xfer := dr.dr_xfer with
      <|state := dr_xfer_read_rxs; xfer_dataOUT_buf := TL dr.dr_xfer.xfer_dataOUT_buf;
      xfer_left_length := dr.dr_xfer.xfer_left_length - 1|>)
 else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_done) /\
     (dr.dr_tx.state = dr_tx_idle) /\ (dr.dr_rx.state = dr_rx_idle) /\
-    (dr.dr_xfer.xfer_left_length = 0)
+    (dr.dr_xfer.xfer_left_length = 1)
 then (NONE, NONE, dr with dr_err := T)
 else (NONE, NONE, dr)`
 

@@ -1,2 +1,2 @@
-INCLUDES = ../spi_model ../driver_model ../spi_abs
+INCLUDES = ../spi_model ../driver_model ../ds_abs1
 

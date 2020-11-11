@@ -10,7 +10,8 @@ val _ = new_theory "SPI_tx";
 val tx_channel_enabled_op_def = Define `
 tx_channel_enabled_op (spi:spi_state) =
 spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT 
-with TXS := 1w; (* TXS is set to 1 when enable channel 0 *)
+with <|TXS := 1w;
+EOT := 0w |>;
 tx := spi.tx with state := tx_ready_for_trans |>`
 
 (* SPI controller's operation after CPU writes TX0 register. 
