@@ -42,16 +42,16 @@ driver_tr dr (call_xfer buffer) (call_xfer_dr dr buffer))`
 (* local_tr: a driver and an SPI conroller transition *)
 val (local_tr_rules, local_tr_ind, local_tr_cases) = Hol_reln `
 (!(dr:driver_state) (spi:spi_state).
-(driver_tr dr call_init dr') /\ (spi.init.state = init_start) ==> 
+(driver_tr dr call_init dr') ==> 
 local_tr (dr, spi) call_init (dr', spi)) /\
 (!(dr:driver_state) (spi:spi_state).
-(driver_tr dr (call_tx buffer) dr') /\ (spi.tx.state = tx_idle) ==> 
+(driver_tr dr (call_tx buffer) dr') ==> 
 local_tr (dr, spi) (call_tx buffer) (dr', spi)) /\
 (!(dr:driver_state) (spi:spi_state).
-(driver_tr dr (call_rx length) dr') /\ (spi.rx.state = rx_idle) ==>
+(driver_tr dr (call_rx length) dr') ==>
 local_tr (dr, spi) (call_rx length) (dr', spi)) /\
 (!(dr:driver_state) (spi:spi_state).
-(driver_tr dr (call_xfer buffer) dr') /\ (spi.xfer.state = xfer_idle) ==>
+(driver_tr dr (call_xfer buffer) dr') ==>
 local_tr (dr, spi) (call_xfer buffer) (dr', spi)) /\
 (!(dr:driver_state) (spi:spi_state).
 driver_tr dr tau dr' ==> local_tr (dr, spi) tau (dr', spi)) /\
