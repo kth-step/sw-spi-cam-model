@@ -181,7 +181,7 @@ else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
 then spi with <|regs := spi.regs with CH0CTRL := 0w;
      rx := spi.rx with state := rx_channel_disabled |>
 else if (spi.init.state = init_done) /\ (spi.tx.state = tx_idle) /\
-        (spi.rx.state = rx_receive_data) /\ (spi.xfer.state = xfer_idle)
+        (spi.rx.state = rx_data_ready) /\ (spi.xfer.state = xfer_idle)
         /\ (v = 0w)
 then spi with <|regs := spi.regs with CH0CTRL := 0w;
      rx := spi.rx with state := rx_channel_disabled |>

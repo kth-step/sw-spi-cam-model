@@ -30,8 +30,10 @@ tx_left_length: num |>`
 
 (* ds_abs1_rx_state: the state of ds_abs1 rx automaton *)
 val _ = Datatype `ds_abs1_rx_general_state =
-| abs1_rx_pre | abs1_rx_idle | abs1_rx_receive | abs1_rx_update
-| abs1_rx_ready | abs1_rx_fetch_data | abs1_rx_return | abs1_rx_done
+| abs1_rx_pre | abs1_rx_idle | abs1_rx_receive 
+| abs1_rx_update | abs1_rx_ready | abs1_rx_fetch_data 
+| abs1_rx_return | abs1_rx_done | abs1_rx_last 
+| abs1_rx_check_1 | abs1_rx_check_2 | abs1_rx_pre_reset 
 | abs1_rx_ready_for_reset | abs1_rx_reset`
 
 val _ = Datatype `ds_abs1_rx_state = <|
@@ -56,7 +58,7 @@ val _ = Datatype `spi_abs1_state = <|
 TX_SHIFT_REG: word8;
 RX_SHIFT_REG: word8 |>`
 
-(* TO REMOVE*)
+(* only used for internal states transition *)
 val _ = Datatype `driver_abs1_state = <|
 dr_abs1_last_read_ad: word32 option;
 dr_abs1_last_read_v: word32 option |>`

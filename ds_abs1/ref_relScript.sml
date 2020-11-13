@@ -92,10 +92,18 @@ IS_RX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (dr.dr_rx.state = dr_rx_check_rxs /\ spi.rx.state = rx_receive_check))) /\
 ((ds_abs1.ds_abs1_rx.state = abs1_rx_done) =
 (dr.dr_rx.state = dr_rx_fetch_data /\ spi.rx.state = rx_receive_data)) /\
+((ds_abs1.ds_abs1_rx.state = abs1_rx_last) = 
+(dr.dr_rx.state = dr_rx_issue_disable /\ spi.rx.state = rx_receive_data)) /\
+((ds_abs1.ds_abs1_rx.state = abs1_rx_check_1) = 
+(dr.dr_rx.state = dr_rx_fetch_data /\ spi.rx.state = rx_update_RX0)) /\
+((ds_abs1.ds_abs1_rx.state = abs1_rx_check_2) = 
+(dr.dr_rx.state = dr_rx_fetch_data /\ spi.rx.state = rx_data_ready)) /\
+((ds_abs1.ds_abs1_rx.state = abs1_rx_pre_reset) = 
+(dr.dr_rx.state = dr_rx_issue_disable /\ spi.rx.state = rx_update_RX0)) /\
 ((ds_abs1.ds_abs1_rx.state = abs1_rx_ready_for_reset) =
 (dr.dr_rx.state = dr_rx_issue_disable /\ spi.rx.state = rx_receive_check)) /\
 ((ds_abs1.ds_abs1_rx.state = abs1_rx_reset) =
-((dr.dr_rx.state = dr_rx_issue_disable /\ spi.rx.state = rx_receive_data) \/
+((dr.dr_rx.state = dr_rx_issue_disable /\ spi.rx.state = rx_data_ready) \/
 (dr.dr_rx.state = dr_rx_reset_conf /\ spi.rx.state = rx_channel_disabled))))`
 
 (* IS_XFER_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
@@ -143,7 +151,7 @@ IS_XFER_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (* ref_rel: ds_abs1_state -> driver_state -> spi_state -> bool *)
 val ref_rel_def = Define `
 ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
-((ds_abs1.err = (dr.dr_err /\ spi.err)) /\
+((ds_abs1.err = (dr.dr_err \/ spi.err)) /\
 (IS_INIT_REL ds_abs1 dr spi) /\
 (IS_TX_REL ds_abs1 dr spi) /\
 (IS_RX_REL ds_abs1 dr spi) /\

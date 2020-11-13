@@ -83,8 +83,8 @@ rw []]);
 val ref_rel_spi_rx_receive_data = store_thm("ref_rel_spi_rx_receive_data",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (spi.rx.state = rx_receive_data) ==>
-ds_abs1.ds_abs1_rx.state = abs1_rx_receive``,
-rw [] >>
+ABS1_RX_LBL_ENABLE ds_abs1``,
+rw [ABS1_RX_LBL_ENABLE_def] >>
 `IS_RX_REL ds_abs1 dr spi` by METIS_TAC[ref_rel_def] >>
 FULL_SIMP_TAC std_ss [IS_RX_REL_def] >>
 Cases_on `dr.dr_rx.state` >>
@@ -97,14 +97,12 @@ rw[],
 `ds_abs1.ds_abs1_rx.state <> abs1_rx_idle` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw[],
-`spi.rx.state <> rx_conf_ready` by rw [] >>
+`(spi.rx.state <> rx_conf_ready) ` by rw [] >>
 `ds_abs1.ds_abs1_rx.state <> abs1_rx_idle` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw[],
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw[],
-cheat,
-cheat,
 `spi.rx.state <> rx_channel_disabled` by rw [] >>
 `ds_abs1.ds_abs1_rx.state <> abs1_rx_reset` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
@@ -118,8 +116,10 @@ val abs1_comb_hold_ref_rel_RX = store_thm("abs1_comb_hold_ref_rel_RX",
 ?ds_abs1'. (ds_abs1_tr ds_abs1 (RX data) ds_abs1') /\ (ref_rel ds_abs1' dr spi')``,
 rw [spi_tr_cases, ds_abs1_tr_cases] >|
 [METIS_TAC [ref_rel_spi_rx_receive_data],
-`ds_abs1.ds_abs1_rx.state = abs1_rx_receive` by METIS_TAC[ref_rel_spi_rx_receive_data] >>
-rw [abs1_rx_receive_op_def, rx_receive_data_op_def] >>
+`ABS1_RX_LBL_ENABLE ds_abs1` by METIS_TAC[ref_rel_spi_rx_receive_data] >>
+FULL_SIMP_TAC std_ss [ABS1_RX_LBL_ENABLE_def] >>
+rw [abs1_rx_receive_data_op_def, rx_receive_data_op_def, abs1_rx_receive_op_def,
+abs1_rx_done_op_def, abs1_rx_last_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def] >>
 rw [] >>
 FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
@@ -128,13 +128,15 @@ rw []]);
 (* bisimulation: (dr',spi') exists for RX label *)
 val comb_abs1_hold_ref_rel_RX = store_thm("comb_abs1_hold_ref_rel_RX",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (data:word8 option).
-(ref_rel ds_abs1 dr spi) /\ (ds_abs1.ds_abs1_rx.state = abs1_rx_receive) ==>
+(ref_rel ds_abs1 dr spi) /\ (ABS1_RX_LBL_ENABLE ds_abs1) ==>
 ?dr' spi'. local_tr (dr,spi) (RX data) (dr', spi') /\
-(ref_rel (abs1_rx_receive_op ds_abs1 data) dr' spi')``,
+(ref_rel (abs1_rx_receive_data_op ds_abs1 data) dr' spi')``,
 rw [local_tr_cases, spi_tr_cases] >|
-[METIS_TAC [ref_rel_def, IS_RX_REL_def],
-`spi.rx.state = rx_receive_data` by METIS_TAC[ref_rel_def, IS_RX_REL_def] >>
-rw [abs1_rx_receive_op_def, rx_receive_data_op_def] >>
+[METIS_TAC [ref_rel_def, IS_RX_REL_def, ABS1_RX_LBL_ENABLE_def],
+`spi.rx.state = rx_receive_data` by METIS_TAC[ref_rel_def, IS_RX_REL_def, ABS1_RX_LBL_ENABLE_def] >>
+FULL_SIMP_TAC std_ss [ABS1_RX_LBL_ENABLE_def] >>
+rw [abs1_rx_receive_data_op_def, abs1_rx_receive_op_def,
+abs1_rx_last_op_def, abs1_rx_done_op_def, rx_receive_data_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def] >>
 rw [] >>
 FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>

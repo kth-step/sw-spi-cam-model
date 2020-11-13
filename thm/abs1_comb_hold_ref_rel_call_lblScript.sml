@@ -172,12 +172,18 @@ rw [],
  (ds_abs1.ds_abs1_rx.state <> abs1_rx_reset)` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw [],
-`(dr.dr_rx.state <> dr_rx_read_rxs) /\ (dr.dr_rx.state <> dr_rx_check_rxs)` by rw [] >>
-`ds_abs1.ds_abs1_rx.state <> abs1_rx_update` by METIS_TAC [] >>
+`(dr.dr_rx.state <> dr_rx_read_rxs) /\ (dr.dr_rx.state <> dr_rx_check_rxs) /\
+ (dr.dr_rx.state <> dr_rx_fetch_data) /\ (dr.dr_rx.state <> dr_rx_issue_disable)` by rw [] >>
+`(ds_abs1.ds_abs1_rx.state <> abs1_rx_update) /\
+ (ds_abs1.ds_abs1_rx.state <> abs1_rx_check_1) /\
+ (ds_abs1.ds_abs1_rx.state <> abs1_rx_pre_reset)` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw [],
-`(dr.dr_rx.state <> dr_rx_read_rxs) /\ (dr.dr_rx.state <> dr_rx_check_rxs)` by rw [] >>
-`ds_abs1.ds_abs1_rx.state <> abs1_rx_ready` by METIS_TAC [] >>
+`(dr.dr_rx.state <> dr_rx_read_rxs) /\ (dr.dr_rx.state <> dr_rx_check_rxs) /\
+ (dr.dr_rx.state <> dr_rx_fetch_data) /\ (dr.dr_rx.state <> dr_rx_issue_disable)` by rw [] >>
+`(ds_abs1.ds_abs1_rx.state <> abs1_rx_ready) /\
+ (ds_abs1.ds_abs1_rx.state <> abs1_rx_check_2) /\
+ (ds_abs1.ds_abs1_rx.state <> abs1_rx_reset)` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw [],
 `(dr.dr_rx.state <> dr_rx_read_rxs) /\ (dr.dr_rx.state <> dr_rx_check_rxs) /\

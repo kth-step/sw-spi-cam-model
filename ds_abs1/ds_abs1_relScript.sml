@@ -60,8 +60,8 @@ ds_abs1_tr ds_abs1 tau ds_abs1') /\
 (!(ds_abs1:ds_abs1_state). (ABS1_TX_LBL_ENABLE ds_abs1) ==>
 ds_abs1_tr ds_abs1 (TX (abs1_tx_trans_done_op_value ds_abs1)) 
 (abs1_tx_trans_done_op_state ds_abs1)) /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1.ds_abs1_rx.state = abs1_rx_receive) ==>
-ds_abs1_tr ds_abs1 (RX data) (abs1_rx_receive_op ds_abs1 data)) /\
+(!(ds_abs1:ds_abs1_state). (ABS1_RX_LBL_ENABLE ds_abs1) ==>
+ds_abs1_tr ds_abs1 (RX data) (abs1_rx_receive_data_op ds_abs1 data)) /\
 (!(ds_abs1:ds_abs1_state). (ds_abs1.ds_abs1_xfer.state = abs1_xfer_exchange) ==>
 ds_abs1_tr ds_abs1 (XFER dataIN (abs1_xfer_exchange_op_value ds_abs1 dataIN)) 
 (abs1_xfer_exchange_op_state ds_abs1 dataIN))`
