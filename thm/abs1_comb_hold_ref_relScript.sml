@@ -59,12 +59,30 @@ val comb_abs1_hold_ref_rel_tau = store_thm("comb_abs1_hold_ref_rel_tau",
 ?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ (ref_rel ds_abs1' dr' spi')``,
 cheat);
 
+<<<<<<< HEAD
+=======
+(* bi-simulation (dr',spi') when lbl is tau *)
+val comb_abs1_hold_ref_rel_tau = store_thm("comb_abs1_hold_ref_rel_tau",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 tau ds_abs1') ==>
+?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ (ref_rel ds_abs1' dr' spi')``,
+cheat);
+
+>>>>>>> 94c284a492b8db7f2ed64e29d103d306882860e9
 (* bi-simulation (dr, spi') *)
 val comb_abs1_hold_ref_rel = store_thm("comb_abs1_hold_ref_rel",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (lbl:global_lbl_type).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
 (?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ (ref_rel ds_abs1' dr' spi'))``,
 cheat);
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> 94c284a492b8db7f2ed64e29d103d306882860e9
 
 
 val _ = export_theory();
