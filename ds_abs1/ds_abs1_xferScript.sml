@@ -40,11 +40,10 @@ COMB_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
 val spi_abs1_xfer_idle_op_def = Define `
 spi_abs1_xfer_idle_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with ds_abs1_xfer := ds_abs1.ds_abs1_xfer with
-<| state := abs1_xfer_prepare;
-   xfer_dataIN_buffer := [];
-   xfer_left_length := LENGTH ds_abs1.ds_abs1_xfer.xfer_dataOUT_buffer |>`
+state := abs1_xfer_prepare`
 
 (* spi_abs1_xfer_trans_op: ds_abs1_state -> ds_abs1_state *)
+(* TO-FIX false for bi-simulation *)
 val spi_abs1_xfer_trans_op_def = Define `
 spi_abs1_xfer_trans_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with
@@ -253,6 +252,8 @@ val call_xfer_ds_abs1_def = Define `
 call_xfer_ds_abs1 (ds_abs1:ds_abs1_state) (buffer:word8 list) =
 ds_abs1 with ds_abs1_xfer := ds_abs1.ds_abs1_xfer with
 <| state := abs1_xfer_idle;
-   xfer_dataOUT_buffer := buffer |>`
+   xfer_dataOUT_buffer := buffer;
+   xfer_dataIN_buffer := [];
+   xfer_left_length := LENGTH buffer |>`
 
 val _ = export_theory();

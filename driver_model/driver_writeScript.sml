@@ -35,10 +35,10 @@ case dr.dr_init.state of
   | dr_init_setting => (SOME addr, SOME v,
     dr with dr_init := dr.dr_init with <|
     issue_wr_sysconfig := T;
-    state := if (dr.dr_init.issue_wr_modulctrl) /\
-    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) /\
-    (dr.dr_init.issue_wr_ch0conf_speed) then
-    dr_init_done else dr_init_setting |>)
+    state := 
+    if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl)
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_init_done else dr_init_setting |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_modulctrl: driver_state -> word32 option * word32 option * driver_state *)
@@ -53,10 +53,10 @@ case dr.dr_init.state of
   | dr_init_setting => (SOME addr, SOME v,
     dr with dr_init := dr.dr_init with <|
     issue_wr_modulctrl := T;
-    state :=  if (dr.dr_init.issue_wr_sysconfig) /\
-    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) /\
-    (dr.dr_init.issue_wr_ch0conf_speed) then
-    dr_init_done else dr_init_setting |>)
+    state :=  
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_init_done else dr_init_setting |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_wl: driver_state -> word32 option * word32 option * driver_state *)
@@ -71,9 +71,10 @@ case dr.dr_init.state of
   | dr_init_setting => (SOME addr, SOME v,
     dr with dr_init := dr.dr_init with <|
     issue_wr_ch0conf_wl := T;
-    state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
-    (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) then
-    dr_init_done else dr_init_setting |>)
+    state :=  
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_init_done else dr_init_setting |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_mode: driver_state -> word32 option * word32 option * driver_state *)
@@ -88,9 +89,10 @@ case dr.dr_init.state of
   | dr_init_setting => (SOME addr, SOME v,
     dr with dr_init := dr.dr_init with <|
     issue_wr_ch0conf_mode := T;
-    state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
-    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) then
-    dr_init_done else dr_init_setting |>)
+    state :=  
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_init_done else dr_init_setting |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_speed: driver_state -> word32 option * word32 option * driver_state *)
@@ -105,9 +107,10 @@ case dr.dr_init.state of
   | dr_init_setting => (SOME addr, SOME v,
     dr with dr_init := dr.dr_init with <|
     issue_wr_ch0conf_speed := T;
-    state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
-    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) then
-    dr_init_done else dr_init_setting |>)
+    state :=  
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
+    then dr_init_done else dr_init_setting |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_tx: driver_state -> word32 option * word32 option * driver_state *)
@@ -117,11 +120,9 @@ let addr = SPI0_CH0CONF:word32 and
     v1 = 0x00102000w:word32 and
     v2 = 0x00000000w:word32 in
 case dr.dr_tx.state of
-  | dr_tx_idle => if (dr.dr_tx.data_buf <> []) then
+  | dr_tx_idle => 
     (SOME addr, SOME v1, 
-    dr with dr_tx := dr.dr_tx with 
-    <|state := dr_tx_conf_issued; tx_left_length := LENGTH dr.dr_tx.data_buf|>)
-    else (NONE, NONE, dr with dr_err := T) 
+    dr with dr_tx := dr.dr_tx with state := dr_tx_conf_issued )
   | dr_tx_conf_issued => (NONE, NONE, dr)
   | dr_tx_read_txs => (NONE, NONE, dr) 
   | dr_tx_check_txs => (NONE, NONE, dr)
@@ -141,7 +142,7 @@ let addr = SPI0_CH0CONF:word32 and
 case dr.dr_rx.state of
   | dr_rx_idle => (SOME addr, SOME v1, 
     dr with dr_rx := dr.dr_rx with
-    <|state := dr_rx_conf_issued; rx_data_buf := [] |>)
+    state := dr_rx_conf_issued )
   | dr_rx_conf_issued => (NONE, NONE, dr)
   | dr_rx_read_rxs => (NONE, NONE, dr)
   | dr_rx_check_rxs => (NONE, NONE, dr)
@@ -158,12 +159,9 @@ let addr = SPI0_CH0CONF:word32 and
     v1 = 0x00100000w:word32 and
     v2 = 0x00000000w:word32 in
 case dr.dr_xfer.state of
- | dr_xfer_idle => if (dr.dr_xfer.xfer_dataOUT_buf <> []) then
+ | dr_xfer_idle => 
    (SOME addr, SOME v1,
-    dr with dr_xfer := dr.dr_xfer with
-    <|state := dr_xfer_conf_issued; xfer_left_length := LENGTH dr.dr_xfer.xfer_dataOUT_buf;
-      xfer_dataIN_buf := []|>)
-    else (NONE, NONE, dr with dr_err := T)
+    dr with dr_xfer := dr.dr_xfer with state := dr_xfer_conf_issued)
  | dr_xfer_conf_issued => (NONE, NONE, dr)
  | dr_xfer_read_txs => (NONE, NONE, dr)
  | dr_xfer_check_txs => (NONE, NONE, dr)
@@ -177,6 +175,7 @@ case dr.dr_xfer.state of
    dr with dr_xfer := dr.dr_xfer with state := dr_xfer_pre)`
 
 (* dr_write_ch0ctrl: driver_state -> word32 option * word32 option * driver_state *)
+(* TOFIX*)
 val dr_write_ch0ctrl_def = Define `
 dr_write_ch0ctrl (dr:driver_state) =
 let addr = SPI0_CH0CTRL:word32 and
@@ -217,22 +216,21 @@ if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
 then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_tx.data_buf):word32),
       dr with dr_tx := dr.dr_tx with 
       <|state := dr_tx_read_txs; data_buf := TL dr.dr_tx.data_buf;
-      tx_left_length := dr.dr_tx.tx_left_length - 1|>)
+      tx_left_length := dr.dr_tx.tx_left_length - 1 |>)
 else if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle) /\
    (dr.dr_tx.tx_left_length = 1)
-then (NONE, NONE, dr with dr_tx := dr.dr_tx with state := dr_tx_read_eot)
+then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_tx.data_buf):word32), 
+     dr with dr_tx := dr.dr_tx with 
+     <|state := dr_tx_read_eot; data_buf := [];
+      tx_left_length := dr.dr_tx.tx_left_length - 1 |>)
 else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_done) /\
     (dr.dr_tx.state = dr_tx_idle) /\ (dr.dr_rx.state = dr_rx_idle) /\
-    (dr.dr_xfer.xfer_left_length > 1)
+    (dr.dr_xfer.xfer_left_length > 0)
 then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_xfer.xfer_dataOUT_buf)),
      dr with dr_xfer := dr.dr_xfer with
      <|state := dr_xfer_read_rxs; xfer_dataOUT_buf := TL dr.dr_xfer.xfer_dataOUT_buf;
      xfer_left_length := dr.dr_xfer.xfer_left_length - 1|>)
-else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_done) /\
-    (dr.dr_tx.state = dr_tx_idle) /\ (dr.dr_rx.state = dr_rx_idle) /\
-    (dr.dr_xfer.xfer_left_length = 1)
-then (NONE, NONE, dr with dr_err := T)
 else (NONE, NONE, dr)`
 
 (* INIT_WR_ENABLE:driver_state -> bool
@@ -240,46 +238,41 @@ else (NONE, NONE, dr)`
  *)
 val INIT_WR_ENABLE_def = Define `
 INIT_WR_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_idle \/ dr.dr_init.state = dr_init_setting 
-\/ dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_init.state = dr_init_idle \/ 
+dr.dr_init.state = dr_init_setting 
+\/ dr.dr_init.state = dr_init_done)`
 
 (* TX_WR_ENABLE:driver_state -> bool
  * driver is eligible to issue write commands within tx state.
  *)
 val TX_WR_ENABLE_def = Define `
 TX_WR_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle \/ dr.dr_tx.state = dr_tx_conf_issued \/ 
-dr.dr_tx.state = dr_tx_write_data \/ dr.dr_tx.state = dr_tx_issue_disable \/ 
-dr_tx_issue_disable = dr_tx_reset_conf) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_tx.state = dr_tx_idle \/
+ dr.dr_tx.state = dr_tx_conf_issued \/ 
+ dr.dr_tx.state = dr_tx_write_data \/
+ dr.dr_tx.state = dr_tx_issue_disable \/ 
+ dr_tx_issue_disable = dr_tx_reset_conf)`
 
 (* RX_WR_ENABLE:driver_state -> bool
  * driver is eligible to issue write commands within rx state.
  *)
 val RX_WR_ENABLE_def = Define `
 RX_WR_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_idle \/ dr.dr_rx.state = dr_rx_conf_issued \/ 
-dr.dr_rx.state = dr_rx_issue_disable \/ dr.dr_rx.state = dr_rx_reset_conf) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_rx.state = dr_rx_idle \/
+ dr.dr_rx.state = dr_rx_conf_issued \/ 
+ dr.dr_rx.state = dr_rx_issue_disable \/
+ dr.dr_rx.state = dr_rx_reset_conf)`
 
 (* XFER_WR_ENABLE:driver_state -> bool
  * driver is eligible to issue write commands within xfer state.
  *)
 val XFER_WR_ENABLE_def = Define `
 XFER_WR_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_idle \/ dr.dr_xfer.state = dr_xfer_conf_issued \/
-dr.dr_xfer.state = dr_xfer_write_dataO \/ dr.dr_xfer.state = dr_xfer_issue_disable \/
-dr.dr_xfer.state = dr_xfer_reset_conf))`
+(dr.dr_xfer.state = dr_xfer_idle \/
+ dr.dr_xfer.state = dr_xfer_conf_issued \/
+ dr.dr_xfer.state = dr_xfer_write_dataO \/
+ dr.dr_xfer.state = dr_xfer_issue_disable \/
+ dr.dr_xfer.state = dr_xfer_reset_conf)`
 
 (* dr_write:driver_state -> word32 option * word32 option * word32 option *)
 val dr_write_def = Define `

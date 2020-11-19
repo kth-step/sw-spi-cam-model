@@ -24,12 +24,14 @@ let (ad, v, dr') = dr_write dr in dr'`
 val (driver_tr_rules, driver_tr_ind, driver_tr_cases) = Hol_reln `
 (!(dr:driver_state). (dr.dr_last_read_ad = SOME a) /\ (dr.dr_last_read_v = SOME v) ==> 
 driver_tr dr tau (dr_check dr a v)) /\
-(!(dr:driver_state). ((INIT_WR_ENABLE dr) \/ (TX_WR_ENABLE dr) \/ (RX_WR_ENABLE dr) \/ 
-(XFER_WR_ENABLE dr)) /\ (dr_write_address dr = SOME a) /\ (dr_write_value dr = SOME v) ==> 
-driver_tr dr (Write a v) (dr_write_state dr)) /\
-(!(dr:driver_state). ((INIT_RD_ENABLE dr) \/ (TX_RD_ENABLE dr) \/ (RX_RD_ENABLE dr) \/
-(XFER_RD_ENABLE dr)) /\ ((dr_read dr).dr_last_read_ad = SOME a) ==> 
-driver_tr dr (Read a v) ((dr_read dr) with dr_last_read_v := SOME v)) /\
+(!(dr:driver_state). ((INIT_WR_ENABLE dr) \/ (TX_WR_ENABLE dr) \/ 
+(RX_WR_ENABLE dr) \/ (XFER_WR_ENABLE dr)) ==> 
+driver_tr dr 
+(Write (THE (dr_write_address dr)) (THE (dr_write_value dr))) (dr_write_state dr)) /\
+(!(dr:driver_state). ((INIT_RD_ENABLE dr) \/ (TX_RD_ENABLE dr) \/ 
+(RX_RD_ENABLE dr) \/ (XFER_RD_ENABLE dr)) ==> 
+driver_tr dr (Read (THE (dr_read dr).dr_last_read_ad) v) 
+((dr_read dr) with dr_last_read_v := SOME v)) /\
 (!(dr:driver_state). (dr.dr_init.state = dr_init_pre) ==>
 driver_tr dr call_init (call_init_dr dr)) /\
 (!(dr:driver_state). (dr.dr_tx.state = dr_tx_pre) /\ (buffer <> []) ==>

@@ -63,12 +63,11 @@ spi_tr spi tau (spi_tx_operations spi)) /\
 spi_tr spi tau (spi_rx_operations spi)) /\
 (!(spi:spi_state). (XFER_ENABLE spi) ==>
 spi_tr spi tau (spi_xfer_operations spi)) /\
-(!(spi:spi_state). (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) ==> 
+(!(spi:spi_state). (spi.tx.state = tx_trans_done) ==> 
 spi_tr spi (TX (tx_trans_done_op_value spi)) (tx_trans_done_op_state spi)) /\
-(!(spi:spi_state). (spi.rx.state = rx_receive_data) /\ (spi.regs.CH0STAT.RXS = 0w) ==> 
+(!(spi:spi_state). (spi.rx.state = rx_receive_data) ==> 
 spi_tr spi (RX data) (rx_receive_data_op spi data)) /\
-(!(spi:spi_state). (spi.xfer.state = xfer_exchange_data) /\ 
-(spi.regs.CH0STAT.TXS = 1w) /\ (spi.regs.CH0STAT.RXS = 0w) ==>
+(!(spi:spi_state). (spi.xfer.state = xfer_exchange_data) ==>
 spi_tr spi (XFER dataIN (xfer_exchange_data_op_value spi dataIN)) (xfer_exchange_data_op_state spi dataIN))`
 
 (*

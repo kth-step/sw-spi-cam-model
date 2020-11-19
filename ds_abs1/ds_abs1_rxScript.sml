@@ -13,7 +13,8 @@ SPI_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
 (ds_abs1.ds_abs1_rx.state = abs1_rx_fetch_data) \/
 (ds_abs1.ds_abs1_rx.state = abs1_rx_return) \/
 (ds_abs1.ds_abs1_rx.state = abs1_rx_check_1) \/
-(ds_abs1.ds_abs1_rx.state = abs1_rx_pre_reset))`
+(ds_abs1.ds_abs1_rx.state = abs1_rx_pre_reset) \/
+(ds_abs1.ds_abs1_rx.state = abs1_rx_ready_for_reset))`
 
 (* DRIVER_ABS1_RX_ENABLE: ds_abs1_state -> bool *)
 val DRIVER_ABS1_RX_ENABLE_def = Define `
@@ -47,8 +48,7 @@ val spi_abs1_rx_idle_op_def = Define `
 spi_abs1_rx_idle_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with
 ds_abs1_rx := ds_abs1.ds_abs1_rx with
-<| state := abs1_rx_receive;
-   rx_data_buffer := [] |>`
+state := abs1_rx_receive`
 
 (* spi_abs1_rx_update_op: ds_abs1_state -> ds_abs1_state *)
 val spi_abs1_rx_update_op_def = Define `
@@ -80,9 +80,15 @@ spi_abs1_rx_pre_reset_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with ds_abs1_rx := ds_abs1.ds_abs1_rx with
 state := abs1_rx_reset`
 
+(* spi_abs1_rx_ready_for_reset_op: ds_abs1_state -> ds_abs1_state *)
+val spi_abs1_rx_ready_for_reset_op_def = Define `
+spi_abs1_rx_ready_for_reset_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with ds_abs1_rx := ds_abs1.ds_abs1_rx with
+state := abs1_rx_last`
+
 (* spi_abs_rx_operations: ds_abs1_state -> ds_abs1_state *)
 val spi_abs1_rx_operations_def = Define `
-spi_abs1_rx_opearions (ds_abs1:ds_abs1_state) =
+spi_abs1_rx_operations (ds_abs1:ds_abs1_state) =
 case ds_abs1.ds_abs1_rx.state of
   | abs1_rx_pre => ds_abs1 with err := T
   | abs1_rx_idle => spi_abs1_rx_idle_op ds_abs1
@@ -96,7 +102,7 @@ case ds_abs1.ds_abs1_rx.state of
   | abs1_rx_check_1 => spi_abs1_rx_check_1_op ds_abs1
   | abs1_rx_check_2 => ds_abs1 with err := T
   | abs1_rx_pre_reset => spi_abs1_rx_pre_reset_op ds_abs1
-  | abs1_rx_ready_for_reset => ds_abs1 with err := T
+  | abs1_rx_ready_for_reset => spi_abs1_rx_ready_for_reset_op ds_abs1
   | abs1_rx_reset => ds_abs1 with err := T`
 
 
@@ -226,7 +232,8 @@ val call_rx_ds_abs1_def = Define `
 call_rx_ds_abs1 (ds_abs1:ds_abs1_state) (length: num) =
 ds_abs1 with ds_abs1_rx := ds_abs1.ds_abs1_rx with
 <| state := abs1_rx_idle;
-rx_left_length := length |>`
+rx_left_length := length;
+rx_data_buffer := [] |>`
 
 (* RX label function *)
 (* abs1_rx_receive_op: ds_abs1_state -> word8 option -> ds_abs1_state *)

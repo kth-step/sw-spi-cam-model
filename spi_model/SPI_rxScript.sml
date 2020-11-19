@@ -18,7 +18,7 @@ rx := spi.rx with state := rx_receive_data |>`
  *)
 val rx_receive_data_op_def = Define `
 rx_receive_data_op (spi:spi_state) (data: word8 option) =
-if (spi.rx.state = rx_receive_data) /\ (spi.regs.CH0STAT.RXS = 0w) /\ (data <> NONE) then 
+if (spi.rx.state = rx_receive_data) /\ (data <> NONE) then 
 spi with <| RX_SHIFT_REG := THE data; (* a word is received over the wire *)
 rx := spi.rx with state := rx_update_RX0 |>
 else spi`
@@ -40,9 +40,7 @@ rx := spi.rx with state := rx_data_ready |>`
  *)
 val rx_receive_check_op_def = Define `
 rx_receive_check_op (spi:spi_state) =
-if ~(CHECK_RXS_BIT spi) then
-spi with rx := spi.rx with state := rx_receive_data
-else spi`
+spi with rx := spi.rx with state := rx_receive_data`
 
 (* This function indicates SPI controller's operations for rx automaton.
  * spi_rx_operations: spi_state -> spi_state

@@ -45,12 +45,10 @@ else dr with dr_last_read_ad := NONE`
 (* dr_read_rx0: driver_state ->  driver_state *)
 val dr_read_rx0_def = Define `
 dr_read_rx0 (dr:driver_state) =
-if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\
-   (dr.dr_rx.state = dr_rx_read_rx0) /\ (dr.dr_xfer.state = dr_xfer_idle) 
+if (dr.dr_rx.state = dr_rx_read_rx0) 
 then dr with <| dr_rx := dr.dr_rx with state := dr_rx_fetch_data;
    dr_last_read_ad := SOME SPI0_RX0 |>
-else if (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\
-   (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_read_rx0) 
+else if (dr.dr_xfer.state = dr_xfer_read_rx0) 
 then dr with <| dr_xfer := dr.dr_xfer with state := dr_xfer_fetch_dataI;
    dr_last_read_ad := SOME SPI0_RX0 |>
 else dr with dr_last_read_ad := NONE`
@@ -58,35 +56,26 @@ else dr with dr_last_read_ad := NONE`
 (* INIT_RD_ENABLE: driver_state -> bool *)
 val INIT_RD_ENABLE_def = Define ` 
 INIT_RD_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_read_req) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_init.state = dr_init_read_req)`
 
 (* TX_RD_ENABLE: driver_state -> bool *)
 val TX_RD_ENABLE_def = Define `
 TX_RD_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_read_txs \/ dr.dr_tx.state = dr_tx_read_eot) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_tx.state = dr_tx_read_txs \/
+ dr.dr_tx.state = dr_tx_read_eot)`
 
 (* RX_RD_ENABLE: driver_state -> bool *)
 val RX_RD_ENABLE_def = Define `
 RX_RD_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_read_rxs \/ dr.dr_rx.state = dr_rx_read_rx0) /\
-(dr.dr_xfer.state = dr_xfer_idle))`
+(dr.dr_rx.state = dr_rx_read_rxs \/
+ dr.dr_rx.state = dr_rx_read_rx0)`
 
 (* XFER_RD_ENABLE: driver_state -> bool *)
 val XFER_RD_ENABLE_def = Define `
 XFER_RD_ENABLE (dr:driver_state) =
-((dr.dr_init.state = dr_init_done) /\
-(dr.dr_tx.state = dr_tx_idle) /\
-(dr.dr_rx.state = dr_rx_idle) /\
-(dr.dr_xfer.state = dr_xfer_read_txs \/ dr.dr_xfer.state = dr_xfer_read_rxs \/ 
-dr.dr_xfer.state = dr_xfer_read_rx0))`
+(dr.dr_xfer.state = dr_xfer_read_txs \/
+ dr.dr_xfer.state = dr_xfer_read_rxs \/ 
+ dr.dr_xfer.state = dr_xfer_read_rx0)`
 
 (* dr_read: driver_state -> driver_state *)
 val dr_read_def = Define `

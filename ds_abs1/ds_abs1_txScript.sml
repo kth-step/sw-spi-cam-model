@@ -39,10 +39,10 @@ val spi_abs1_tx_idle_op_def = Define `
 spi_abs1_tx_idle_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with
 ds_abs1_tx := ds_abs1.ds_abs1_tx with 
-<| state := abs1_tx_prepare;
-   tx_left_length := LENGTH ds_abs1.ds_abs1_tx.tx_data_buffer |>`
+state := abs1_tx_prepare`
 
 (* spi_abs1_tx_trans_op: ds_abs1_state -> ds_abs1_state *)
+(* false for bi-simulation, to change *)
 val spi_abs1_tx_trans_op_def = Define `
 spi_abs1_tx_trans_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with

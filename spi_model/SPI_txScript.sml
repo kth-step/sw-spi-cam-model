@@ -10,8 +10,7 @@ val _ = new_theory "SPI_tx";
 val tx_channel_enabled_op_def = Define `
 tx_channel_enabled_op (spi:spi_state) =
 spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT 
-with <|TXS := 1w;
-EOT := 0w |>;
+with <|TXS := 1w; EOT := 0w |>;
 tx := spi.tx with state := tx_ready_for_trans |>`
 
 (* SPI controller's operation after CPU writes TX0 register. 
@@ -22,7 +21,7 @@ val tx_trans_data_op_def = Define `
 tx_trans_data_op (spi:spi_state) =
 spi with <| TX_SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-with <|EOT := 0w; TXS := 1w|>; (* EOT bit is cleared, TXS bit is set*)  
+with <|EOT := 0w; TXS := 1w|>; (* cleat EOT bit, set TXS *)  
 tx := spi.tx with state := tx_trans_done |>`
 
 (* SPI controller's operation after EOT bit is set to 1.
@@ -30,9 +29,7 @@ tx := spi.tx with state := tx_trans_done |>`
  *)
 val tx_trans_check_op_def = Define `
 tx_trans_check_op (spi:spi_state) = 
-if (CHECK_TXS_BIT spi) /\ (CHECK_EOT_BIT spi) then
-spi with tx := spi.tx with state := tx_ready_for_trans
-else spi`
+spi with tx := spi.tx with state := tx_ready_for_trans`
 
 (* This function indicates SPI controller's internal operations for tx automaton.
  * spi_tx_operations: spi_state -> spi_state -> spi_state * word8 option
@@ -55,7 +52,7 @@ case spi.tx.state of
  *)
 val tx_trans_done_op_def = Define `
 tx_trans_done_op (spi:spi_state) =
-if (spi.tx.state = tx_trans_done) /\ (spi.regs.CH0STAT.TXS = 1w) then
+if (spi.tx.state = tx_trans_done) then
 (spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 (* An SPI word is transferred from the TX shift register to the slave *)
 with EOT := 1w;
