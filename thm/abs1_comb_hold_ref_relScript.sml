@@ -117,6 +117,9 @@ val comb_abs1_hold_ref_rel = store_thm("comb_abs1_hold_ref_rel",
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
 (?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ (ref_rel ds_abs1' dr' spi'))``,
 cheat);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0e90da248938a4568bb193f8b0aa2975919feb94
 
 val _ = export_theory();
