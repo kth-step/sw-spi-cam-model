@@ -11,7 +11,8 @@ INIT_ENABLE (spi:spi_state) =
 
 val TX_ENABLE_def = Define `
 TX_ENABLE (spi:spi_state) =
-((spi.tx.state <> tx_idle) /\ 
+((spi.tx.state <> tx_not_ready) /\
+(spi.tx.state <> tx_idle) /\ 
 (spi.tx.state <> tx_conf_ready) /\ 
 (spi.tx.state <> tx_ready_for_trans) /\ 
 (spi.tx.state <> tx_trans_done) /\ 
@@ -19,7 +20,8 @@ TX_ENABLE (spi:spi_state) =
 
 val RX_ENABLE_def = Define `
 RX_ENABLE (spi:spi_state) =
-((spi.rx.state <> rx_idle) /\ 
+((spi.rx.state <> rx_not_ready) /\
+(spi.rx.state <> rx_idle) /\ 
 (spi.rx.state <> rx_conf_ready) /\ 
 (spi.rx.state <> rx_receive_data) /\
 (spi.rx.state <> rx_data_ready) /\ 
@@ -27,7 +29,8 @@ RX_ENABLE (spi:spi_state) =
 
 val XFER_ENABLE_def = Define `
 XFER_ENABLE (spi:spi_state) =
-((spi.xfer.state <> xfer_idle) /\ 
+((spi.xfer.state <> xfer_not_ready) /\
+(spi.xfer.state <> xfer_idle) /\ 
 (spi.xfer.state <> xfer_conf_ready) /\ 
 (spi.xfer.state <> xfer_ready_for_trans) /\
 (spi.xfer.state <> xfer_exchange_data) /\ 

@@ -33,12 +33,24 @@ case dr.dr_init.state of
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)
   | dr_init_setting => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <|
+    dr with <| dr_init := dr.dr_init with <|
     issue_wr_sysconfig := T;
     state := 
     if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl)
     /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-    then dr_init_done else dr_init_setting |>)
+    then dr_init_done else dr_init_setting |>;
+    dr_tx := dr.dr_tx with state := 
+    if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl)
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_tx_pre else dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state := 
+    if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl)
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_rx_pre else dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state := 
+    if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl)
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_xfer_pre else dr_xfer_not_ready |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_modulctrl: driver_state -> word32 option * word32 option * driver_state *)
@@ -51,12 +63,24 @@ case dr.dr_init.state of
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)
   | dr_init_setting => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <|
+    dr with <| dr_init := dr.dr_init with <|
     issue_wr_modulctrl := T;
     state :=  
     if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
     /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-    then dr_init_done else dr_init_setting |>)
+    then dr_init_done else dr_init_setting |>;
+    dr_tx := dr.dr_tx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_tx_pre else dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_rx_pre else dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
+    /\ (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_xfer_pre else dr_xfer_not_ready |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_wl: driver_state -> word32 option * word32 option * driver_state *)
@@ -69,12 +93,24 @@ case dr.dr_init.state of
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)
   | dr_init_setting => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <|
+    dr with <| dr_init := dr.dr_init with <|
     issue_wr_ch0conf_wl := T;
     state :=  
     if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
     (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
-    then dr_init_done else dr_init_setting |>)
+    then dr_init_done else dr_init_setting |>;
+    dr_tx := dr.dr_tx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_tx_pre else dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_rx_pre else dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+    then dr_xfer_pre else dr_xfer_not_ready |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_mode: driver_state -> word32 option * word32 option * driver_state *)
@@ -87,12 +123,24 @@ case dr.dr_init.state of
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)   
   | dr_init_setting => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <|
+    dr with <| dr_init := dr.dr_init with <|
     issue_wr_ch0conf_mode := T;
     state :=  
     if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
     (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-    then dr_init_done else dr_init_setting |>)
+    then dr_init_done else dr_init_setting |>;
+    dr_tx := dr.dr_tx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_tx_pre else dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_rx_pre else dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+    then dr_xfer_pre else dr_xfer_not_ready |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_speed: driver_state -> word32 option * word32 option * driver_state *)
@@ -105,12 +153,24 @@ case dr.dr_init.state of
   | dr_init_read_req => (NONE, NONE, dr)
   | dr_init_check_rep => (NONE, NONE, dr)   
   | dr_init_setting => (SOME addr, SOME v,
-    dr with dr_init := dr.dr_init with <|
+    dr with <| dr_init := dr.dr_init with <|
     issue_wr_ch0conf_speed := T;
     state :=  
     if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
     (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
-    then dr_init_done else dr_init_setting |>)
+    then dr_init_done else dr_init_setting |>;
+    dr_tx := dr.dr_tx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
+    then dr_tx_pre else dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
+    then dr_rx_pre else dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state :=
+    if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
+    (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
+    then dr_xfer_pre else dr_xfer_not_ready |>)
   | dr_init_done => (NONE, NONE, dr)`
 
 (* dr_write_ch0conf_tx: driver_state -> word32 option * word32 option * driver_state *)
@@ -120,6 +180,8 @@ let addr = SPI0_CH0CONF:word32 and
     v1 = 0x00102000w:word32 and
     v2 = 0x00000000w:word32 in
 case dr.dr_tx.state of
+  | dr_tx_not_ready => (NONE, NONE, dr)
+  | dr_tx_pre => (NONE, NONE, dr)
   | dr_tx_idle => 
     (SOME addr, SOME v1, 
     dr with dr_tx := dr.dr_tx with state := dr_tx_conf_issued )
@@ -140,6 +202,8 @@ let addr = SPI0_CH0CONF:word32 and
     v1 = 0x00101000w:word32 and
     v2 = 0x00000000w:word32 in
 case dr.dr_rx.state of
+  | dr_rx_not_ready => (NONE, NONE, dr)
+  | dr_rx_pre => (NONE, NONE, dr)
   | dr_rx_idle => (SOME addr, SOME v1, 
     dr with dr_rx := dr.dr_rx with
     state := dr_rx_conf_issued )
@@ -159,6 +223,8 @@ let addr = SPI0_CH0CONF:word32 and
     v1 = 0x00100000w:word32 and
     v2 = 0x00000000w:word32 in
 case dr.dr_xfer.state of
+ | dr_xfer_not_ready => (NONE, NONE, dr)
+ | dr_xfer_pre => (NONE, NONE, dr)
  | dr_xfer_idle => 
    (SOME addr, SOME v1,
     dr with dr_xfer := dr.dr_xfer with state := dr_xfer_conf_issued)
@@ -175,7 +241,7 @@ case dr.dr_xfer.state of
    dr with dr_xfer := dr.dr_xfer with state := dr_xfer_pre)`
 
 (* dr_write_ch0ctrl: driver_state -> word32 option * word32 option * driver_state *)
-(* TOFIX*)
+(* TOFIX *)
 val dr_write_ch0ctrl_def = Define `
 dr_write_ch0ctrl (dr:driver_state) =
 let addr = SPI0_CH0CTRL:word32 and
@@ -212,25 +278,25 @@ val dr_write_tx0_def = Define `
 dr_write_tx0 (dr:driver_state) = 
 if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle) /\
-   (dr.dr_tx.tx_left_length > 1)
-then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_tx.data_buf):word32),
+   (dr.dr_tx.tx_cur_length < ((LENGTH dr.dr_tx.data_buf) - 1))
+then (SOME SPI0_TX0, SOME (w2w (EL (dr.dr_tx.tx_cur_length) (dr.dr_tx.data_buf))),
       dr with dr_tx := dr.dr_tx with 
-      <|state := dr_tx_read_txs; data_buf := TL dr.dr_tx.data_buf;
-      tx_left_length := dr.dr_tx.tx_left_length - 1 |>)
+      <|state := dr_tx_read_txs;
+      tx_cur_length := dr.dr_tx.tx_cur_length + 1 |>)
 else if (dr.dr_tx.state = dr_tx_write_data) /\ (dr.dr_init.state = dr_init_done) /\
    (dr.dr_rx.state = dr_rx_idle) /\ (dr.dr_xfer.state = dr_xfer_idle) /\
-   (dr.dr_tx.tx_left_length = 1)
-then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_tx.data_buf):word32), 
+   (dr.dr_tx.tx_cur_length = ((LENGTH dr.dr_tx.data_buf) - 1))
+then (SOME SPI0_TX0, SOME (w2w (EL (dr.dr_tx.tx_cur_length) (dr.dr_tx.data_buf))),
      dr with dr_tx := dr.dr_tx with 
-     <|state := dr_tx_read_eot; data_buf := [];
-      tx_left_length := dr.dr_tx.tx_left_length - 1 |>)
+     <|state := dr_tx_read_eot;
+      tx_cur_length := dr.dr_tx.tx_cur_length + 1 |>)
 else if (dr.dr_xfer.state = dr_xfer_write_dataO) /\ (dr.dr_init.state = dr_init_done) /\
     (dr.dr_tx.state = dr_tx_idle) /\ (dr.dr_rx.state = dr_rx_idle) /\
-    (dr.dr_xfer.xfer_left_length > 0)
-then (SOME SPI0_TX0, SOME (w2w (HD dr.dr_xfer.xfer_dataOUT_buf)),
+    (dr.dr_xfer.xfer_cur_length <= ((LENGTH dr.dr_xfer.xfer_dataOUT_buf) -1))
+then (SOME SPI0_TX0, SOME (w2w (EL (dr.dr_xfer.xfer_cur_length) (dr.dr_xfer.xfer_dataOUT_buf))),
      dr with dr_xfer := dr.dr_xfer with
-     <|state := dr_xfer_read_rxs; xfer_dataOUT_buf := TL dr.dr_xfer.xfer_dataOUT_buf;
-     xfer_left_length := dr.dr_xfer.xfer_left_length - 1|>)
+     <|state := dr_xfer_read_rxs;
+     xfer_cur_length := dr.dr_xfer.xfer_cur_length + 1|>)
 else (NONE, NONE, dr)`
 
 (* INIT_WR_ENABLE:driver_state -> bool

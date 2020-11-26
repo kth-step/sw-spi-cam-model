@@ -4,7 +4,7 @@ open driver_stateTheory driver_relationTheory driver_callTheory;
 open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
 open ref_relTheory;
 
-val _ = new_theory "abs1_comb_hold_ref_rel_call_lbl";
+val _ = new_theory "ref_rel_holds_call_lbl";
 
 (* a lemma for call_init label *)
 val ref_rel_dr_init_pre = store_thm("ref_rel_dr_init_pre",
@@ -13,8 +13,8 @@ val ref_rel_dr_init_pre = store_thm("ref_rel_dr_init_pre",
 ds_abs1.ds_abs1_init.state = abs1_init_pre``,
 rw [] >>
 `IS_INIT_REL ds_abs1 dr spi` by METIS_TAC[ref_rel_def] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def] >|
-[Cases_on `spi.init.state` >>
+FULL_SIMP_TAC std_ss [IS_INIT_REL_def] >>
+Cases_on `spi.init.state` >>
 rw [] >|
 [`(dr.dr_init.state <> dr_init_read_req) /\ (dr.dr_init.state <> dr_init_check_rep)` by rw [] >>
 `ds_abs1.ds_abs1_init.state <> abs1_init_start` by METIS_TAC [] >>
@@ -23,13 +23,12 @@ rw [],
 `(dr.dr_init.state <> dr_init_read_req) /\ 
  (dr.dr_init.state <> dr_init_check_rep) /\
  (dr.dr_init.state <> dr_init_setting)` by rw [] >>
-`(ds_abs1.ds_abs1_init.state <> abs1_init_check) /\
- (ds_abs1.ds_abs1_init.state <> abs1_init_done)` by METIS_TAC [] >>
+`(ds_abs1.ds_abs1_init.state <> abs1_init_start)` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_init.state` >>
 rw [],
+`dr.dr_init.state <> dr_init_done` by rw [] >>
+`ds_abs1.ds_abs1_init.state <> abs1_init_done` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_init.state` >>
-rw []],
-FULL_SIMP_TAC std_ss [] >>
 rw []]);
 
 (* bisimulation: ds_abs1' exits for call_init label *)
@@ -72,7 +71,11 @@ rw [] >>
 FULL_SIMP_TAC std_ss [IS_TX_REL_def] >>
 Cases_on `spi.tx.state` >>
 rw [] >|
-[`dr.dr_tx.state <> dr_tx_conf_issued` by rw [] >>
+[`dr.dr_tx.state <> dr_tx_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_tx.state <> abs1_tx_not_ready` by METIS_TAC [] >>
+Cases_on `ds_abs1.ds_abs1_tx.state` >>
+rw [],
+`dr.dr_tx.state <> dr_tx_conf_issued` by rw [] >>
 `ds_abs1.ds_abs1_tx.state <> abs1_tx_idle` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_tx.state` >>
 rw [],
@@ -157,7 +160,11 @@ rw [] >>
 FULL_SIMP_TAC std_ss [IS_RX_REL_def] >>
 Cases_on `spi.rx.state` >>
 rw [] >|
-[`dr.dr_rx.state <> dr_rx_conf_issued` by rw [] >>
+[`dr.dr_rx.state <> dr_rx_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_rx.state <> abs1_rx_not_ready` by METIS_TAC [] >>
+Cases_on `ds_abs1.ds_abs1_rx.state` >>
+rw [],
+`dr.dr_rx.state <> dr_rx_conf_issued` by rw [] >>
 `ds_abs1.ds_abs1_rx.state <> abs1_rx_idle` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw [],
@@ -239,7 +246,11 @@ rw [] >>
 FULL_SIMP_TAC std_ss [IS_XFER_REL_def] >>
 Cases_on `spi.xfer.state` >>
 rw [] >|
-[`dr.dr_xfer.state <> dr_xfer_conf_issued` by rw [] >>
+[`dr.dr_xfer.state <> dr_xfer_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_xfer.state <> abs1_xfer_not_ready` by METIS_TAC[] >>
+Cases_on `ds_abs1.ds_abs1_xfer.state` >>
+rw [],
+`dr.dr_xfer.state <> dr_xfer_conf_issued` by rw [] >>
 `ds_abs1.ds_abs1_xfer.state <> abs1_xfer_idle` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_xfer.state` >>
 rw [],

@@ -5,15 +5,49 @@ open driver_stateTheory board_memTheory;
 (* Driver checks the reply from the SPI controller for a read request *)
 val _ = new_theory "driver_check";
 
+(* INIT_CHECK_ENABLE: driver_state -> bool *)
+val INIT_CHECK_ENABLE_def = Define `
+INIT_CHECK_ENABLE (dr:driver_state) =
+(dr.dr_init.state = dr_init_check_rep)`
+
+(* TX_CHECK_ENABLE: driver_state -> bool *)
+val TX_CHECK_ENABLE_def = Define `
+TX_CHECK_ENABLE (dr:driver_state) =
+((dr.dr_tx.state = dr_tx_check_txs) \/
+(dr.dr_tx.state = dr_tx_check_eot))`
+
+(* RX_CHECK_ENABLE: driver_state -> bool *)
+val RX_CHECK_ENABLE_def = Define `
+RX_CHECK_ENBALE (dr:driver_state) =
+((dr.dr_rx.state = dr_rx_check_rxs) \/
+(dr.dr_rx.state = dr_rx_fetch_data))`
+
+(* XFER_CHECK_ENABLE: driver_state -> bool *)
+val XFER_CHECK_ENABLE_def = Define `
+XFER_CHECK_ENABLE (dr:driver_state) =
+((dr.dr_xfer.state = dr_xfer_check_txs) \/
+(dr.dr_xfer.state = dr_xfer_check_rxs) \/
+(dr.dr_xfer.state = dr_xfer_fetch_dataI))`
+
+(* CHECK_ENABLE: driver_state -> bool *)
+val CHECK_ENABLE_def = Define `
+CHECK_ENABLE (dr:driver_state) =
+((INIT_CHECK_ENABLE dr) \/ (TX_CHECK_ENABLE dr) \/ 
+(RX_CHECK_ENABLE dr) \/ (XFER_CHECK_ENABLE dr))`
+
 (* dr_check_sysstatus:driver_state -> word32 -> driver_state *)
 val dr_check_sysstatus_def = Define `
 dr_check_sysstatus (dr:driver_state) (rep_v:word32) =
 let v = (0 >< 0) rep_v:word1 in
 case dr.dr_init.state of
+  | dr_init_pre => dr
   | dr_init_idle => dr
   | dr_init_read_req => dr
   | dr_init_check_rep => if v = 1w 
-    then dr with dr_init := dr.dr_init with state := dr_init_setting
+    then dr with <| dr_init := dr.dr_init with state := dr_init_setting;
+    dr_tx := dr.dr_tx with state := dr_tx_not_ready;
+    dr_rx := dr.dr_rx with state := dr_rx_not_ready;
+    dr_xfer := dr.dr_xfer with state := dr_xfer_not_ready |>
     else dr with dr_init := dr.dr_init with state := dr_init_read_req
   | dr_init_setting => dr
   | dr_init_done => dr`
@@ -24,6 +58,8 @@ dr_check_tx_ch0stat (dr:driver_state) (rep_v:word32) =
 let v1 = (1 >< 1) rep_v:word1 and
     v2 = (2 >< 2) rep_v:word1 in
 case dr.dr_tx.state of
+  | dr_tx_not_ready => dr
+  | dr_tx_pre => dr
   | dr_tx_idle => dr
   | dr_tx_conf_issued => dr 
   | dr_tx_read_txs => dr
@@ -95,26 +131,17 @@ else dr`
 val dr_check_rx0_def = Define `
 dr_check_rx0 (dr:driver_state) (rep_v:word32) =
 let v = (7 >< 0) rep_v:word8 in
-if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_tx.state = dr_tx_idle) /\
-   (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_done) /\
-   (dr.dr_rx.rx_left_length > 1)
+if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_rx.rx_left_length > 1)
 then dr with dr_rx := dr.dr_rx with 
      <|state := dr_rx_read_rxs; rx_data_buf := dr.dr_rx.rx_data_buf ++ [v];
        rx_left_length := dr.dr_rx.rx_left_length - 1|>
-else if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_tx.state = dr_tx_idle) /\
-        (dr.dr_xfer.state = dr_xfer_idle) /\ (dr.dr_init.state = dr_init_done) /\
-        (dr.dr_rx.rx_left_length = 1)
+else if (dr.dr_rx.state = dr_rx_fetch_data) /\ (dr.dr_rx.rx_left_length = 1)
 then dr with dr_rx := dr.dr_rx with state := dr_rx_issue_disable
-else if (dr.dr_xfer.state = dr_xfer_fetch_dataI) /\ (dr.dr_xfer.xfer_left_length > 0) /\
-        (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\ 
-        (dr.dr_rx.state = dr_rx_idle)
+else if (dr.dr_xfer.state = dr_xfer_fetch_dataI)
 then dr with dr_xfer := dr.dr_xfer with
-     <|state := dr_xfer_read_txs; xfer_dataIN_buf := dr.dr_xfer.xfer_dataIN_buf ++ [v]|>
-else if (dr.dr_xfer.state = dr_xfer_fetch_dataI) /\ (dr.dr_xfer.xfer_left_length = 0) /\
-        (dr.dr_init.state = dr_init_done) /\ (dr.dr_tx.state = dr_tx_idle) /\ 
-        (dr.dr_rx.state = dr_rx_idle)
-then dr with dr_xfer := dr.dr_xfer with
-     <|state := dr_xfer_issue_disable; xfer_dataIN_buf := dr.dr_xfer.xfer_dataIN_buf ++ [v]|>
+     <|state := if (dr.dr_xfer.xfer_cur_length < (LENGTH dr.dr_xfer.xfer_dataOUT_buf)) 
+                then dr_xfer_read_txs else dr_xfer_issue_disable; 
+       xfer_dataIN_buf := dr.dr_xfer.xfer_dataIN_buf ++ [v]|>
 else dr`
 
 (* dr_check:driver_state -> word32 -> word32 -> driver_state *)

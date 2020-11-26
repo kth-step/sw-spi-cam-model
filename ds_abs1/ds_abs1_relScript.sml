@@ -7,8 +7,8 @@ val _ = new_theory "ds_abs1_rel"
 
 (* ds_abs1_spi_tr: spi abstract level1 model transtion *)
 val (ds_abs1_spi_tr_rules, ds_abs1_spi_tr_ind, ds_abs1_spi_tr_cases) = Hol_reln `
-(!(ds_abs1:ds_abs1_state). (SPI_ABS1_INIT_ENABLE ds_abs1) ==>
-ds_abs1_spi_tr ds_abs1 tau_spi (spi_abs1_init_operations ds_abs1)) /\
+(* (!(ds_abs1:ds_abs1_state). (SPI_ABS1_INIT_ENABLE ds_abs1) ==>
+ds_abs1_spi_tr ds_abs1 tau_spi (spi_abs1_init_operations ds_abs1)) /\ *)
 (!(ds_abs1:ds_abs1_state). (SPI_ABS1_TX_ENABLE ds_abs1) ==>
 ds_abs1_spi_tr ds_abs1 tau_spi (spi_abs1_tx_operations ds_abs1)) /\
 (!(ds_abs1:ds_abs1_state). (SPI_ABS1_RX_ENABLE ds_abs1) ==>
@@ -19,8 +19,8 @@ ds_abs1_spi_tr ds_abs1 tau_spi (spi_abs1_xfer_operations ds_abs1))`
 
 (* ds_abs1_dr_tr: driver abstract level1 model transtion *)
 val (ds_abs1_dr_tr_rules, ds_abs1_dr_tr_ind, ds_abs1_dr_tr_cases) = Hol_reln `
-(!(ds_abs1:ds_abs1_state). (DRIVER_ABS1_INIT_ENABLE ds_abs1) ==>
-ds_abs1_dr_tr ds_abs1 tau_dr (driver_abs1_init_operations ds_abs1)) /\
+(* (!(ds_abs1:ds_abs1_state). (DRIVER_ABS1_INIT_ENABLE ds_abs1) ==>
+ds_abs1_dr_tr ds_abs1 tau_dr (driver_abs1_init_operations ds_abs1)) /\ *)
 (!(ds_abs1:ds_abs1_state). (DRIVER_ABS1_TX_ENABLE ds_abs1) ==>
 ds_abs1_dr_tr ds_abs1 tau_dr (driver_abs1_tx_operations ds_abs1)) /\
 (!(ds_abs1:ds_abs1_state). (DRIVER_ABS1_RX_ENABLE ds_abs1) ==>

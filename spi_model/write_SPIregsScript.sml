@@ -59,8 +59,20 @@ case spi.init.state of
       state := 
       if (spi.init.modulctrl_bus_done /\ spi.init.ch0conf_wordlen_done 
       /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
-      then init_done else init_setregs|> |> 
-      else spi with err := T
+      then init_done else init_setregs |>;
+    tx := spi.tx with
+      state := if (spi.init.modulctrl_bus_done /\ spi.init.ch0conf_wordlen_done 
+      /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+      then tx_idle else tx_not_ready;
+    rx := spi.rx with
+      state := if (spi.init.modulctrl_bus_done /\ spi.init.ch0conf_wordlen_done 
+      /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+      then rx_idle else rx_not_ready;
+    xfer := spi.xfer with
+      state := if (spi.init.modulctrl_bus_done /\ spi.init.ch0conf_wordlen_done 
+      /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+      then xfer_idle else xfer_not_ready |> 
+    else spi with err := T
   | init_done => spi with err := T`
 
 (* write a value to spi.regs.MODULCTRL, set to a single-channel master mode.
@@ -81,7 +93,22 @@ case spi.init.state of
     state := 
     if (spi.init.sysconfig_mode_done /\ spi.init.ch0conf_wordlen_done 
     /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
-    then init_done else init_setregs|> |> 
+    then init_done else init_setregs |>; 
+    tx := spi.tx with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.ch0conf_wordlen_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then tx_idle else tx_not_ready;
+    rx := spi.rx with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.ch0conf_wordlen_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then rx_idle else rx_not_ready;
+    xfer := spi.xfer with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.ch0conf_wordlen_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then xfer_idle else xfer_not_ready |> 
     else spi with err := T
   | init_done => spi with err := T`
 
@@ -101,7 +128,22 @@ case spi.init.state of
     state := 
     if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
     /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
-    then init_done else init_setregs |> |> 
+    then init_done else init_setregs |>;
+    tx := spi.tx with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then tx_idle else tx_not_ready;
+    rx := spi.rx with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then rx_idle else rx_not_ready;
+    xfer := spi.xfer with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_mode_done /\ spi.init.ch0conf_speed_done) 
+    then xfer_idle else xfer_not_ready |> 
     else spi with err := T
   | init_done => spi with err := T`
 
@@ -124,12 +166,27 @@ case spi.init.state of
   | init_setregs => if v4 = 3w then spi with err := T
     else spi with <|regs := spi.regs with CH0CONF := spi.regs.CH0CONF with 
     <|IS := v1; DPE1 := v2; DPE0 := v3;
-      TRM := v4; EPOL := v5; POL := v6; PHA := v7|>;
+      TRM := v4; EPOL := v5; POL := v6; PHA := v7 |>;
     init := spi.init with <|ch0conf_mode_done := T;
     state := 
     if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
     /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_speed_done) 
-    then init_done else init_setregs |> |>
+    then init_done else init_setregs |>;
+    tx := spi.tx with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_speed_done) 
+    then tx_idle else tx_not_ready;
+    rx := spi.rx with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_speed_done) 
+    then rx_idle else rx_not_ready;
+    xfer := spi.xfer with
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_speed_done) 
+    then xfer_idle else xfer_not_ready |>
   | init_done => spi with err := T`
 
 (* write a value to spi.regs.CH0CONF to set speed 
@@ -142,19 +199,33 @@ case spi.init.state of
   | init_start => spi with err := T
   | init_reset => spi with err := T
   | init_setregs => 
-     spi with <|regs := spi.regs with
-     CH0CONF := spi.regs.CH0CONF with CLKD := v;
-     init := spi.init with <|ch0conf_speed_done := T;
-     state := 
-     if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
-     /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done)
-     then init_done else init_setregs |> |>
+    spi with <|regs := spi.regs with
+    CH0CONF := spi.regs.CH0CONF with CLKD := v;
+    init := spi.init with <|ch0conf_speed_done := T;
+    state := 
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done)
+    then init_done else init_setregs |>;
+    tx := spi.tx with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done)
+    then tx_idle else tx_not_ready;
+    rx := spi.rx with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done)
+    then rx_idle else rx_not_ready;
+    xfer := spi.xfer with 
+    state :=
+    if (spi.init.sysconfig_mode_done /\ spi.init.modulctrl_bus_done 
+    /\ spi.init.ch0conf_wordlen_done /\ spi.init.ch0conf_mode_done)
+    then xfer_idle else xfer_not_ready |>
   | init_done => spi with err := T`
 
 (* enable or disable the SPI channel 0 for tx, rx and xfer automatons.
  * write_CH0CTRL: word32 -> spi_state -> spi_state
  *)
-(* TOFIX *)
 val write_CH0CTRL_def = Define `
 write_CH0CTRL (value:word32) (spi:spi_state) =
 let v = (0 >< 0) value:word1 in
@@ -208,6 +279,7 @@ write_CH0CONF_tx (value:word32) (spi:spi_state) =
 let v1 = (13 >< 12) value:word2 and
     v2 = (20 >< 20) value:word1 in
 case spi.tx.state of
+  | tx_not_ready => spi with err := T
   | tx_idle => if (v1 = 2w) /\ (v2 = 1w) then 
     spi with <| regs := spi.regs with CH0CONF := spi.regs.CH0CONF
     with <|TRM := 2w; FORCE := 1w |>;
@@ -233,6 +305,7 @@ write_CH0CONF_rx (value:word32) (spi:spi_state) =
 let v1 = (13 >< 12) value:word2 and
     v2 = (20 >< 20) value:word1 in
 case spi.rx.state of
+  | rx_not_ready => spi with err := T
   | rx_idle => if (v1 = 1w) /\ (v2 = 1w) then
     spi with <| regs := spi.regs with CH0CONF := spi.regs.CH0CONF
     with <|TRM := 1w; FORCE := 1w|>;
@@ -257,6 +330,7 @@ write_CH0CONF_xfer (value:word32) (spi:spi_state) =
 let v1 = (13 >< 12) value:word2 and
     v2 = (20 >< 20) value:word1 in
 case spi.xfer.state of
+  | xfer_not_ready => spi with err := T
   | xfer_idle => if (v1 = 0w) /\ (v2 = 1w) then
     spi with <| regs := spi.regs with CH0CONF := spi.regs.CH0CONF
     with  <|TRM := 0w; FORCE := 1w |>;

@@ -65,7 +65,7 @@ ch0conf_speed_done: bool |>`
 
 (* spi controller transmit automaton *)
 val _ = Datatype `tx_general_state =
-| tx_idle | tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
+| tx_not_ready | tx_idle | tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
 | tx_trans_data | tx_trans_done | tx_trans_check | tx_channel_disabled`
 
 val _ = Datatype `tx_state = <|
@@ -73,7 +73,7 @@ state: tx_general_state |>`
 
 (* spi controller receive automaton *)
 val _ = Datatype `rx_general_state =
-| rx_idle | rx_conf_ready | rx_channel_enabled | rx_receive_data 
+| rx_not_ready | rx_idle | rx_conf_ready | rx_channel_enabled | rx_receive_data 
 | rx_update_RX0 | rx_data_ready | rx_receive_check | rx_channel_disabled`
 
 val _ = Datatype `rx_state = <|
@@ -81,8 +81,8 @@ state: rx_general_state |>`
 
 (* spi controller transfer automaton (transmit and receive, full-dulplex mode) *)
 val _ = Datatype `xfer_general_state =
-| xfer_idle | xfer_conf_ready | xfer_channel_enabled | xfer_ready_for_trans
-| xfer_trans_data | xfer_exchange_data | xfer_update_RX0 
+| xfer_not_ready | xfer_idle | xfer_conf_ready | xfer_channel_enabled 
+| xfer_ready_for_trans | xfer_trans_data | xfer_exchange_data | xfer_update_RX0 
 | xfer_data_ready | xfer_check | xfer_channel_disabled`
 
 val _ = Datatype `xfer_state = <|

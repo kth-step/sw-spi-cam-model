@@ -9,6 +9,7 @@ val _ = new_theory "driver_read";
 val dr_read_sysstatus_def = Define `
 dr_read_sysstatus (dr:driver_state) =
 case dr.dr_init.state of
+  | dr_init_pre => dr with dr_last_read_ad := NONE
   | dr_init_idle => dr with dr_last_read_ad := NONE
   | dr_init_read_req => 
     dr with <| dr_init := dr.dr_init with state := dr_init_check_rep;

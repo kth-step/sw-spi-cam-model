@@ -37,6 +37,7 @@ spi with tx := spi.tx with state := tx_ready_for_trans`
 val spi_tx_operations_def = Define `
 spi_tx_operations (spi:spi_state) =
 case spi.tx.state of
+  | tx_not_ready => spi with err := T
   | tx_idle => spi with err := T
   | tx_conf_ready => spi with err := T
   | tx_channel_enabled => tx_channel_enabled_op spi 

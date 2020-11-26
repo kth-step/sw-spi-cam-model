@@ -48,6 +48,7 @@ spi with rx := spi.rx with state := rx_receive_data`
 val spi_rx_operations_def = Define `
 spi_rx_operations (spi:spi_state) =
 case spi.rx.state of
+| rx_not_ready => spi with err := T
 | rx_idle => spi with err := T
 | rx_conf_ready => spi with err := T
 | rx_channel_enabled => rx_channel_enabled_op spi

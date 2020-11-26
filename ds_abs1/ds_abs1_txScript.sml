@@ -9,7 +9,8 @@ val _ = new_theory "ds_abs1_tx";
 val SPI_ABS1_TX_ENABLE_def = Define `
 SPI_ABS1_TX_ENABLE (ds_abs1:ds_abs1_state) =
 ((ds_abs1.ds_abs1_tx.state = abs1_tx_idle) \/ 
-(ds_abs1.ds_abs1_tx.state = abs1_tx_trans) \/
+(ds_abs1.ds_abs1_tx.state = abs1_tx_data_1) \/
+(ds_abs1.ds_abs1_tx.state = abs1_tx_data_2) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_check_1) \/ 
 (ds_abs1.ds_abs1_tx.state = abs1_tx_check_3) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_next) \/ 
@@ -18,10 +19,7 @@ SPI_ABS1_TX_ENABLE (ds_abs1:ds_abs1_state) =
 (* DRIVER_ABS1_TX_ENABLE: ds_abs1_state -> bool *)
 val DRIVER_ABS1_TX_ENABLE_def = Define `
 DRIVER_ABS1_TX_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.ds_abs1_tx.state = abs1_tx_idle) \/
-(ds_abs1.ds_abs1_tx.state = abs1_tx_prepare) \/
-(ds_abs1.ds_abs1_tx.state = abs1_tx_trans) \/
-(ds_abs1.ds_abs1_tx.state = abs1_tx_done_1) \/
+((ds_abs1.ds_abs1_tx.state = abs1_tx_prepare) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_done_2) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_check_1) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_check_2) \/
@@ -30,29 +28,32 @@ DRIVER_ABS1_TX_ENABLE (ds_abs1:ds_abs1_state) =
 (* COMB_ABS1_TX_ENABLE: ds_abs1_state -> bool *)
 val COMB_ABS1_TX_ENABLE_def = Define `
 COMB_ABS1_TX_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.ds_abs1_tx.state = abs1_tx_reset) \/
+((ds_abs1.ds_abs1_tx.state = abs1_tx_trans) \/
+(ds_abs1.ds_abs1_tx.state = abs1_tx_reset) \/
 (ds_abs1.ds_abs1_tx.state = abs1_tx_ready_for_reset))`
 
 (* tau_spi related functions *)
 (* spi_abs1_tx_idle_op: ds_abs1_state -> ds_abs1_state *)
 val spi_abs1_tx_idle_op_def = Define `
 spi_abs1_tx_idle_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with
-ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
 state := abs1_tx_prepare`
 
-(* spi_abs1_tx_trans_op: ds_abs1_state -> ds_abs1_state *)
-(* false for bi-simulation, to change *)
-val spi_abs1_tx_trans_op_def = Define `
-spi_abs1_tx_trans_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with
-<| state := if ds_abs1.ds_abs1_tx.tx_left_length > 1 then abs1_tx_done_2 
-   else abs1_tx_done_1;
-   tx_data_buffer := TL ds_abs1.ds_abs1_tx.tx_data_buffer;
-   tx_left_length := ds_abs1.ds_abs1_tx.tx_left_length - 1 |>;
-   spi_abs1 := ds_abs1.spi_abs1 with 
-   TX_SHIFT_REG := HD ds_abs1.ds_abs1_tx.tx_data_buffer |>`
+(* spi_abs1_tx_data_1_op: ds_abs1_state -> ds_abs1_state *)
+val spi_abs1_tx_data_1_op_def = Define `
+spi_abs1_tx_data_1_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with <| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_done_1;
+spi_abs1 := ds_abs1.spi_abs1 with
+TX_SHIFT_REG := (EL (ds_abs1.ds_abs1_tx.tx_cur_length - 1) 
+(ds_abs1.ds_abs1_tx.tx_data_buffer)) |>`
+
+(* spi_abs1_tx_data_2_op: ds_abs1_state -> ds_abs1_state *)
+val spi_abs1_tx_data_2_op_def = Define `
+spi_abs1_tx_data_2_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with <| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_done_2;
+spi_abs1 := ds_abs1.spi_abs1 with
+TX_SHIFT_REG := (EL (ds_abs1.ds_abs1_tx.tx_cur_length - 1) 
+(ds_abs1.ds_abs1_tx.tx_data_buffer)) |>`
 
 (* spi_abs1_check_1_op: ds_abs1_state -> ds_abs1_state *)
 val spi_abs1_tx_check_1_op_def = Define `
@@ -72,7 +73,7 @@ spi_abs1_tx_next_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with
 state := abs1_tx_trans`
 
-(* spi_abs1_tx_reset_op: ds_abs1_state -> ds_abs1_state *)
+(* spi_abs1_tx_ready_for_reset_op: ds_abs1_state -> ds_abs1_state *)
 val spi_abs1_tx_ready_for_reset_op_def = Define `
 spi_abs1_tx_ready_for_reset_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with
@@ -82,10 +83,13 @@ state := abs1_tx_reset`
 val spi_abs1_tx_operations_def = Define `
 spi_abs1_tx_operations (ds_abs1:ds_abs1_state) =
 case ds_abs1.ds_abs1_tx.state of
+  | abs1_tx_not_ready => ds_abs1 with err := T
   | abs1_tx_pre => ds_abs1 with err := T
   | abs1_tx_idle => spi_abs1_tx_idle_op ds_abs1
   | abs1_tx_prepare => ds_abs1 with err := T
-  | abs1_tx_trans => spi_abs1_tx_trans_op ds_abs1
+  | abs1_tx_trans => ds_abs1 with err := T
+  | abs1_tx_data_1 => spi_abs1_tx_data_1_op ds_abs1
+  | abs1_tx_data_2 => spi_abs1_tx_data_2_op ds_abs1
   | abs1_tx_done_1 => ds_abs1 with err := T
   | abs1_tx_done_2 => ds_abs1 with err := T
   | abs1_tx_done_3 => ds_abs1 with err := T
@@ -98,83 +102,49 @@ case ds_abs1.ds_abs1_tx.state of
 
 
 (* tau_dr related functions *)
-(* driver_abs1_tx_idle_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_tx_idle_op_def = Define `
-driver_abs1_tx_idle_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with <| ds_abs1_tx := ds_abs1.ds_abs1_tx with 
-tx_left_length := LENGTH ds_abs1.ds_abs1_tx.tx_data_buffer;
-driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 0w) |> |>`
 
 (* driver_abs1_tx_prepare_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_prepare_op_def = Define `
 driver_abs1_tx_prepare_op (ds_abs1:ds_abs1_state) =
-if (ds_abs1.driver_abs1.dr_abs1_last_read_ad = (SOME SPI0_CH0STAT)) /\
-   (ds_abs1.driver_abs1.dr_abs1_last_read_v = (SOME 0w))
-then ds_abs1 with driver_abs1 := ds_abs1.driver_abs1 with
-     dr_abs1_last_read_v := (SOME 2w)
-else ds_abs1 with
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_trans;
-   driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 2w)|> |>`
-
-(* driver_abs1_tx_trans_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_tx_trans_op_def = Define `
-driver_abs1_tx_trans_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 0w) |>`
-
-(* driver_abs1_tx_done_1_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_tx_done_1_op_def = Define `
-driver_abs1_tx_done_1_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 0w) |>`
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+state := abs1_tx_trans`
 
 (* driver_abs1_tx_done_2_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_done_2_op_def = Define `
 driver_abs1_tx_done_2_op (ds_abs1:ds_abs1_state) =
-if (ds_abs1.driver_abs1.dr_abs1_last_read_ad = (SOME SPI0_CH0STAT)) /\
-   (ds_abs1.driver_abs1.dr_abs1_last_read_v = (SOME 0w))
-then ds_abs1 with driver_abs1 := ds_abs1.driver_abs1 with
-     dr_abs1_last_read_v := (SOME 2w)
-else ds_abs1 with
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_done_3;
-driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 2w)|> |>`
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+state := abs1_tx_done_3`
 
 (* driver_abs1_tx_check_1_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_check_1_op_def = Define `
 driver_abs1_tx_check_1_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_ready_for_reset;
-driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 6w) |> |>`
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+state := abs1_tx_ready_for_reset`
 
 (* driver_abs1_tx_check_2_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_check_2_op_def = Define `
 driver_abs1_tx_check_2_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with 
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_reset;
-driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 6w) |> |>`
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+state := abs1_tx_reset`
 
 (* driver_abs1_tx_check_3_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_check_3_op_def = Define `
 driver_abs1_tx_check_3_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with 
-<| ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_next;
-driver_abs1 := ds_abs1.driver_abs1 with
-<| dr_abs1_last_read_ad := (SOME SPI0_CH0STAT); dr_abs1_last_read_v := (SOME 2w) |> |>`
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with 
+state := abs1_tx_next`
 
 (* driver_abs1_tx_operations: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_tx_operations_def = Define `
 driver_abs1_tx_operations (ds_abs1:ds_abs1_state) =
 case ds_abs1.ds_abs1_tx.state of
+  | abs1_tx_not_ready => ds_abs1 with err := T
   | abs1_tx_pre => ds_abs1 with err := T
-  | abs1_tx_idle =>  driver_abs1_tx_idle_op ds_abs1
+  | abs1_tx_idle =>  ds_abs1 with err := T
   | abs1_tx_prepare => driver_abs1_tx_prepare_op ds_abs1
-  | abs1_tx_trans => driver_abs1_tx_trans_op ds_abs1
-  | abs1_tx_done_1 => driver_abs1_tx_done_1_op ds_abs1
+  | abs1_tx_trans => ds_abs1 with err := T
+  | abs1_tx_data_1 => ds_abs1 with err := T
+  | abs1_tx_data_2 => ds_abs1 with err := T
+  | abs1_tx_done_1 => ds_abs1 with err := T
   | abs1_tx_done_2 => driver_abs1_tx_done_2_op ds_abs1
   | abs1_tx_done_3 => ds_abs1 with err := T
   | abs1_tx_check_1 => driver_abs1_tx_check_1_op ds_abs1
@@ -186,6 +156,15 @@ case ds_abs1.ds_abs1_tx.state of
 
 
 (* tau_comb related functions *)
+(* comb_abs1_tx_trans_op ds_abs1_state -> ds_abs1_state *)
+val comb_abs1_tx_trans_op_def = Define `
+comb_abs1_tx_trans_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with
+<| state := if ds_abs1.ds_abs1_tx.tx_cur_length < ((LENGTH ds_abs1.ds_abs1_tx.tx_data_buffer) - 1)
+   then abs1_tx_data_2 
+   else abs1_tx_data_1;
+   tx_cur_length := ds_abs1.ds_abs1_tx.tx_cur_length + 1 |>`
+
 (* comb_abs1_tx_ready_for_reset_op: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_tx_ready_for_reset_op_def = Define `
 comb_abs1_tx_ready_for_reset_op (ds_abs1:ds_abs1_state) =
@@ -199,7 +178,9 @@ ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with state := abs1_tx_pre`
 (* comb_abs1_tx_operations: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_tx_operations_def = Define `
 comb_abs1_tx_operations (ds_abs1:ds_abs1_state) =
-if ds_abs1.ds_abs1_tx.state = abs1_tx_ready_for_reset
+if ds_abs1.ds_abs1_tx.state = abs1_tx_trans 
+then (comb_abs1_tx_trans_op ds_abs1)
+else if ds_abs1.ds_abs1_tx.state = abs1_tx_ready_for_reset
 then (comb_abs1_tx_ready_for_reset_op ds_abs1)
 else if ds_abs1.ds_abs1_tx.state = abs1_tx_reset 
 then (comb_abs1_tx_reset_op ds_abs1)
@@ -245,6 +226,7 @@ val call_tx_ds_abs1_def = Define `
 call_tx_ds_abs1 (ds_abs1:ds_abs1_state) (buffer:word8 list) =
 ds_abs1 with ds_abs1_tx := ds_abs1.ds_abs1_tx with
 <| state := abs1_tx_idle;
-   tx_data_buffer := buffer |>`
+   tx_data_buffer := buffer;
+   tx_cur_length := 0 |>`
 
 val _ = export_theory();

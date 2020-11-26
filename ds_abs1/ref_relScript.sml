@@ -5,7 +5,7 @@ open ds_abs1_stateTheory;
 
 val _ = new_theory "ref_rel";
 
-(* IS_INIT_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
+(* IS_INIT_REL: ds_abs1_state -> driver_state -> spi_state -> bool 
 val IS_INIT_REL_def = Define `
 IS_INIT_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (((ds_abs1.ds_abs1_init.state = abs1_init_pre) = 
@@ -20,11 +20,27 @@ IS_INIT_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((ds_abs1.ds_abs1_init.state = abs1_init_done) =
 (dr.dr_init.state = dr_init_setting /\ spi.init.state = init_setregs) \/
 (dr.dr_init.state = dr_init_done /\ spi.init.state = init_done)))`
+*)
+val IS_INIT_REL_def = Define `
+IS_INIT_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
+(((ds_abs1.ds_abs1_init.state = abs1_init_pre) = 
+(dr.dr_init.state = dr_init_pre /\ spi.init.state = init_start)) /\
+((ds_abs1.ds_abs1_init.state = abs1_init_start) =
+((dr.dr_init.state = dr_init_idle /\ spi.init.state = init_start) \/
+(dr.dr_init.state = dr_init_read_req /\ spi.init.state = init_reset) \/
+(dr.dr_init.state = dr_init_check_rep /\ spi.init.state = init_reset) \/
+(dr.dr_init.state = dr_init_read_req /\ spi.init.state = init_setregs) \/
+(dr.dr_init.state = dr_init_check_rep /\ spi.init.state = init_setregs) \/
+(dr.dr_init.state = dr_init_setting /\ spi.init.state = init_setregs))) /\
+((ds_abs1.ds_abs1_init.state = abs1_init_done) =
+(dr.dr_init.state = dr_init_done /\ spi.init.state = init_done)))`
 
 (* IS_TX_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
 val IS_TX_REL_def = Define `
 IS_TX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
-(((ds_abs1.ds_abs1_tx.state = abs1_tx_pre) =
+(((ds_abs1.ds_abs1_tx.state = abs1_tx_not_ready) =
+(dr.dr_tx.state = dr_tx_not_ready /\ spi.tx.state = tx_not_ready)) /\
+((ds_abs1.ds_abs1_tx.state = abs1_tx_pre) =
 (dr.dr_tx.state = dr_tx_pre /\ spi.tx.state = tx_idle)) /\
 ((ds_abs1.ds_abs1_tx.state = abs1_tx_idle) =
 ((dr.dr_tx.state = dr_tx_idle /\ spi.tx.state = tx_idle) \/
@@ -35,11 +51,13 @@ IS_TX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((dr.dr_tx.state = dr_tx_read_txs /\ spi.tx.state = tx_ready_for_trans) \/
 (dr.dr_tx.state = dr_tx_check_txs /\ spi.tx.state = tx_ready_for_trans))) /\
 ((ds_abs1.ds_abs1_tx.state = abs1_tx_trans) =
-((dr.dr_tx.state = dr_tx_write_data /\ spi.tx.state = tx_ready_for_trans) \/
-(dr.dr_tx.state = dr_tx_read_txs /\ spi.tx.state = tx_trans_data) \/
-(dr.dr_tx.state = dr_tx_check_txs /\ spi.tx.state = tx_trans_data) \/
-(dr.dr_tx.state = dr_tx_read_eot /\ spi.tx.state = tx_trans_data) \/
+(dr.dr_tx.state = dr_tx_write_data /\ spi.tx.state = tx_ready_for_trans)) /\
+((ds_abs1.ds_abs1_tx.state = abs1_tx_data_1) =
+((dr.dr_tx.state = dr_tx_read_eot /\ spi.tx.state = tx_trans_data) \/
 (dr.dr_tx.state = dr_tx_check_eot /\ spi.tx.state = tx_trans_data))) /\
+((ds_abs1.ds_abs1_tx.state = abs1_tx_data_2) =
+((dr.dr_tx.state = dr_tx_read_txs /\ spi.tx.state = tx_trans_data) \/
+(dr.dr_tx.state = dr_tx_check_txs /\ spi.tx.state = tx_trans_data))) /\
 ((ds_abs1.ds_abs1_tx.state = abs1_tx_done_1) =
 ((dr.dr_tx.state = dr_tx_read_eot /\ spi.tx.state = tx_trans_done) \/
 (dr.dr_tx.state = dr_tx_check_eot /\ spi.tx.state = tx_trans_done))) /\
@@ -68,7 +86,9 @@ IS_TX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (* IS_RX_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
 val IS_RX_REL_def = Define `
 IS_RX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
-(((ds_abs1.ds_abs1_rx.state = abs1_rx_pre) =
+(((ds_abs1.ds_abs1_rx.state = abs1_rx_not_ready) =
+(dr.dr_rx.state = dr_rx_not_ready /\ spi.rx.state = rx_not_ready)) /\
+((ds_abs1.ds_abs1_rx.state = abs1_rx_pre) =
 (dr.dr_rx.state = dr_rx_pre /\ spi.rx.state = rx_idle)) /\
 ((ds_abs1.ds_abs1_rx.state = abs1_rx_idle) =
 ((dr.dr_rx.state = dr_rx_idle /\ spi.rx.state = rx_idle) \/
@@ -109,7 +129,9 @@ IS_RX_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (* IS_XFER_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
 val IS_XFER_REL_def = Define `
 IS_XFER_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
-(((ds_abs1.ds_abs1_xfer.state = abs1_xfer_pre) =
+(((ds_abs1.ds_abs1_xfer.state = abs1_xfer_not_ready) =
+(dr.dr_xfer.state = dr_xfer_not_ready /\ spi.xfer.state = xfer_not_ready)) /\
+((ds_abs1.ds_abs1_xfer.state = abs1_xfer_pre) =
 (dr.dr_xfer.state = dr_xfer_pre /\ spi.xfer.state = xfer_idle)) /\
 ((ds_abs1.ds_abs1_xfer.state = abs1_xfer_idle) =
 ((dr.dr_xfer.state = dr_xfer_idle /\ spi.xfer.state = xfer_idle) \/
@@ -120,8 +142,9 @@ IS_XFER_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((dr.dr_xfer.state = dr_xfer_read_txs /\ spi.xfer.state = xfer_ready_for_trans) \/
 (dr.dr_xfer.state = dr_xfer_check_txs /\ spi.xfer.state = xfer_ready_for_trans))) /\
 ((ds_abs1.ds_abs1_xfer.state = abs1_xfer_trans) =
-((dr.dr_xfer.state = dr_xfer_write_dataO /\ spi.xfer.state = xfer_ready_for_trans) \/
-(dr.dr_xfer.state = dr_xfer_read_rxs /\ spi.xfer.state = xfer_trans_data) \/
+(dr.dr_xfer.state = dr_xfer_write_dataO /\ spi.xfer.state = xfer_ready_for_trans)) /\
+((ds_abs1.ds_abs1_xfer.state = abs1_xfer_data) =
+((dr.dr_xfer.state = dr_xfer_read_rxs /\ spi.xfer.state = xfer_trans_data) \/
 (dr.dr_xfer.state = dr_xfer_check_rxs /\ spi.xfer.state = xfer_trans_data))) /\
 ((ds_abs1.ds_abs1_xfer.state = abs1_xfer_exchange) =
 ((dr.dr_xfer.state = dr_xfer_read_rxs /\ spi.xfer.state = xfer_exchange_data) \/
@@ -159,8 +182,14 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (ds_abs1.spi_abs1.TX_SHIFT_REG = spi.TX_SHIFT_REG) /\
 (ds_abs1.spi_abs1.RX_SHIFT_REG = spi.RX_SHIFT_REG) /\
 (ds_abs1.ds_abs1_tx.tx_data_buffer = dr.dr_tx.data_buf) /\
+(ds_abs1.ds_abs1_tx.tx_cur_length = dr.dr_tx.tx_cur_length) /\
 (ds_abs1.ds_abs1_rx.rx_data_buffer = dr.dr_rx.rx_data_buf) /\
 (ds_abs1.ds_abs1_xfer.xfer_dataIN_buffer = dr.dr_xfer.xfer_dataIN_buf) /\
-(ds_abs1.ds_abs1_xfer.xfer_dataOUT_buffer = dr.dr_xfer.xfer_dataOUT_buf))`
+(ds_abs1.ds_abs1_xfer.xfer_dataOUT_buffer = dr.dr_xfer.xfer_dataOUT_buf) /\
+(ds_abs1.ds_abs1_xfer.xfer_cur_length = dr.dr_xfer.xfer_cur_length) /\
+(spi.tx.state = tx_trans_data ==> 
+(w2w spi.regs.TX0 = EL (dr.dr_tx.tx_cur_length - 1) dr.dr_tx.data_buf)) /\
+(spi.xfer.state = xfer_trans_data ==>
+(w2w spi.regs.TX0 = EL (dr.dr_xfer.xfer_cur_length - 1) dr.dr_xfer.xfer_dataOUT_buf)))`
 
 val _ = export_theory();

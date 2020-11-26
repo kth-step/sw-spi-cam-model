@@ -4,7 +4,7 @@ open driver_stateTheory driver_relationTheory;
 open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
 open ref_relTheory;
 
-val _ = new_theory "abs1_comb_hold_ref_rel_trans_lbl";
+val _ = new_theory "ref_rel_holds_trans_lbl";
 
 (* a help lemma to determine ds_abs1.ds_abs1_tx.state *)
 val ref_rel_spi_tx_trans_done = store_thm("ref_rel_spi_tx_trans_done",
@@ -16,7 +16,11 @@ rw [ABS1_TX_LBL_ENABLE_def] >>
 FULL_SIMP_TAC std_ss [IS_TX_REL_def] >>
 Cases_on `dr.dr_tx.state` >>
 rw [] >|
-[`spi.tx.state <> tx_idle` by rw [] >>
+[`spi.tx.state <> tx_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_tx.state <> abs1_tx_not_ready` by METIS_TAC [] >>
+Cases_on `ds_abs1.ds_abs1_tx.state` >>
+rw [],
+`spi.tx.state <> tx_idle` by rw [] >>
 `ds_abs1.ds_abs1_tx.state <> abs1_tx_pre` by METIS_TAC [] >>
 Cases_on `ds_abs1.ds_abs1_tx.state` >>
 rw [],
@@ -89,7 +93,11 @@ rw [ABS1_RX_LBL_ENABLE_def] >>
 FULL_SIMP_TAC std_ss [IS_RX_REL_def] >>
 Cases_on `dr.dr_rx.state` >>
 rw [] >|
-[`spi.rx.state <> rx_idle` by rw [] >>
+[`spi.rx.state <> rx_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_rx.state <> abs1_rx_not_ready` by METIS_TAC[] >>
+Cases_on `ds_abs1.ds_abs1_rx.state` >>
+rw[],
+`spi.rx.state <> rx_idle` by rw [] >>
 `ds_abs1.ds_abs1_rx.state <> abs1_rx_pre` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_rx.state` >>
 rw[],
@@ -152,7 +160,11 @@ rw [] >>
 FULL_SIMP_TAC std_ss [IS_XFER_REL_def] >>
 Cases_on `dr.dr_xfer.state` >>
 rw [] >|
-[`spi.xfer.state <> xfer_idle` by rw [] >>
+[`spi.xfer.state <> xfer_not_ready` by rw [] >>
+`ds_abs1.ds_abs1_xfer.state <> abs1_xfer_not_ready` by METIS_TAC[] >>
+Cases_on `ds_abs1.ds_abs1_xfer.state` >>
+rw [],
+`spi.xfer.state <> xfer_idle` by rw [] >>
 `ds_abs1.ds_abs1_xfer.state <> abs1_xfer_pre` by METIS_TAC[] >>
 Cases_on `ds_abs1.ds_abs1_xfer.state` >>
 rw [],

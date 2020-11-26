@@ -64,6 +64,7 @@ spi with xfer := spi.xfer with state := xfer_ready_for_trans`
 val spi_xfer_operations_def = Define `
 spi_xfer_operations (spi:spi_state) =
 case spi.xfer.state of
+  | xfer_not_ready => spi with err := T
   | xfer_idle => spi with err := T
   | xfer_conf_ready => spi with err := T
   | xfer_channel_enabled => xfer_channel_enabled_op spi
