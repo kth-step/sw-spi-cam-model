@@ -25,10 +25,7 @@ spi with <|regs := spi.regs with
       CH0CTRL := 0w;
       TX0 := 0w;
       RX0 := 0w |>;
-      init := spi.init with state := init_setregs;
-      tx := spi.tx with state := tx_not_ready;
-      rx := spi.rx with state := rx_not_ready;
-      xfer := spi.xfer with state := xfer_not_ready |>`
+      init := spi.init with state := init_setregs |>`
  *) 
 
 (* This function shows initialization operations of SPI controller, spi -> spi'.
@@ -41,5 +38,14 @@ case spi.init.state of
   | init_reset => init_reset_op spi
   | init_setregs => spi with err := T
   | init_done => spi with err := T`
+
+(* INIT_SYN_ENABLE/DISABLE: spi.init.state -> bool *)
+val INIT_SYN_ENABLE_def = Define `
+INIT_SYN_ENABLE (init_s:init_general_state) =
+(init_s = init_done)`
+
+val INIT_SYN_DISABLE_def = Define `
+INIT_SYN_DISABLE (init_s:init_general_state) =
+(init_s = init_start)`
 
 val _ = export_theory();

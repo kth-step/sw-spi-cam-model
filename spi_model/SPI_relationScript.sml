@@ -7,6 +7,7 @@ open SPI_initTheory SPI_txTheory SPI_rxTheory SPI_xferTheory;
 val _ = new_theory "SPI_relation";
 
 (* tr: (state) transition *)
+
 (* Some functions return specific datatypes *)
 val read_SPI_regs_state_def = Define `
 read_SPI_regs_state (env:environment) (pa:word32) (spi:spi_state) =
@@ -32,29 +33,30 @@ val xfer_exchange_data_op_value_def = Define `
 xfer_exchange_data_op_value (spi:spi_state) (dataIN: word8 option) =
 let (spi', v_option) = xfer_exchange_data_op spi dataIN in v_option`
 
-(* prerequisite for write commands to spi controller 
- * SPI_UPDATE_ENABLE: spi_state -> bool
+(* tx_syn_tr: tx automaton synchronizing transition *)
+val (tx_syn_tr_rules, tx_syn_tr_ind, tx_syn_tr_cases) = Hol_reln `
+(!(tx:tx_state). tx.state = tx_not_ready ==>
+tx_syn_tr tx TX_SYN_RD (tx with state := tx_idle)) /\
+(!(tx:tx_state). T ==> tx_syn_tr tx TX_SYN_NRD  (tx with state := tx_not_ready))`
 
-val SPI_UPDATE_ENABLE_def = Define `
-SPI_UPDATE_ENABLE (spi:spi_state) =
-((spi.init.state <> init_reset) /\ (spi.tx.state <> tx_channel_enabled) /\
-(spi.tx.state <> tx_trans_data) /\ (spi.tx.state <> tx_trans_check) /\
-(spi.rx.state <> rx_channel_enabled) /\ (spi.rx.state <> rx_update_RX0) /\
-(spi.rx.state <> rx_receive_check) /\ (spi.xfer.state <> xfer_channel_enabled) /\
-(spi.xfer.state <> xfer_trans_data) /\ (spi.xfer.state <> xfer_update_RX0) /\
-(spi.xfer.state <> xfer_check))`
- *)
+(* rx_syn_tr: rx automaton synchronizing transition *)
+val (rx_syn_tr_rules, rx_syn_tr_ind, rx_syn_tr_cases) = Hol_reln `
+(!(rx:rx_state). rx.state = rx_not_ready ==>
+rx_syn_tr rx RX_SYN_RD (rx with state := rx_idle)) /\
+(!(rx:rx_state). T ==> rx_syn_tr rx RX_SYN_NRD (rx with state := rx_not_ready))`
 
-
-(* prerequisite for read commands to spi controller 
- * SPI_RETURN_ENABLE: word32 -> spi_state -> bool
- *)
-
+(* xfer_syn_tr: xfer automaton synchronizing transition *)
+val (xfer_syn_tr_rules, xfer_syn_tr_ind, xfer_syn_tr_cases) = Hol_reln `
+(!(xfer:xfer_state). xfer.state = xfer_not_ready ==>
+xfer_syn_tr xfer XFER_SYN_RD (xfer with  state := xfer_idle)) /\
+(!(xfer:xfer_state). T ==> xfer_syn_tr xfer XFER_SYN_NRD (xfer with state := xfer_not_ready))`
 
 (* relation for spi transition (an SPI device). *)
 val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
+(* two cases for the driver and spi interface *)
 (!(spi:spi_state). T ==> spi_tr spi (Update a v) (write_SPI_regs a v spi)) /\
 (!(spi:spi_state). T ==> spi_tr spi (Return a (read_SPI_regs_value env a spi)) (read_SPI_regs_state env a spi)) /\
+(* spi internal operations for functionality *)
 (!(spi:spi_state). (INIT_ENABLE spi) ==>
 spi_tr spi tau (spi_init_operations spi)) /\
 (!(spi:spi_state). (TX_ENABLE spi) ==>
@@ -63,6 +65,20 @@ spi_tr spi tau (spi_tx_operations spi)) /\
 spi_tr spi tau (spi_rx_operations spi)) /\
 (!(spi:spi_state). (XFER_ENABLE spi) ==>
 spi_tr spi tau (spi_xfer_operations spi)) /\
+(* spi interal operations for synchronizing automatons *)
+(!(spi:spi_state). (tx_syn_tr spi.tx TX_SYN_RD tx') /\ (INIT_SYN_ENABLE spi.init.state) ==>
+spi_tr spi tau (spi with tx := tx')) /\
+(!(spi:spi_state). (rx_syn_tr spi.rx RX_SYN_RD rx') /\ (INIT_SYN_ENABLE spi.init.state) ==>
+spi_tr spi tau (spi with rx := rx')) /\
+(!(spi:spi_state). (xfer_syn_tr spi.xfer XFER_SYN_RD xfer') /\ (INIT_SYN_ENABLE spi.init.state) ==>
+spi_tr spi tau (spi with xfer := xfer')) /\
+(!(spi:spi_state). (tx_syn_tr spi.tx TX_SYN_NRD tx') /\ (INIT_SYN_DISABLE spi.init.state) ==> 
+spi_tr spi tau (spi with tx := tx')) /\
+(!(spi:spi_state). (rx_syn_tr spi.rx RX_SYN_NRD rx') /\ (INIT_SYN_DISABLE spi.init.state) ==>
+spi_tr spi tau (spi with rx := rx')) /\
+(!(spi:spi_state). (xfer_syn_tr spi.xfer XFER_SYN_NRD xfer') /\ (INIT_SYN_DISABLE spi.init.state) ==>
+spi_tr spi tau (spi with xfer := xfer')) /\
+(* 3 cases for spi to transfer data with another spi device *)
 (!(spi:spi_state). (spi.tx.state = tx_trans_done) ==> 
 spi_tr spi (TX (tx_trans_done_op_value spi)) (tx_trans_done_op_state spi)) /\
 (!(spi:spi_state). (spi.rx.state = rx_receive_data) ==> 

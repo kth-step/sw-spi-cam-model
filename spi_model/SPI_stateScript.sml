@@ -131,19 +131,17 @@ val _ = Datatype `global_lbl_type =
 | Write word32 word32 | Update word32 word32 | Read word32 word32 | Return word32 word32
 | call_init | call_tx (word8 list) | call_rx num | call_xfer (word8 list)`
 
+(* Datatypes for synchronzing labels *)
+val _ = Datatype `tx_syn_lbl_type = | TX_SYN_RD | TX_SYN_NRD `
+
+val _ = Datatype `rx_syn_lbl_type = | RX_SYN_RD | RX_SYN_NRD `
+
+val _ = Datatype `xfer_syn_lbl_type = | XFER_SYN_RD | XFER_SYN_NRD ` 
+
 (* mem_req: memory reuqest 
 val _ = Datatype `mem_req = <|
 pa: word32;
 v: word8 option |>`
-*)
-
-(* CHECK if the buffer is in the board RAM region. BUFFER_IN_BOARD_RAM: word32 -> num -> bool 
-val BUFFER_IN_BOARD_RAM_def = Define `
-BUFFER_IN_BOARD_RAM (buffer_pa:word32) (left_length:num) =
-let start_pa = buffer_pa
-and length = n2w left_length: word32
-in !a. a <+ length ==> 
-((BOARD_RAM_START <=+ start_pa + a) /\ (start_pa + a <+ BOARD_RAM_END))`
 *)
 
 val _ = export_theory();

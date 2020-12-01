@@ -67,4 +67,11 @@ dr_tx: dr_tx_state;
 dr_rx: dr_rx_state;
 dr_xfer: dr_xfer_state |>`
 
+(* Datatypes for driver synchronzing labels *)
+val _ = Datatype `dr_tx_syn_lbl_type = | DR_TX_SYN_RD | DR_TX_SYN_NRD `
+
+val _ = Datatype `dr_rx_syn_lbl_type = | DR_RX_SYN_RD | DR_RX_SYN_NRD `
+
+val _ = Datatype `dr_xfer_syn_lbl_type = | DR_XFER_SYN_RD | DR_XFER_SYN_NRD ` 
+
 val _ = export_theory();

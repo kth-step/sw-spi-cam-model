@@ -18,7 +18,7 @@ TX_CHECK_ENABLE (dr:driver_state) =
 
 (* RX_CHECK_ENABLE: driver_state -> bool *)
 val RX_CHECK_ENABLE_def = Define `
-RX_CHECK_ENBALE (dr:driver_state) =
+RX_CHECK_ENABLE (dr:driver_state) =
 ((dr.dr_rx.state = dr_rx_check_rxs) \/
 (dr.dr_rx.state = dr_rx_fetch_data))`
 
@@ -149,7 +149,7 @@ val dr_check_def = Define `
 dr_check (dr:driver_state) (rep_ad:word32) (rep_v:word32) =
 (* driver is in an error state *)
 if dr.dr_err then dr
-(* only SYSSTATUS, CHOSTAT, RX0 should be hanled *)
+(* only SYSSTATUS, CHOSTAT, RX0 should be handled *)
 else if rep_ad = SPI0_SYSSTATUS then (dr_check_sysstatus dr rep_v)
 else if rep_ad = SPI0_CH0STAT then (dr_check_ch0stat dr rep_v)
 else if rep_ad = SPI0_RX0 then (dr_check_rx0 dr rep_v)
