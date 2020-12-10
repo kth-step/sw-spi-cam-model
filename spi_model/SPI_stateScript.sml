@@ -51,53 +51,33 @@ CH0CTRL: word1; (* channel 0 control register *)
 TX0: word32; (* channel 0 transmit buffer register *)
 RX0: word32 (*channel 0 receive buffer register *)|>`
 
-(* spi controller initialization automaton *)
-val _ = Datatype `init_general_state = 
-| init_start | init_reset | init_setregs | init_done`
+(* spi general state *)
+val _ = Datatype `spi_general_state = 
+| init_start | init_reset | init_setregs | spi_ready 
+| tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
+| tx_trans_data | tx_trans_done | tx_channel_disabled
+| rx_conf_ready | rx_channel_enabled | rx_receive_data 
+| rx_update_RX0 | rx_data_ready | rx_channel_disabled
+| xfer_conf_ready | xfer_channel_enabled | xfer_ready_for_trans 
+| xfer_trans_data | xfer_exchange_data | xfer_update_RX0 
+| xfer_data_ready | xfer_channel_disabled`
 
-val _ = Datatype `init_state = <|
-state: init_general_state;
+(* boolean flags to record the init process *)
+val _ = Datatype `init_flags = <|
 sysconfig_mode_done: bool;
 modulctrl_bus_done: bool;
 ch0conf_wordlen_done: bool;
 ch0conf_mode_done: bool;
 ch0conf_speed_done: bool |>`
 
-(* spi controller transmit automaton *)
-val _ = Datatype `tx_general_state =
-| tx_not_ready | tx_idle | tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
-| tx_trans_data | tx_trans_done | tx_trans_check | tx_channel_disabled`
-
-val _ = Datatype `tx_state = <|
-state: tx_general_state |>`
-
-(* spi controller receive automaton *)
-val _ = Datatype `rx_general_state =
-| rx_not_ready | rx_idle | rx_conf_ready | rx_channel_enabled | rx_receive_data 
-| rx_update_RX0 | rx_data_ready | rx_receive_check | rx_channel_disabled`
-
-val _ = Datatype `rx_state = <|
-state: rx_general_state |>`
-
-(* spi controller transfer automaton (transmit and receive, full-dulplex mode) *)
-val _ = Datatype `xfer_general_state =
-| xfer_not_ready | xfer_idle | xfer_conf_ready | xfer_channel_enabled 
-| xfer_ready_for_trans | xfer_trans_data | xfer_exchange_data | xfer_update_RX0 
-| xfer_data_ready | xfer_check | xfer_channel_disabled`
-
-val _ = Datatype `xfer_state = <|
-state : xfer_general_state |>`
-
 (* spi_state: spi controller state *)
 val _ = Datatype `spi_state = <|
 err: bool; (* an error flag for SPI state*)
+state : spi_general_state; (* SPI general state*)
 regs: spi_regs; (* SPI registers *)
 TX_SHIFT_REG : word8; (* Shift register to transmit data, not memory-mapped SPI register *)
 RX_SHIFT_REG : word8; (* Shift register to receive data, not memory-mapped SPI register *)
-init: init_state; (* initialization state *)
-tx: tx_state; (* transmit state *)
-rx: rx_state; (* receive state *)
-xfer: xfer_state (* transfer (transmit and receive) state *) |>`
+init: init_flags; (* initialization flags *) |>`
 
 (* Some simple functions related to the spi_state *)
 (* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
@@ -112,13 +92,8 @@ CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
 val CHECK_EOT_BIT_def = Define `
 CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
-(* shcedule automaton indicates the status of SPI controller *)
-val _ = Datatype `schedule = | Initialize | Transmit | Receive | Transfer`
-
 (* Externel environment connected to the SPI bus *)
 val _ = Datatype `environment = <|
-scheduler: schedule; (* SPI bus scheduler *)
-(* SPI_slave : spi_state;  SPI slave *)
 read_reg : word32 (* An arbitrary value *)|>`
 
 (* Datatype for global labels, used by the relationScript.sml *)
@@ -130,18 +105,5 @@ val _ = Datatype `global_lbl_type =
 | tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)
 | Write word32 word32 | Update word32 word32 | Read word32 word32 | Return word32 word32
 | call_init | call_tx (word8 list) | call_rx num | call_xfer (word8 list)`
-
-(* Datatypes for synchronzing labels *)
-val _ = Datatype `tx_syn_lbl_type = | TX_SYN_RD | TX_SYN_NRD `
-
-val _ = Datatype `rx_syn_lbl_type = | RX_SYN_RD | RX_SYN_NRD `
-
-val _ = Datatype `xfer_syn_lbl_type = | XFER_SYN_RD | XFER_SYN_NRD ` 
-
-(* mem_req: memory reuqest 
-val _ = Datatype `mem_req = <|
-pa: word32;
-v: word8 option |>`
-*)
 
 val _ = export_theory();

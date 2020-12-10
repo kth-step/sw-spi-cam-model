@@ -1,7 +1,6 @@
 open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory;
-open SPI_stateTheory SPI_relationTheory SPI_initTheory SPI_txTheory SPI_rxTheory
-SPI_xferTheory SPI_schedulerTheory;
+open SPI_stateTheory SPI_relationTheory SPI_tauTheory;
 open driver_stateTheory driver_relationTheory;
 open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory 
 ds_abs1_rxTheory ds_abs1_xferTheory;
@@ -19,283 +18,290 @@ SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 (* ref_rel holds for ds_abs1 dr spi' in case of init tau transition *)
 val ref_rel_spi_init_tau = store_thm("ref_rel_spi_init_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (INIT_ENABLE spi) ==>
-(ref_rel ds_abs1 dr (spi_init_operations spi))``,
-rw [INIT_ENABLE_def, spi_init_operations_def, init_reset_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >|
-[FULL_SIMP_TAC std_ss [IS_INIT_REL_def] >>
+(ref_rel ds_abs1 dr spi) /\ (spi.state = init_reset) ==>
+(ref_rel ds_abs1 dr (spi_tau_operations spi))``,
+rw [spi_tau_operations_def, init_reset_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
 rw [] >>
-Cases_on `ds_abs1.ds_abs1_init.state` >>
+Cases_on `ds_abs1.state` >>
 rw [] >>
-rw [],
-FULL_SIMP_TAC std_ss [IS_TX_REL_def] >>
-rw [],
-FULL_SIMP_TAC std_ss [IS_RX_REL_def] >>
-rw [],
-FULL_SIMP_TAC std_ss [IS_XFER_REL_def] >>
-rw []]);
-
-
-(* a lemma: TX_ENABLE => SPI_ABS1_TX_ENABLE based on ref_rel *)
-val COMB_IMP_ABS1_TX_ENABLE = store_thm("COMB_IMP_ABS1_TX_ENABLE",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (TX_ENABLE spi) ==>
-(SPI_ABS1_TX_ENABLE ds_abs1)``,
-rw [TX_ENABLE_def, SPI_ABS1_TX_ENABLE_def] >>
-`IS_TX_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
-Cases_on `spi.tx.state` >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_TX_REL_def] >>
-rw [] >>
-Cases_on `dr.dr_tx.state` >>
-rw [] >>
-Cases_on `ds_abs1.ds_abs1_tx.state` >>
 rw []);
 
-val ref_rel_spi_tx_tau = store_thm("ref_rel_spi_tx_tau",
+
+(* a lemma: TX_TAU_ENABLE spi => SPI_ABS1_TX_ENABLE ds_abs1 based on ref_rel *)
+val COMB_IMP_ABS1_TX_ENABLE = store_thm("COMB_IMP_ABS1_TX_ENABLE",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (TX_ENABLE spi) ==>
+(ref_rel ds_abs1 dr spi) /\ 
+(spi.state = tx_channel_enabled \/ spi.state = tx_trans_data) ==>
+(SPI_ABS1_TX_ENABLE ds_abs1)``,
+rw [SPI_ABS1_TX_ENABLE_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
+rw [] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+rw [] >>
+Cases_on `dr.state` >>
+rw [] >>
+Cases_on `ds_abs1.state` >>
+rw []);
+
+(* ds_abs1' exists when spi.state = tx_channel_enabled *)
+val ref_rel_spi_tx_tau_channel_enabled = store_thm("ref_rel_spi_tx_tau_channel_enabled",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (spi.state = tx_channel_enabled) ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ref_rel ds_abs1' dr (spi_tx_operations spi))``,
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
 rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
 EXISTS_TAC ``spi_abs1_tx_operations ds_abs1`` >>
 `SPI_ABS1_TX_ENABLE ds_abs1` by METIS_TAC[COMB_IMP_ABS1_TX_ENABLE] >>
 rw [] >>
-FULL_SIMP_TAC std_ss [TX_ENABLE_def, SPI_ABS1_TX_ENABLE_def] >|
+FULL_SIMP_TAC std_ss [SPI_ABS1_TX_ENABLE_def] >|
 [(* abs1_tx_idle *)
-`spi.tx.state = tx_channel_enabled` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
 rw [spi_abs1_tx_operations_def, spi_abs1_tx_idle_op_def,
-spi_tx_operations_def, tx_channel_enabled_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+spi_tau_operations_def, tx_channel_enabled_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
 rw [],
 (* abs1_tx_data_1 *)
-`spi.tx.state = tx_trans_data` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_data_1_op_def,
-spi_tx_operations_def, tx_trans_data_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+`spi.state = tx_trans_data` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw [],
 (* abs1_tx_data_2 *)
-`spi.tx.state = tx_trans_data` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_data_2_op_def,
-spi_tx_operations_def, tx_trans_data_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_tx_check_1 *)
-`spi.tx.state = tx_trans_check` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_check_1_op_def,
-spi_tx_operations_def, tx_trans_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_tx_check_3 *)
-`spi.tx.state = tx_trans_check` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_check_3_op_def,
-spi_tx_operations_def, tx_trans_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_tx_next *)
-`spi.tx.state = tx_trans_check` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_next_op_def,
-spi_tx_operations_def, tx_trans_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_tx_ready_for_reset *)
-`spi.tx.state = tx_trans_check` by METIS_TAC [ref_rel_def, IS_TX_REL_def] >>
-rw [spi_abs1_tx_operations_def, spi_abs1_tx_ready_for_reset_op_def,
-spi_tx_operations_def, tx_trans_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+`spi.state = tx_trans_data` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw []]);
 
-(* a lemma: RX_ENABLE => SPI_ABS1_RX_ENABLE based on ref_rel *)
+(* ds_abs1' exists when spi.state = tx_trans_data *)
+val ref_rel_spi_tx_tau_trans_data = store_thm("ref_rel_spi_tx_tau_trans_data",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (spi.state = tx_trans_data) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
+rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
+EXISTS_TAC ``spi_abs1_tx_operations ds_abs1`` >>
+`SPI_ABS1_TX_ENABLE ds_abs1` by METIS_TAC[COMB_IMP_ABS1_TX_ENABLE] >>
+rw [] >>
+FULL_SIMP_TAC std_ss [SPI_ABS1_TX_ENABLE_def] >|
+[(* abs1_tx_idle *)
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
+rw [] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+rw [] >>
+Cases_on `dr.state` >>
+rw [] >>
+Cases_on `ds_abs1.state` >>
+rw [],
+(* abs1_tx_data_1 *)
+rw [spi_abs1_tx_operations_def, spi_abs1_tx_data_1_op_def,
+spi_tau_operations_def, tx_trans_data_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw [],
+(* abs1_tx_data_2 *)
+rw [spi_abs1_tx_operations_def, spi_abs1_tx_data_2_op_def,
+spi_tau_operations_def, tx_trans_data_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw []]);
+
+
+(* a lemma: RX_TAU_ENABLE spi => SPI_ABS1_RX_ENABLE ds_abs1 based on ref_rel *)
 val COMB_IMP_ABS1_RX_ENABLE = store_thm("COMB_IMP_ABS1_RX_ENABLE",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (RX_ENABLE spi) ==>
+(ref_rel ds_abs1 dr spi) /\ 
+(spi.state = rx_channel_enabled \/ spi.state = rx_update_RX0) ==>
 (SPI_ABS1_RX_ENABLE ds_abs1)``,
-rw [RX_ENABLE_def, SPI_ABS1_RX_ENABLE_def] >>
-`IS_RX_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
-Cases_on `spi.rx.state` >>
+rw [SPI_ABS1_RX_ENABLE_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
 rw [] >>
-FULL_SIMP_TAC std_ss [IS_RX_REL_def] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
 rw [] >>
-Cases_on `dr.dr_rx.state` >>
+Cases_on `dr.state` >>
 rw [] >>
-Cases_on `ds_abs1.ds_abs1_rx.state` >>
+Cases_on `ds_abs1.state` >>
 rw []);
 
-(* ds_abs1' exists when spi performs rx tau transition *)
-val ref_rel_spi_rx_tau = store_thm("ref_rel_spi_rx_tau",
+(* ds_abs1' exists when spi.state = rx_channel_enabled *)
+val ref_rel_spi_rx_tau_channel_enabled = store_thm("ref_rel_spi_rx_tau_channel_enabled",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (RX_ENABLE spi) ==>
+(ref_rel ds_abs1 dr spi) /\ (spi.state = rx_channel_enabled) ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ref_rel ds_abs1' dr (spi_rx_operations spi))``,
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
 rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
 EXISTS_TAC ``spi_abs1_rx_operations ds_abs1`` >>
 `SPI_ABS1_RX_ENABLE ds_abs1` by METIS_TAC [COMB_IMP_ABS1_RX_ENABLE] >>
 rw [] >>
-FULL_SIMP_TAC std_ss [RX_ENABLE_def, SPI_ABS1_RX_ENABLE_def] >|
+FULL_SIMP_TAC std_ss [SPI_ABS1_RX_ENABLE_def] >|
 [(* abs1_rx_idle *)
-`spi.rx.state = rx_channel_enabled` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
 rw [spi_abs1_rx_operations_def, spi_abs1_rx_idle_op_def,
-spi_rx_operations_def, rx_channel_enabled_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+spi_tau_operations_def, rx_channel_enabled_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
 rw [],
 (* abs1_rx_update *)
-`spi.rx.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_update_op_def,
-spi_rx_operations_def, rx_update_RX0_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+`spi.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw [],
-(* abs1_rx_fetch_data *)
-`spi.rx.state = rx_receive_check` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_fetch_data_op_def,
-spi_rx_operations_def, rx_receive_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+(* abs1_rx_next *)
+`spi.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw [],
-(* abs1_rx_return *)
-`spi.rx.state = rx_receive_check` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_return_op_def,
-spi_rx_operations_def, rx_receive_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_rx_check_1 *)
-`spi.rx.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_check_1_op_def,
-spi_rx_operations_def, rx_update_RX0_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_rx_pre_reset *)
-`spi.rx.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_pre_reset_op_def,
-spi_rx_operations_def, rx_update_RX0_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_rx_ready_for_reset *)
-`spi.rx.state = rx_receive_check` by METIS_TAC [ref_rel_def, IS_RX_REL_def] >>
-rw [spi_abs1_rx_operations_def, spi_abs1_rx_ready_for_reset_op_def,
-spi_rx_operations_def, rx_receive_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+(* abs1_rx_stop *)
+`spi.state = rx_update_RX0` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw []]);
 
-(* a lemma: XFER_ENABLE => SPI_ABS1_XFER_ENABLE based on ref_rel *)
+(* ds_abs1' exists when spi.state = rx_update_RX0 *)
+val ref_rel_spi_rx_tau_update_RX0 = store_thm("ref_rel_spi_rx_tau_update_RX0",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (spi.state = rx_update_RX0) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
+rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
+EXISTS_TAC ``spi_abs1_rx_operations ds_abs1`` >>
+`SPI_ABS1_RX_ENABLE ds_abs1` by METIS_TAC [COMB_IMP_ABS1_RX_ENABLE] >>
+rw [] >>
+FULL_SIMP_TAC std_ss [SPI_ABS1_RX_ENABLE_def] >|
+[(* abs1_rx_idle *)
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
+rw [] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+rw [] >>
+Cases_on `dr.state` >>
+rw [] >>
+Cases_on `ds_abs1.state` >>
+rw [],
+(* abs1_rx_update *)
+rw [spi_abs1_rx_operations_def, spi_abs1_rx_update_op_def,
+spi_tau_operations_def, rx_update_RX0_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw [],
+(* abs1_rx_next *)
+rw [spi_abs1_rx_operations_def, spi_abs1_rx_next_op_def,
+spi_tau_operations_def, rx_update_RX0_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw [],
+(* abs1_rx_stop *)
+rw [spi_abs1_rx_operations_def, spi_abs1_rx_stop_op_def,
+spi_tau_operations_def, rx_update_RX0_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw []]);
+
+(* a lemma: XFER_TAU_ENABLE spi => SPI_ABS1_XFER_ENABLE ds_abs1 based on ref_rel *)
 val COMB_IMP_ABS1_XFER_ENABLE = store_thm("COMB_IMP_ABS1_XFER_ENABLE",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (XFER_ENABLE spi) ==>
+(ref_rel ds_abs1 dr spi) /\ (spi.state = xfer_channel_enabled \/
+spi.state = xfer_trans_data \/ spi.state = xfer_update_RX0) ==>
 (SPI_ABS1_XFER_ENABLE ds_abs1)``,
-rw [XFER_ENABLE_def, SPI_ABS1_XFER_ENABLE_def] >>
-`IS_XFER_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
-Cases_on `spi.xfer.state` >>
+rw [SPI_ABS1_XFER_ENABLE_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
 rw [] >>
-FULL_SIMP_TAC std_ss [IS_XFER_REL_def] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
 rw [] >>
-Cases_on `dr.dr_xfer.state` >>
+Cases_on `dr.state` >>
 rw [] >>
-Cases_on `ds_abs1.ds_abs1_xfer.state` >>
+Cases_on `ds_abs1.state` >>
 rw []);
 
-val ref_rel_spi_xfer_tau = store_thm("ref_rel_spi_xfer_tau",
+(* ds_abs1' exists when spi.state = xfer_channel_enabled *)
+val ref_rel_spi_xfer_tau_channel_enabled = store_thm("ref_rel_spi_xfer_tau_channel_enabled",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (XFER_ENABLE spi) ==>
+(ref_rel ds_abs1 dr spi) /\ (spi.state = xfer_channel_enabled) ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ref_rel ds_abs1' dr (spi_xfer_operations spi))``,
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
 rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
 EXISTS_TAC ``spi_abs1_xfer_operations ds_abs1`` >>
 `SPI_ABS1_XFER_ENABLE ds_abs1` by METIS_TAC [COMB_IMP_ABS1_XFER_ENABLE] >>
 rw [] >>
-FULL_SIMP_TAC std_ss [XFER_ENABLE_def, SPI_ABS1_XFER_ENABLE_def] >|
+FULL_SIMP_TAC std_ss [SPI_ABS1_XFER_ENABLE_def] >|
 [(* abs1_xfer_idle *)
-`spi.xfer.state = xfer_channel_enabled` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
 rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_idle_op_def,
-spi_xfer_operations_def, xfer_channel_enabled_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+spi_tau_operations_def, xfer_channel_enabled_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
 rw [],
 (* abs1_xfer_data *)
-`spi.xfer.state = xfer_trans_data` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_data_op_def,
-spi_xfer_operations_def, xfer_trans_data_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [ref_rel_def,IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [] >>
-METIS_TAC[],
+`spi.state = xfer_trans_data` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
+rw [],
 (* abs1_xfer_update *)
-`spi.xfer.state = xfer_update_RX0` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_update_op_def,
-spi_xfer_operations_def, xfer_update_RX0_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_xfer_fetch_data *)
-`spi.xfer.state = xfer_check` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_fetch_data_op_def,
-spi_xfer_operations_def, xfer_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_xfer_next *)
-`spi.xfer.state = xfer_check` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_next_op_def,
-spi_xfer_operations_def, xfer_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_xfer_next_write *)
-`spi.xfer.state = xfer_check` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_next_write_op_def,
-spi_xfer_operations_def, xfer_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
-rw [],
-(* abs1_xfer_ready_for_reset *)
-`spi.xfer.state = xfer_check` by METIS_TAC [ref_rel_def, IS_XFER_REL_def] >>
-rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_ready_for_reset_op_def,
-spi_xfer_operations_def, xfer_check_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def] >>
-rw [] >>
-FULL_SIMP_TAC std_ss [IS_INIT_REL_def, IS_TX_REL_def, IS_RX_REL_def, IS_XFER_REL_def] >>
+`spi.state = xfer_update_RX0` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw []]);
 
-(* bi-simulation: ds_abs1' exists and holds the ref_rel when spi_tau *)
+(* ds_abs1' exists when spi.state = xfer_trans_data *)
+val ref_rel_spi_xfer_tau_trans_data = store_thm("ref_rel_spi_xfer_tau_trans_data",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (spi.state = xfer_trans_data) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
+rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
+EXISTS_TAC ``spi_abs1_xfer_operations ds_abs1`` >>
+`SPI_ABS1_XFER_ENABLE ds_abs1` by METIS_TAC [COMB_IMP_ABS1_XFER_ENABLE] >>
+rw [] >>
+FULL_SIMP_TAC std_ss [SPI_ABS1_XFER_ENABLE_def] >|
+[(* abs1_xfer_idle *)
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
+rw [] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+rw [] >>
+Cases_on `dr.state` >>
+rw [] >>
+Cases_on `ds_abs1.state` >>
+rw [],
+(* abs1_xfer_data *)
+rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_data_op_def,
+spi_tau_operations_def, xfer_trans_data_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw [],
+(* abs1_xfer_update *)
+`spi.state = xfer_update_RX0` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
+rw []]);
+
+(* ds_abs1' exists when spi.state = xfer_update_RX0 *)
+val ref_rel_spi_xfer_tau_update_RX0 = store_thm("ref_rel_spi_xfer_tau_update_RX0",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+(ref_rel ds_abs1 dr spi) /\ (spi.state = xfer_update_RX0) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
+(ref_rel ds_abs1' dr (spi_tau_operations spi))``,
+rw [ds_abs1_tr_cases, ds_abs1_spi_tr_cases] >>
+EXISTS_TAC ``spi_abs1_xfer_operations ds_abs1`` >>
+`SPI_ABS1_XFER_ENABLE ds_abs1` by METIS_TAC [COMB_IMP_ABS1_XFER_ENABLE] >>
+rw [] >>
+FULL_SIMP_TAC std_ss [SPI_ABS1_XFER_ENABLE_def] >|
+[(* abs1_xfer_idle *)
+`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
+Cases_on `spi.state` >>
+rw [] >>
+FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+rw [] >>
+Cases_on `dr.state` >>
+rw [] >>
+Cases_on `ds_abs1.state` >>
+rw [],
+(* abs1_xfer_data *)
+`spi.state = xfer_trans_data` by METIS_TAC [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
+rw [],
+(* abs1_xfer_update *)
+rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_update_op_def,
+spi_tau_operations_def, xfer_update_RX0_op_def] >>
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+rw []]);
+
+(* simulation: ds_abs1' exists and holds the ref_rel when spi_tau *)
 val abs1_comb_hold_ref_rel_spi_tr = store_thm("abs1_comb_hold_ref_rel_spi_tr",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (spi_tr spi tau spi') ==>
 (ref_rel ds_abs1 dr spi') \/
 (?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ref_rel ds_abs1' dr spi'))``,
 rw [spi_tr_cases] >>
-rw [ref_rel_spi_init_tau, ref_rel_spi_tx_tau, 
-ref_rel_spi_rx_tau, ref_rel_spi_xfer_tau]);
+FULL_SIMP_TAC std_ss [SPI_TAU_ENABLE_def] >>
+rw [] >>
+rw [ref_rel_spi_init_tau, ref_rel_spi_tx_tau_channel_enabled,
+ref_rel_spi_tx_tau_trans_data, ref_rel_spi_rx_tau_channel_enabled,
+ref_rel_spi_rx_tau_update_RX0, ref_rel_spi_xfer_tau_channel_enabled,
+ref_rel_spi_xfer_tau_trans_data, ref_rel_spi_xfer_tau_update_RX0]);
 
 val _ = export_theory();

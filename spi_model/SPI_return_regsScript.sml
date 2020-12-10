@@ -2,7 +2,7 @@ open HolKernel bossLib boolLib Parse;
 open wordsTheory wordsLib;
 open board_memTheory SPI_stateTheory;
 
-val _ = new_theory "read_SPIregs";
+val _ = new_theory "SPI_return_regs";
 
 (* concat sysconfig bits into a 32-bits word *)
 val build_SYSCONFIG_def = Define `
@@ -34,37 +34,31 @@ val build_CH0STAT_def = Define `
 build_CH0STAT (CH0STAT:ch0stat_bits) =
 (CH0STAT.EOT @@ ((CH0STAT.TXS @@ CH0STAT.RXS):word2)):word32`
 
-(* Test to concat words
-EVAL ``(1w:word1 @@ (1w:word1 @@ (1w:word1 @@ 3w:word2):word3):word4):word32`` 
- *)
-
 (* read the value of RX0 with certain word-length
- * read_RX0: environment -> spi_state -> spi_state * word32
+ * read_RX0: spi_state -> spi_state * word32
  *)
 val read_RX0_def = Define `
-read_RX0 (env:environment) (spi:spi_state) =
+read_RX0 (spi:spi_state) =
 let wl = (w2n spi.regs.CH0CONF.WL) in
-if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) /\ 
-(spi.rx.state = rx_data_ready) then
-(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
-rx := spi.rx with state := rx_receive_check |>,
+if (CHECK_RXS_BIT spi) /\ (spi.state = rx_data_ready) then
+(spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
+state := rx_receive_data |>,
 (wl >< 0) spi.regs.RX0:word32)
-else if (CHECK_RXS_BIT spi) /\ (spi.regs.CH0CONF.WL >+ 2w) /\
-(spi.xfer.state = xfer_data_ready) then
-(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
-xfer := spi.xfer with state := xfer_check |>,
+else if (CHECK_RXS_BIT spi) /\ (spi.state = xfer_data_ready) then
+(spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
+state := xfer_ready_for_trans |>,
 (wl >< 0) spi.regs.RX0:word32)
-else (spi with err := T, env.read_reg)`
+else (spi with err := T, ARB)`
 
 (* read_register returns a new spi state and the value of pa
- * read_SPI_regs: environment -> word32 -> spi_state -> spi_state * word32
+ * read_SPI_regs: word32 -> spi_state -> spi_state * word32
  *)
 val read_SPI_regs_def = Define `
-read_SPI_regs (env:environment) (pa:word32) (spi:spi_state) =
+read_SPI_regs (pa:word32) (spi:spi_state) =
 (* check spi error flag *)
-if spi.err then (spi, env.read_reg)
+if spi.err then (spi, ARB)
 (* pa is not in the SPI region, no changes *)
-else if ~(pa IN SPI0_PA_RANGE) then (spi, env.read_reg)
+else if ~(pa IN SPI0_PA_RANGE) then (spi, ARB)
 (* most regs can be read at any time *)
 else if pa = SPI0_SYSCONFIG then (spi, build_SYSCONFIG spi.regs.SYSCONFIG)
 else if pa = SPI0_SYSSTATUS then (spi, w2w spi.regs.SYSSTATUS)
@@ -74,8 +68,17 @@ else if pa = SPI0_CH0STAT then (spi, build_CH0STAT spi.regs.CH0STAT)
 else if pa = SPI0_CH0CTRL then (spi, w2w spi.regs.CH0CTRL)
 else if pa = SPI0_TX0 then (spi, spi.regs.TX0)
 (* a read for RX0 is vaild when RXS = 1 *)
-else if pa = SPI0_RX0 then (read_RX0 env spi)
+else if pa = SPI0_RX0 then (read_RX0 spi)
 (* other addresses in SPI are not modeled, return an arbitrary value *)
-else (spi, env.read_reg)`
+else (spi, ARB)`
+
+(* functions return specific datatypes *)
+val read_SPI_regs_state_def = Define `
+read_SPI_regs_state (pa:word32) (spi:spi_state) =
+let (spi', v) = read_SPI_regs pa spi in spi'`
+
+val read_SPI_regs_value_def = Define `
+read_SPI_regs_value (pa:word32) (spi:spi_state) =
+let (spi', v) = read_SPI_regs pa spi in v`
 
 val _ = export_theory();

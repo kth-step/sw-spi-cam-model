@@ -8,7 +8,7 @@ open ref_rel_holds_call_lblTheory;
 open ref_rel_holds_trans_lblTheory;
 open abs1_comb_hold_ref_rel_spi_trTheory;
 
-val _ = new_theory "abs1_comb_bisimulation";
+val _ = new_theory "abs1_comb_simulation";
 
 (* bi-simulation: ds_abs1' exists when lbl is not tau *)
 val abs1_comb_hold_ref_rel_not_tau_lbl = store_thm("abs1_comb_hold_ref_rel_not_tau_lbl",
@@ -45,7 +45,7 @@ val abs1_comb_hold_ref_rel_RD_RE = store_thm("abs1_comb_hold_ref_rel_RD_RE",
 (ref_rel ds_abs1 dr' spi')``,
 cheat);
 
-(* bi-simulation: ds_abs1 or ds_abs1' exists when lbl is tau *)
+(* simulation: ds_abs1 or ds_abs1' exists when lbl is tau *)
 val abs1_comb_hold_ref_rel_tau = store_thm("abs1_comb_hold_ref_rel_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (local_tr (dr, spi) tau (dr', spi')) ==>
@@ -56,21 +56,23 @@ METIS_TAC [abs1_comb_hold_ref_rel_spi_tr],
 METIS_TAC [abs1_comb_hold_ref_rel_WR_UP],
 METIS_TAC [abs1_comb_hold_ref_rel_RD_RE]]);
 
-(* bi-simulation ds_abs1 *)
+(* simulation: ds_abs1' or ds_abs1 for ref_rel holding  *)
 val abs1_comb_hold_ref_rel = store_thm("abs1_comb_hold_ref_rel",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (lbl:global_lbl_type).
 (ref_rel ds_abs1 dr spi) /\ (local_tr (dr, spi) lbl (dr', spi')) ==>
 (lbl <> tau ==> ?ds_abs1'. (ds_abs1_tr ds_abs1 lbl ds_abs1') /\ (ref_rel ds_abs1' dr' spi')) /\
 (lbl = tau ==> (ref_rel ds_abs1 dr' spi') \/ (?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') \/ (ref_rel ds_abs1' dr' spi')))``,
-cheat);
+rw []  >>
+METIS_TAC [abs1_comb_hold_ref_rel_tau, abs1_comb_hold_ref_rel_not_tau_lbl]);
 
-(* bi-simulation: (dr', spi') exists when lbl is not tau *)
+(* simulation: (dr', spi') exists when lbl is not tau *)
 val comb_abs1_hold_ref_rel_not_tau_lbl = store_thm("comb_abs1_hold_ref_rel_not_tau_lbl",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (lbl:global_lbl_type).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
 (lbl <> tau ==> ?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ (ref_rel ds_abs1' dr' spi'))``,
 rw [ds_abs1_tr_cases] >|
 [METIS_TAC [ds_abs1_tr_cases, comb_abs1_hold_ref_rel_call_init], 
+METIS_TAC [ds_abs1_tr_cases, comb_abs1_hold_ref_rel_call_init],
 METIS_TAC [ds_abs1_tr_cases, comb_abs1_hold_ref_rel_call_tx],
 METIS_TAC [ds_abs1_tr_cases, comb_abs1_hold_ref_rel_call_rx], 
 METIS_TAC [ds_abs1_tr_cases, comb_abs1_hold_ref_rel_call_xfer],
@@ -96,7 +98,7 @@ val comb_abs1_hold_ref_rel_tau_comb = store_thm("comb_abs1_hold_ref_rel_tau_comb
 ?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ (ref_rel ds_abs1' dr' spi')``,
 cheat);
 
-(* bi-simulation (dr',spi') when lbl is tau *)
+(* bi-simulation (dr',spi') when lbl is tau 
 val comb_abs1_hold_ref_rel_tau = store_thm("comb_abs1_hold_ref_rel_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 tau ds_abs1') ==>
@@ -112,6 +114,7 @@ val comb_abs1_hold_ref_rel = store_thm("comb_abs1_hold_ref_rel",
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
 (?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ (ref_rel ds_abs1' dr' spi'))``,
 cheat);
+*)
 
 
 val _ = export_theory();
