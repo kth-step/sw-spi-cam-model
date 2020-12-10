@@ -1,16 +1,16 @@
 This folder is the driver model.
 
 ### Files
-- `driver_writeScript`: defines the `dr_write` function and its sub-functions that issue write requests to the SPI hardware according to the driver state.
-- `driver_readScript`: defines the `dr_read` function and its sub-functions that issue read requests to the SPI hardware according to the driver state.
-- `driver_checkScript`: defines the `dr_check` function and its sub-funcions. It updates the driver state based on the reply from SPI hardware for previous read request.
+- `driver_writeScript`: defines the `dr_write` function and related functions that issue write requests to the SPI controller according to the driver state.
+- `driver_readScript`: defines the `dr_read` function and related functions that issue read requests to the SPI controller according to the driver state.
+- `driver_checkScript`: defines the `dr_check` function and related funcions. It updates the driver state based on the reply from SPI hardware for previous read request.
 - `driver_stateScript`: defines datatypes for the driver model.
 - `driver_relationScript`: defines a relation for driver state to descibe the driver labeled state transitions.
 
 ### Driver state transition relation
 driver_tr defines three rules:
 
-1. (dr.dr_last_read_ad = SOME a) /\ (dr.dr_last_read_v) = SOME v ==> dr tau dr'
+1. (TAU_ENABLE dr) /\ (dr.dr_last_read_ad = SOME a) /\ (dr.dr_last_read_v = SOME v) ==> dr tau dr'
 
 2. (WR_ENABLE dr) /\ (dr_write_address dr = SOME a) /\ (dr_write_value = SOME v) ==> dr (Write a v) dr'
 
@@ -21,16 +21,16 @@ There are 4 automatons of the driver model, init, tx, rx and xfer. In the figure
 
 Driver init (initialize):
 
-<img src="https://user-images.githubusercontent.com/34090109/92883000-be71bb00-f410-11ea-817a-743cf42b092a.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/101760907-ce666d00-3adb-11eb-8d46-f6161ce9bc4b.png" width="90%"></img> 
 
 Driver tx (transmit):
 
-<img src="https://user-images.githubusercontent.com/34090109/93056493-c88ff580-f66c-11ea-8f9d-cc9559fb0586.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/101761094-0968a080-3adc-11eb-8240-50512c591b16.png" width="90%"></img> 
 
 Driver rx (receive):
 
-<img src="https://user-images.githubusercontent.com/34090109/92894805-304f0200-f41b-11ea-8ef6-24f7b1b77606.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/101761287-3cab2f80-3adc-11eb-86e3-c427771c72ce.png" width="90%"></img>  
 
 Driver xfer (transfer, full-duplex):
 
-<img src="https://user-images.githubusercontent.com/34090109/92899641-46f75800-f41f-11ea-9192-f2709dc9d6c2.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/101761457-74b27280-3adc-11eb-88b7-f2f8308e1f16.png" width="90%"></img> 
