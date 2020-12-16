@@ -1,4 +1,5 @@
 open HolKernel bossLib boolLib Parse;
+open wordsLib;
 open SPI_stateTheory SPI_relationTheory SPI_data_trTheory;
 open driver_stateTheory driver_relationTheory;
 open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
@@ -129,7 +130,7 @@ rw [spi_tr_cases, ds_abs1_tr_cases] >|
 FULL_SIMP_TAC std_ss [ABS1_RX_LBL_ENABLE_def] >>
 rw [abs1_rx_receive_data_op_def, rx_receive_data_op_def, abs1_rx_receive_op_def,
 abs1_rx_fetch_data_op_def, abs1_rx_done_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+FULL_SIMP_TAC (std_ss++WORD_ss) [ref_rel_def, IS_STATE_REL_def] >>
 rw []]);
 
 (* bisimulation: (dr',spi') exists for RX label *)

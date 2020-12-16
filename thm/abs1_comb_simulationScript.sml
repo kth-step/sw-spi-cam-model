@@ -7,10 +7,13 @@ open ds_abs1_relTheory;
 open ref_rel_holds_call_lblTheory;
 open ref_rel_holds_trans_lblTheory;
 open abs1_comb_hold_ref_rel_spi_trTheory;
+open abs1_comb_hold_ref_rel_dr_trTheory;
+open abs1_comb_hold_ref_rel_RD_RETheory;
+open abs1_comb_hold_ref_rel_WR_UPTheory;
 
 val _ = new_theory "abs1_comb_simulation";
 
-(* bi-simulation: ds_abs1' exists when lbl is not tau *)
+(* simulation: ds_abs1' exists when lbl is not tau *)
 val abs1_comb_hold_ref_rel_not_tau_lbl = store_thm("abs1_comb_hold_ref_rel_not_tau_lbl",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (lbl:global_lbl_type).
 (ref_rel ds_abs1 dr spi) /\ (local_tr (dr, spi) lbl (dr', spi')) ==>
@@ -24,28 +27,7 @@ METIS_TAC [abs1_comb_hold_ref_rel_TX],
 METIS_TAC [abs1_comb_hold_ref_rel_RX],
 METIS_TAC [abs1_comb_hold_ref_rel_XFER]]);
 
-val abs1_comb_hold_ref_rel_driver_tr = store_thm("abs1_comb_hold_ref_rel_driver_tr",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (driver_tr dr tau dr') ==>
-?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ref_rel ds_abs1' dr' spi)``,
-cheat);
-
-val abs1_comb_hold_ref_rel_WR_UP = store_thm("abs1_comb_hold_ref_rel_WR_UP",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (driver_tr dr (Write a v) dr') /\ 
-(spi_tr spi (Update a v) spi') ==>
-(ref_rel ds_abs1 dr' spi') \/
-(?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ref_rel ds_abs1' dr' spi'))``,
-cheat);
-
-val abs1_comb_hold_ref_rel_RD_RE = store_thm("abs1_comb_hold_ref_rel_RD_RE",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 dr spi) /\ (driver_tr dr (Read a v) dr') /\ 
-(spi_tr spi (Return a v) spi') ==>
-(ref_rel ds_abs1 dr' spi')``,
-cheat);
-
-(* simulation: ds_abs1 or ds_abs1' exists when lbl is tau *)
+(* simulation: ds_abs1 or ds_abs1' exists for ref_rel holding when lbl is tau *)
 val abs1_comb_hold_ref_rel_tau = store_thm("abs1_comb_hold_ref_rel_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (local_tr (dr, spi) tau (dr', spi')) ==>

@@ -244,8 +244,7 @@ else spi with err := T`
 (* write_SPI_regs_def: word32 -> word32 -> spi_state -> spi_state *)
 val write_SPI_regs_def = Define `
 write_SPI_regs (pa:word32) (value:word32) (spi:spi_state) =
-if spi.err then spi
-else if ~(pa IN SPI0_PA_RANGE) then spi
+if ~(pa IN SPI0_PA_RANGE) then spi
 else if (pa = SPI0_SYSCONFIG) then (write_SYSCONFIG_comb value spi)
 else if (pa = SPI0_MODULCTRL) then (write_MODULCTRL value spi)
 else if (pa = SPI0_CH0CONF) then (write_CH0CONF_comb value spi)

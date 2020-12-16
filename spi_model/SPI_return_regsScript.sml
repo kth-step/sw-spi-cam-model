@@ -55,10 +55,8 @@ else (spi with err := T, ARB)`
  *)
 val read_SPI_regs_def = Define `
 read_SPI_regs (pa:word32) (spi:spi_state) =
-(* check spi error flag *)
-if spi.err then (spi, ARB)
 (* pa is not in the SPI region, no changes *)
-else if ~(pa IN SPI0_PA_RANGE) then (spi, ARB)
+if ~(pa IN SPI0_PA_RANGE) then (spi, ARB)
 (* most regs can be read at any time *)
 else if pa = SPI0_SYSCONFIG then (spi, build_SYSCONFIG spi.regs.SYSCONFIG)
 else if pa = SPI0_SYSSTATUS then (spi, w2w spi.regs.SYSSTATUS)

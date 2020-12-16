@@ -6,7 +6,6 @@ open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory
 ds_abs1_rxTheory ds_abs1_xferTheory;
 open ref_relTheory;
 
-
 val _ = new_theory "abs1_comb_hold_ref_rel_spi_tr";
 
 (* a lemma for w2w

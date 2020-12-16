@@ -14,14 +14,13 @@ SPI_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
 (* DRIVER_ABS1_XFER_ENABLE: ds_abs1_state -> bool *)
 val DRIVER_ABS1_XFER_ENABLE_def = Define `
 DRIVER_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.state = abs1_xfer_prepare) \/
-(ds_abs1.state = abs1_xfer_ready) \/
-(ds_abs1.state = abs1_xfer_fetch_data))`
+(ds_abs1.state = abs1_xfer_fetch_data)`
 
 (* COMB_ABS1_XFER_ENABLE: ds_abs1_state -> bool *)
 val COMB_ABS1_XFER_ENABLE_def = Define `
 COMB_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.state = abs1_xfer_trans) \/
+((ds_abs1.state = abs1_xfer_prepare) \/
+(ds_abs1.state = abs1_xfer_ready) \/
 (ds_abs1.state = abs1_xfer_reset))`
 
 
@@ -57,16 +56,6 @@ else ds_abs1 with err := T`
 
 
 (* tau_driver related functions *)
-(* driver_abs1_xfer_prepare_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_xfer_prepare_op_def = Define `
-driver_abs1_xfer_prepare_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with state := abs1_xfer_trans`
-
-(* driver_abs1_xfer_ready_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_xfer_ready_op_def = Define `
-driver_abs1_xfer_ready_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with state := abs1_xfer_fetch_data`
-
 (* driver_abs1_xfer_fetch_data_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_xfer_fetch_data_op_def = Define `
 driver_abs1_xfer_fetch_data_op (ds_abs1:ds_abs1_state) =
@@ -78,22 +67,23 @@ then abs1_xfer_prepare else abs1_xfer_reset |>`
 (* driver_abs1_xfer_operations: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_xfer_operations_def = Define `
 driver_abs1_xfer_operations (ds_abs1:ds_abs1_state) =
-if (ds_abs1.state = abs1_xfer_prepare) then
-(driver_abs1_xfer_prepare_op ds_abs1)
-else if (ds_abs1.state = abs1_xfer_ready) then
-(driver_abs1_xfer_ready_op ds_abs1)
-else if (ds_abs1.state = abs1_xfer_fetch_data) then
+if (ds_abs1.state = abs1_xfer_fetch_data) then
 (driver_abs1_xfer_fetch_data_op ds_abs1)
 else ds_abs1 with err := T`
 
 
 (* tau_comb related functions *)
-(* comb_abs1_xfer_trans_op: ds_abs1_state -> ds_abs1_state *)
-val comb_abs1_xfer_trans_op_def = Define `
-comb_abs1_xfer_trans_op (ds_abs1:ds_abs1_state) =
+(* comb_abs1_xfer_prepare_op: ds_abs1_state -> ds_abs1_state *)
+val comb_abs1_xfer_prepare_op_def = Define `
+comb_abs1_xfer_prepare_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with <| ds_abs1_xfer := ds_abs1.ds_abs1_xfer with 
 xfer_cur_length := ds_abs1.ds_abs1_xfer.xfer_cur_length + 1;
 state := abs1_xfer_data |>`
+
+(* comb_abs1_xfer_ready_op: ds_abs1_state -> ds_abs1_state *)
+val comb_abs1_xfer_ready_op_def = Define `
+comb_abs1_xfer_ready_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with state := abs1_xfer_fetch_data`
 
 (* comb_abs1_xfer_reset_op: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_xfer_reset_op_def = Define `
@@ -103,8 +93,10 @@ ds_abs1 with state := abs1_ready`
 (* comb_abs1_xfer_operations: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_xfer_operations_def = Define `
 comb_abs1_xfer_operations (ds_abs1:ds_abs1_state) =
-if ds_abs1.state = abs1_xfer_trans 
-then (comb_abs1_xfer_trans_op ds_abs1)
+if ds_abs1.state = abs1_xfer_prepare 
+then (comb_abs1_xfer_prepare_op ds_abs1)
+else if (ds_abs1.state = abs1_xfer_ready)
+then (comb_abs1_xfer_ready_op ds_abs1)
 else if (ds_abs1.state = abs1_xfer_reset)
 then (comb_abs1_xfer_reset_op ds_abs1)
 else ds_abs1 with err := T`

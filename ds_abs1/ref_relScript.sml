@@ -1,7 +1,9 @@
 open HolKernel bossLib boolLib Parse;
+open wordsTheory listTheory;
 open SPI_stateTheory;
 open driver_stateTheory;
 open ds_abs1_stateTheory;
+open board_memTheory;
 
 val _ = new_theory "ref_rel";
 
@@ -60,10 +62,10 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (dr.state = dr_rx_check_rxs /\ spi.state = rx_update_RX0))) /\
 ((ds_abs1.state = abs1_rx_ready) =
 ((dr.state = dr_rx_read_rxs /\ spi.state = rx_data_ready) \/
-(dr.state = dr_rx_check_rxs /\ spi.state = rx_data_ready))) /\
+(dr.state = dr_rx_check_rxs /\ spi.state = rx_data_ready) \/
+(dr.state = dr_rx_read_rx0 /\ spi.state = rx_data_ready))) /\
 ((ds_abs1.state = abs1_rx_fetch_data) =
-((dr.state = dr_rx_read_rx0 /\ spi.state = rx_data_ready) /\
-(dr.state = dr_rx_fetch_data /\ spi.state = rx_receive_data))) /\
+(dr.state = dr_rx_fetch_data /\ spi.state = rx_receive_data)) /\
 ((ds_abs1.state = abs1_rx_done) =
 (dr.state = dr_rx_issue_disable /\ spi.state = rx_receive_data)) /\
 ((ds_abs1.state = abs1_rx_stop) = 
@@ -82,9 +84,8 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (dr.state = dr_xfer_check_txs /\ spi.state = xfer_channel_enabled))) /\
 ((ds_abs1.state = abs1_xfer_prepare) =
 ((dr.state = dr_xfer_read_txs /\ spi.state = xfer_ready_for_trans) \/
-(dr.state = dr_xfer_check_txs /\ spi.state = xfer_ready_for_trans))) /\
-((ds_abs1.state = abs1_xfer_trans) =
-(dr.state = dr_xfer_write_dataO /\ spi.state = xfer_ready_for_trans)) /\
+(dr.state = dr_xfer_check_txs /\ spi.state = xfer_ready_for_trans) \/
+(dr.state = dr_xfer_write_dataO /\ spi.state = xfer_ready_for_trans))) /\
 ((ds_abs1.state = abs1_xfer_data) =
 ((dr.state = dr_xfer_read_rxs /\ spi.state = xfer_trans_data) \/
 (dr.state = dr_xfer_check_rxs /\ spi.state = xfer_trans_data))) /\
@@ -96,10 +97,10 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (dr.state = dr_xfer_check_rxs /\ spi.state = xfer_update_RX0))) /\
 ((ds_abs1.state = abs1_xfer_ready) =
 ((dr.state = dr_xfer_read_rxs /\ spi.state = xfer_data_ready) \/
-(dr.state = dr_xfer_check_rxs /\ spi.state = xfer_data_ready))) /\
+(dr.state = dr_xfer_check_rxs /\ spi.state = xfer_data_ready) \/
+(dr.state = dr_xfer_read_rx0 /\ spi.state = xfer_data_ready))) /\
 ((ds_abs1.state = abs1_xfer_fetch_data) =
-((dr.state = dr_xfer_read_rx0 /\ spi.state = xfer_data_ready) \/
-(dr.state = dr_xfer_fetch_dataI /\ spi.state = xfer_ready_for_trans))) /\
+(dr.state = dr_xfer_fetch_dataI /\ spi.state = xfer_ready_for_trans)) /\
 ((ds_abs1.state = abs1_xfer_reset) =
 ((dr.state = dr_xfer_issue_disable /\ spi.state = xfer_ready_for_trans) \/
 (dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled))))`
@@ -122,11 +123,59 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (ds_abs1.ds_abs1_xfer.xfer_dataIN_buffer = dr.dr_xfer.xfer_dataIN_buf) /\
 (ds_abs1.ds_abs1_xfer.xfer_dataOUT_buffer = dr.dr_xfer.xfer_dataOUT_buf) /\
 (ds_abs1.ds_abs1_xfer.xfer_cur_length = dr.dr_xfer.xfer_cur_length) /\
-(* rules for simulation proof *)
+(* rules for simulation proof, spi tau part *)
 (spi.state = tx_trans_data ==> 
 (w2w spi.regs.TX0 = EL (dr.dr_tx.tx_cur_length - 1) dr.dr_tx.tx_data_buf)) /\
 (spi.state = xfer_trans_data ==>
-(w2w spi.regs.TX0 = EL (dr.dr_xfer.xfer_cur_length - 1) dr.dr_xfer.xfer_dataOUT_buf)))`
+(w2w spi.regs.TX0 = EL (dr.dr_xfer.xfer_cur_length - 1) dr.dr_xfer.xfer_dataOUT_buf)) /\
+(* rules for simulation proof, dr tau part *)
+(dr.state = dr_init_check_rep ==> dr.dr_last_read_ad = SOME SPI0_SYSSTATUS) /\
+(dr.state = dr_tx_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_tx_check_eot ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_rx_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_rx_fetch_data ==> dr.dr_last_read_ad = SOME SPI0_RX0) /\
+(dr.state = dr_xfer_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_xfer_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_xfer_fetch_dataI ==> dr.dr_last_read_ad = SOME SPI0_RX0) /\
+(* for init automaton *)
+(spi.state = init_reset /\ dr.state = dr_init_check_rep ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = init_reset ==> spi.regs.SYSSTATUS = 0w) /\
+(* for tx automaton *)
+(spi.state = tx_channel_enabled /\ dr.state = dr_tx_check_txs ==>
+(1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = tx_trans_data /\ dr.state = dr_tx_check_txs ==>
+(1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = tx_trans_data /\ dr.state = dr_tx_check_eot ==>
+(2 >< 2) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = tx_trans_done /\ dr.state = dr_tx_check_eot ==>
+(2 >< 2) (THE dr.dr_last_read_v) = 0w:word1) /\
+(* for rx automaton *)
+(spi.state = rx_channel_enabled /\ dr.state = dr_rx_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = rx_receive_data /\ dr.state = dr_rx_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = rx_update_RX0 /\ dr.state = dr_rx_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = rx_receive_data /\ dr.state = dr_rx_fetch_data ==>
+spi.RX_SHIFT_REG = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(spi.state = rx_update_RX0 /\ dr.state = dr_rx_fetch_data ==>
+ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(spi.state = rx_receive_data /\ dr.state = dr_rx_fetch_data ==>
+ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(spi.state = rx_data_ready /\ dr.state = dr_rx_fetch_data ==>
+ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(* for xfer automaton *)
+(spi.state = xfer_channel_enabled /\ dr.state = dr_xfer_check_txs ==>
+(1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = xfer_trans_data /\ dr.state = dr_xfer_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = xfer_exchange_data /\ dr.state = dr_xfer_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = xfer_update_RX0 /\ dr.state = dr_xfer_check_rxs ==>
+(0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = xfer_ready_for_trans /\ dr.state = dr_xfer_fetch_dataI ==>
+spi.RX_SHIFT_REG = (7 >< 0) (THE dr.dr_last_read_v):word8))`
 
 
 val _ = export_theory();

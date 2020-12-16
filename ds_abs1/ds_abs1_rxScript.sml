@@ -15,15 +15,15 @@ SPI_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
 (* DRIVER_ABS1_RX_ENABLE: ds_abs1_state -> bool *)
 val DRIVER_ABS1_RX_ENABLE_def = Define `
 DRIVER_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.state = abs1_rx_ready) \/
-(ds_abs1.state = abs1_rx_fetch_data) \/
+((ds_abs1.state = abs1_rx_fetch_data) \/
 (ds_abs1.state = abs1_rx_next) \/
 (ds_abs1.state = abs1_rx_next_ready))`
 
 (* COMB_ABS1_RX_ENABLE: ds_abs1_state -> bool *)
 val COMB_ABS1_RX_ENABLE_def = Define `
 COMB_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
-(ds_abs1.state = abs1_rx_reset)`
+((ds_abs1.state = abs1_rx_ready) \/
+(ds_abs1.state = abs1_rx_reset))`
 
 (* ABS1_RX_LBL_ENABLE: ds_abs1_state -> bool *)
 val ABS1_RX_LBL_ENABLE_def = Define `
@@ -68,18 +68,13 @@ else ds_abs1 with err := T`
 
 
 (* tau_dr related functions *)
-(* driver_abs1_rx_ready_op: ds_abs1_state -> ds_abs1_state *)
-val driver_abs1_rx_ready_op_def = Define `
-driver_abs1_rx_ready_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with state := abs1_rx_fetch_data`
-
 (* driver_abs1_rx_fetch_data_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_rx_fetch_data_op_def = Define `
 driver_abs1_rx_fetch_data_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with <| ds_abs1_rx := ds_abs1.ds_abs1_rx with
 <| rx_data_buffer := ds_abs1.ds_abs1_rx.rx_data_buffer ++ [ds_abs1.spi_abs1.RX_SHIFT_REG]; 
    rx_left_length := ds_abs1.ds_abs1_rx.rx_left_length - 1 |>;
-state := if ds_abs1.ds_abs1_rx.rx_left_length > 1 then abs1_rx_done else abs1_rx_receive |>`
+state := if ds_abs1.ds_abs1_rx.rx_left_length > 1 then abs1_rx_receive else abs1_rx_done |>`
 
 (* driver_abs1_rx_next_op: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_rx_next_op_def = Define `
@@ -100,9 +95,7 @@ state := if ds_abs1.ds_abs1_rx.rx_left_length > 1 then abs1_rx_ready else abs1_r
 (* driver_abs1_rx_operations: ds_abs1_state -> ds_abs1_state *)
 val driver_abs1_rx_operations_def = Define `
 driver_abs1_rx_operations (ds_abs1:ds_abs1_state) =
-if (ds_abs1.state = abs1_rx_ready) then
-(driver_abs1_rx_ready_op ds_abs1)
-else if (ds_abs1.state = abs1_rx_fetch_data) then
+if (ds_abs1.state = abs1_rx_fetch_data) then
 (driver_abs1_rx_fetch_data_op ds_abs1)
 else if (ds_abs1.state = abs1_rx_next) then
 (driver_abs1_rx_next_op ds_abs1)
@@ -112,6 +105,12 @@ else ds_abs1 with err:= T`
 
 
 (* tau_comb related functions *)
+(* comb_abs1_rx_ready_op: ds_abs1_state -> ds_abs1_state *)
+val comb_abs1_rx_ready_op_def = Define `
+comb_abs1_rx_ready_op (ds_abs1:ds_abs1_state) =
+ds_abs1 with <| state := abs1_rx_fetch_data;
+ds_abs1_rx := ds_abs1.ds_abs1_rx with temp_value := ds_abs1.spi_abs1.RX_SHIFT_REG |>`
+
 (* comb_abs1_rx_reset_op: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_rx_reset_op_def = Define `
 comb_abs1_rx_reset_op (ds_abs1:ds_abs1_state) =
@@ -120,7 +119,9 @@ ds_abs1 with state := abs1_ready`
 (* comb_abs1_rx_operations: ds_abs1_state -> ds_abs1_state *)
 val comb_abs1_rx_operations_def = Define `
 comb_abs1_rx_operations (ds_abs1:ds_abs1_state) =
-if ds_abs1.state = abs1_rx_reset
+if ds_abs1.state = abs1_rx_ready 
+then (comb_abs1_rx_ready_op ds_abs1)
+else if ds_abs1.state = abs1_rx_reset
 then (comb_abs1_rx_reset_op ds_abs1)
 else ds_abs1 with err := T`
 
@@ -147,7 +148,7 @@ abs1_rx_fetch_data_op (ds_abs1:ds_abs1_state) (data:word8 option) =
 ds_abs1 with 
 <| state := abs1_rx_next;
    spi_abs1 := ds_abs1.spi_abs1 with RX_SHIFT_REG := THE data;
-   ds_abs1_rx := ds_abs1.ds_abs1_rx with temp_value := ds_abs1.spi_abs1.RX_SHIFT_REG |>`
+   (*ds_abs1_rx := ds_abs1.ds_abs1_rx with temp_value := ds_abs1.spi_abs1.RX_SHIFT_REG*) |>`
 
 (* abs1_rx_done_op: ds_abs1_state -> word8 option -> ds_abs1_state *)
 val abs1_rx_done_op_def = Define `
