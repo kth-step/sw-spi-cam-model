@@ -150,6 +150,9 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (2 >< 2) (THE dr.dr_last_read_v) = 0w:word1) /\
 (spi.state = tx_trans_done /\ dr.state = dr_tx_check_eot ==>
 (2 >< 2) (THE dr.dr_last_read_v) = 0w:word1) /\
+(spi.state = tx_channel_enabled ==> spi.regs.CH0STAT.TXS = 0w) /\
+(spi.state = tx_trans_data ==> spi.regs.CH0STAT.TXS = 0w /\ spi.regs.CH0STAT.EOT = 0w) /\
+(spi.state = tx_trans_done ==> spi.regs.CH0STAT.EOT = 0w) /\
 (* for rx automaton *)
 (spi.state = rx_channel_enabled /\ dr.state = dr_rx_check_rxs ==>
 (0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
@@ -165,6 +168,11 @@ ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
 ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
 (spi.state = rx_data_ready /\ dr.state = dr_rx_fetch_data ==>
 ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(spi.state = rx_channel_enabled ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = rx_receive_data ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = rx_update_RX0 ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = rx_data_ready ==> spi.RX_SHIFT_REG = (7 >< 0) spi.regs.RX0 /\
+spi.regs.CH0STAT.RXS = 1w) /\
 (* for xfer automaton *)
 (spi.state = xfer_channel_enabled /\ dr.state = dr_xfer_check_txs ==>
 (1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\
@@ -175,7 +183,14 @@ ds_abs1.ds_abs1_rx.temp_value = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
 (spi.state = xfer_update_RX0 /\ dr.state = dr_xfer_check_rxs ==>
 (0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
 (spi.state = xfer_ready_for_trans /\ dr.state = dr_xfer_fetch_dataI ==>
-spi.RX_SHIFT_REG = (7 >< 0) (THE dr.dr_last_read_v):word8))`
+spi.RX_SHIFT_REG = (7 >< 0) (THE dr.dr_last_read_v):word8) /\
+(spi.state = xfer_channel_enabled ==> spi.regs.CH0STAT.TXS = 0w /\ spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = xfer_ready_for_trans ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = xfer_trans_data ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = xfer_exchange_data ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = xfer_update_RX0 ==> spi.regs.CH0STAT.RXS = 0w) /\
+(spi.state = xfer_data_ready ==> spi.RX_SHIFT_REG = (7 >< 0) spi.regs.RX0 /\
+spi.regs.CH0STAT.RXS = 1w))`
 
 
 val _ = export_theory();

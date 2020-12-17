@@ -173,17 +173,20 @@ rw [],
 rw [spi_abs1_rx_operations_def, spi_abs1_rx_update_op_def,
 spi_tau_operations_def, rx_update_RX0_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [],
+rw [] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [],
 (* abs1_rx_next *)
 rw [spi_abs1_rx_operations_def, spi_abs1_rx_next_op_def,
 spi_tau_operations_def, rx_update_RX0_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [],
+rw [] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [],
 (* abs1_rx_stop *)
 rw [spi_abs1_rx_operations_def, spi_abs1_rx_stop_op_def,
 spi_tau_operations_def, rx_update_RX0_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+rw [] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []]);
 
 (* a lemma: XFER_TAU_ENABLE spi => SPI_ABS1_XFER_ENABLE ds_abs1 based on ref_rel *)
 val COMB_IMP_ABS1_XFER_ENABLE = store_thm("COMB_IMP_ABS1_XFER_ENABLE",
@@ -287,7 +290,8 @@ rw [],
 rw [spi_abs1_xfer_operations_def, spi_abs1_xfer_update_op_def,
 spi_tau_operations_def, xfer_update_RX0_op_def] >>
 FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+rw [] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []]);
 
 (* simulation: ds_abs1' exists and holds the ref_rel when spi_tau *)
 val abs1_comb_hold_ref_rel_spi_tr = store_thm("abs1_comb_hold_ref_rel_spi_tr",

@@ -39,15 +39,14 @@ build_CH0STAT (CH0STAT:ch0stat_bits) =
  *)
 val read_RX0_def = Define `
 read_RX0 (spi:spi_state) =
-let wl = (w2n spi.regs.CH0CONF.WL) in
 if (CHECK_RXS_BIT spi) /\ (spi.state = rx_data_ready) then
 (spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
 state := rx_receive_data |>,
-(wl >< 0) spi.regs.RX0:word32)
+(7 >< 0) spi.regs.RX0:word32)
 else if (CHECK_RXS_BIT spi) /\ (spi.state = xfer_data_ready) then
 (spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT with RXS := 0w;
 state := xfer_ready_for_trans |>,
-(wl >< 0) spi.regs.RX0:word32)
+(7 >< 0) spi.regs.RX0:word32)
 else (spi with err := T, ARB)`
 
 (* read_register returns a new spi state and the value of pa
