@@ -55,7 +55,8 @@ RX0: word32 (*channel 0 receive buffer register *)|>`
 val _ = Datatype `spi_general_state = 
 | init_start | init_reset | init_setregs | spi_ready 
 | tx_conf_ready | tx_channel_enabled | tx_ready_for_trans
-| tx_trans_data | tx_trans_done | tx_channel_disabled
+| tx_trans_data | tx_trans_done | tx_trans_next 
+| tx_trans_update | tx_channel_disabled
 | rx_conf_ready | rx_channel_enabled | rx_receive_data 
 | rx_update_RX0 | rx_data_ready | rx_channel_disabled
 | xfer_conf_ready | xfer_channel_enabled | xfer_ready_for_trans 

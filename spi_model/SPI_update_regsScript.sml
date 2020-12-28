@@ -230,14 +230,17 @@ else spi with err := T`
  *)
 val write_TX0_def = Define `
 write_TX0 (value:word32) (spi:spi_state) =
-let wl = (w2n spi.regs.CH0CONF.WL) in
 if (CHECK_TXS_BIT spi) /\ (spi.state = tx_ready_for_trans) then
-spi with <| regs := spi.regs with <| CH0STAT := spi.regs.CH0STAT with <| TXS := 0w; EOT := 0w |>;
-TX0 := ((wl >< 0) value:word32) |>;
+spi with <| regs := spi.regs with <| CH0STAT := spi.regs.CH0STAT with TXS := 0w;
+TX0 := ((7 >< 0) value:word32) |>;
 state := tx_trans_data |>
+else if (CHECK_TXS_BIT spi) /\ (spi.state = tx_trans_done) then
+spi with <| regs := spi.regs with <| CH0STAT := spi.regs.CH0STAT with TXS := 0w;
+TX0 := ((7 >< 0) value:word32) |>;
+state := tx_trans_next |>
 else if (CHECK_TXS_BIT spi) /\ (spi.state = xfer_ready_for_trans) then
 spi with <| regs := spi.regs with <| CH0STAT := spi.regs.CH0STAT with TXS := 0w;
-TX0 := ((wl >< 0) value:word32) |>;
+TX0 := ((7 >< 0) value:word32) |>;
 state := xfer_trans_data |>
 else spi with err := T`
 

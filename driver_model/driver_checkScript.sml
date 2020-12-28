@@ -34,9 +34,9 @@ if (dr.state = dr_tx_check_txs) /\ (v1 = 1w) then
 dr with state := dr_tx_write_data
 else if (dr.state = dr_tx_check_txs) /\ (v1 = 0w) then
 dr with state := dr_tx_read_txs
-else if (dr.state = dr_tx_check_eot) /\ (v2 = 1w) then
+else if (dr.state = dr_tx_check_eot) /\ (v2 = 1w) /\ (v1 = 1w) then
 dr with state := dr_tx_issue_disable
-else if (dr.state = dr_tx_check_eot) /\ (v2 = 0w) then
+else if (dr.state = dr_tx_check_eot) /\ (~((v2 = 1w) /\ (v1 = 1w))) then
 dr with state := dr_tx_read_eot
 else dr with dr_err := T`
 
@@ -44,8 +44,10 @@ else dr with dr_err := T`
 val dr_check_rx_ch0stat_def = Define `
 dr_check_rx_ch0stat (dr:driver_state) (rep_v:word32) =
 let v = (0 >< 0) rep_v:word1 in
-if v = 1w
+if (v = 1w) /\ (dr.dr_rx.rx_left_length > 0)
 then dr with state := dr_rx_read_rx0
+else if (v = 1w)
+then dr with state := dr_rx_issue_disable
 else dr with state := dr_rx_read_rxs`
 
 (* dr_check_xfer_ch0stat:driver_state -> word32 -> driver_state *)
@@ -70,7 +72,7 @@ let v = (7 >< 0) rep_v:word8 in
 if (dr.state = dr_rx_fetch_data) then
 dr with <| dr_rx := dr.dr_rx with <| rx_data_buf := dr.dr_rx.rx_data_buf ++ [v];
 rx_left_length := dr.dr_rx.rx_left_length - 1 |>;
-state := if dr.dr_rx.rx_left_length > 1 then dr_rx_read_rxs else dr_rx_issue_disable |>
+state := dr_rx_read_rxs |>
 else if (dr.state = dr_xfer_fetch_dataI) then
 dr with <| dr_xfer := dr.dr_xfer with xfer_dataIN_buf := dr.dr_xfer.xfer_dataIN_buf ++ [v];
 state := if (dr.dr_xfer.xfer_cur_length < (LENGTH dr.dr_xfer.xfer_dataOUT_buf)) 

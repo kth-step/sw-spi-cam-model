@@ -12,8 +12,8 @@ val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
 (* spi internal operations *)
 (!(spi:spi_state). (SPI_TAU_ENABLE spi) ==> spi_tr spi tau (spi_tau_operations spi)) /\
 (* 3 cases for spi to transfer data with another spi device *)
-(!(spi:spi_state). (spi.state = tx_trans_done) ==> 
-spi_tr spi (TX (tx_trans_done_op_value spi)) (tx_trans_done_op_state spi)) /\
+(!(spi:spi_state). (spi.state = tx_trans_done \/ spi.state = tx_trans_next) ==> 
+spi_tr spi (TX (tx_TX_op_value spi)) (tx_TX_op_state spi)) /\
 (!(spi:spi_state). (spi.state = rx_receive_data) /\ (data <> NONE) ==> 
 spi_tr spi (RX data) (rx_receive_data_op spi data)) /\
 (!(spi:spi_state). (spi.state = xfer_exchange_data) /\ (dataIN <> NONE) ==>

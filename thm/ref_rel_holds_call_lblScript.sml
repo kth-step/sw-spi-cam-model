@@ -101,7 +101,7 @@ rw []);
 
 (* bisimulation: ds_abs1' exits for call_init label *)
 val abs1_comb_hold_ref_rel_call_init = store_thm("abs1_comb_hold_ref_rel_call_init",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (dr':driver_state).
 (ref_rel ds_abs1 dr spi) /\ (driver_tr dr call_init dr') ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 call_init ds_abs1') /\ (ref_rel ds_abs1' dr' spi)``,
 rw [driver_tr_cases, ds_abs1_tr_cases] >|
@@ -122,7 +122,7 @@ rw []]);
 
 (* bisimulation: (dr',spi') exists for call_init label *)
 val comb_abs1_hold_ref_rel_call_init = store_thm("comb_abs1_hold_ref_rel_call_init",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (ds_abs1':ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 call_init ds_abs1') ==>
 ?dr' spi'. (local_tr (dr, spi) call_init (dr', spi')) /\
 (ref_rel ds_abs1' dr' spi')``,
@@ -138,7 +138,7 @@ rw []]);
 
 (* bisimulation: ds_abs1' exists for call_tx label *)
 val abs1_comb_hold_ref_rel_call_tx = store_thm("abs1_comb_hold_ref_rel_call_tx",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list) (dr':driver_state).
 (ref_rel ds_abs1 dr spi) /\ (driver_tr dr (call_tx buffer) dr') ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 (call_tx buffer) ds_abs1') /\ (ref_rel ds_abs1' dr' spi)``,
 rw [driver_tr_cases, ds_abs1_tr_cases] >|
@@ -152,7 +152,7 @@ rw []]);
 
 (* bisimulation: (dr',spi') exists for call_tx label *)
 val comb_abs1_hold_ref_rel_call_tx = store_thm("comb_abs1_hold_ref_rel_call_tx",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list) (ds_abs1':ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 (call_tx buffer) ds_abs1') ==>
 ?dr' spi'. (local_tr (dr, spi) (call_tx buffer) (dr', spi')) /\
 (ref_rel ds_abs1' dr' spi')``,
@@ -164,7 +164,7 @@ rw []]);
 
 (* bisimulation: ds_abs1' exists for call_rx label *)
 val abs1_comb_hold_ref_rel_call_rx = store_thm("abs1_comb_hold_ref_rel_call_rx",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (length: num).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (length: num) (dr':driver_state).
 (ref_rel ds_abs1 dr spi) /\ (driver_tr dr (call_rx length) dr') ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 (call_rx length) ds_abs1') /\ (ref_rel ds_abs1' dr' spi)``,
 rw [driver_tr_cases, ds_abs1_tr_cases] >|
@@ -178,7 +178,7 @@ rw []]);
 
 (* bisimulation: (ds',spi') exists for call_rx label *)
 val comb_abs1_hold_ref_rel_call_rx = store_thm("comb_abs1_hold_ref_rel_call_rx",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (length: num).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (length: num) (dr':driver_state) (ds_abs1':ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 (call_rx length) ds_abs1') ==>
 ?dr' spi'. (local_tr (dr, spi) (call_rx length) (dr', spi')) /\ 
 (ref_rel ds_abs1' dr' spi')``,
@@ -190,7 +190,7 @@ rw []]);
 
 (* bisimulation: ds_abs1' exists for call_xfer label *)
 val abs1_comb_hold_ref_rel_call_xfer = store_thm("abs1_comb_hold_ref_rel_call_xfer",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list) (dr':driver_state) (ds_abs1':ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (driver_tr dr (call_xfer buffer) dr') ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 (call_xfer buffer) ds_abs1') /\ (ref_rel ds_abs1' dr' spi)``,
 rw [driver_tr_cases, ds_abs1_tr_cases] >|
@@ -204,7 +204,7 @@ rw []]);
 
 (* bisimulation: (dr',spi') exists for call_xfer label *)
 val comb_abs1_hold_ref_rel_call_xfer = store_thm("comb_abs1_hold_ref_rel_call_xfer",
-``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list).
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (buffer:word8 list) (ds_abs1':ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 (call_xfer buffer) ds_abs1') ==>
 ?dr' spi'. (local_tr (dr, spi) (call_xfer buffer) (dr', spi')) /\
 (ref_rel ds_abs1' dr' spi')``,

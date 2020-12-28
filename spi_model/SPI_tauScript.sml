@@ -9,9 +9,10 @@ val _ = new_theory "SPI_tau";
 val SPI_TAU_ENABLE_def = Define `
 SPI_TAU_ENABLE (spi:spi_state) =
 ((spi.state = init_reset) \/ (spi.state = tx_channel_enabled) \/
-(spi.state = tx_trans_data) \/ (spi.state = rx_channel_enabled) \/
-(spi.state = rx_update_RX0) \/ (spi.state = xfer_channel_enabled) \/
-(spi.state = xfer_trans_data) \/ (spi.state = xfer_update_RX0))`
+(spi.state = tx_trans_data) \/ (spi.state = tx_trans_update) \/
+(spi.state = rx_channel_enabled) \/ (spi.state = rx_update_RX0) \/ 
+(spi.state = xfer_channel_enabled) \/ (spi.state = xfer_trans_data) \/ 
+(spi.state = xfer_update_RX0))`
 
 
 (* internal operations for init automaton *)
@@ -43,6 +44,14 @@ tx_trans_data_op (spi:spi_state) =
 spi with <| TX_SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
 with <|EOT := 0w; TXS := 1w|>; (* cleat EOT bit, set TXS *)  
+state := tx_trans_done |>`
+
+(* tx_trans_update_op: spi_state -> spi_state *)
+val tx_trans_update_op_def = Define `
+tx_trans_update_op (spi:spi_state) =
+spi with <| TX_SHIFT_REG := w2w spi.regs.TX0;
+regs := spi.regs with CH0STAT := spi.regs.CH0STAT
+with <|EOT := 0w; TXS := 1w|>;
 state := tx_trans_done |>`
 
 (* internal operations for rx automaton *)
@@ -115,6 +124,8 @@ case spi.state of
   | tx_ready_for_trans => spi with err := T
   | tx_trans_data => tx_trans_data_op spi
   | tx_trans_done => spi with err := T
+  | tx_trans_next => spi with err := T
+  | tx_trans_update => tx_trans_update_op spi
   | tx_channel_disabled => spi with err := T
   | rx_conf_ready => spi with err := T
   | rx_channel_enabled => rx_channel_enabled_op spi

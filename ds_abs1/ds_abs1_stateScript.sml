@@ -12,10 +12,10 @@ val _ = new_theory "ds_abs1_state";
 val _ = Datatype `ds_abs1_general_state =
 | abs1_init_pre | abs1_init_start | abs1_ready
 | abs1_tx_idle | abs1_tx_trans | abs1_tx_data_1 | abs1_tx_data_2
-| abs1_tx_done_1 | abs1_tx_done_2 | abs1_tx_reset
-| abs1_rx_idle | abs1_rx_receive | abs1_rx_update | abs1_rx_ready 
-| abs1_rx_fetch_data | abs1_rx_done | abs1_rx_next 
-| abs1_rx_next_ready | abs1_rx_stop | abs1_rx_reset
+| abs1_tx_done_1 | abs1_tx_done_2 | abs1_tx_next | abs1_tx_update 
+| abs1_tx_last | abs1_tx_last_update | abs1_tx_reset
+| abs1_rx_idle | abs1_rx_receive | abs1_rx_update | abs1_rx_ready | abs1_rx_read
+| abs1_rx_fetch_data | abs1_rx_next | abs1_rx_next_ready | abs1_rx_reset
 | abs1_xfer_idle | abs1_xfer_prepare | abs1_xfer_data | abs1_xfer_exchange 
 | abs1_xfer_update | abs1_xfer_ready | abs1_xfer_fetch_data | abs1_xfer_reset`
 

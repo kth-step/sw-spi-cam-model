@@ -158,7 +158,7 @@ if (dr.state = dr_tx_write_data) /\
 dr with <| dr_tx := dr.dr_tx with tx_cur_length := dr.dr_tx.tx_cur_length + 1;
 state := dr_tx_read_txs |>)
 else if (dr.state = dr_tx_write_data) /\
-(dr.dr_tx.tx_cur_length = ((LENGTH dr.dr_tx.tx_data_buf) - 1)) then 
+(~ (dr.dr_tx.tx_cur_length < ((LENGTH dr.dr_tx.tx_data_buf) - 1))) then 
 (SOME SPI0_TX0, SOME (w2w (EL (dr.dr_tx.tx_cur_length) (dr.dr_tx.tx_data_buf))),
 dr with <| dr_tx := dr.dr_tx with tx_cur_length := dr.dr_tx.tx_cur_length + 1;
 state := dr_tx_read_eot |>)
@@ -180,8 +180,7 @@ case dr.state of
    else if (~ dr.dr_init.issue_wr_modulctrl) then (dr_write_modulctrl dr)
    else if (~ dr.dr_init.issue_wr_ch0conf_wl) then (dr_write_ch0conf_wl dr)
    else if (~ dr.dr_init.issue_wr_ch0conf_mode) then (dr_write_ch0conf_mode dr)
-   else if (~ dr.dr_init.issue_wr_ch0conf_speed) then (dr_write_ch0conf_speed dr)
-   else (NONE, NONE, dr)
+   else (dr_write_ch0conf_speed dr)
  | dr_ready => (NONE, NONE, dr with dr_err := T)
  | dr_tx_idle => (dr_write_ch0conf_tx dr)
  | dr_tx_conf_issued => (dr_write_ch0ctrl dr)

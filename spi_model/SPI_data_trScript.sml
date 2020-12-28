@@ -16,14 +16,29 @@ with EOT := 1w;
 state := tx_ready_for_trans |>,
 SOME spi.TX_SHIFT_REG)`
 
+(* tx_trans_next_op: spi_state -> spi_state * word8 option *)
+val tx_trans_next_op_def = Define `
+tx_trans_next_op (spi:spi_state) =
+(spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT
+with EOT := 1w;
+state := tx_trans_update |>,
+SOME spi.TX_SHIFT_REG)`
+
+(* tx_TX_op: spi_state -> spi_state * word8 option *)
+val tx_TX_op_def = Define `
+tx_TX_op (spi:spi_state) =
+if spi.state = tx_trans_done then (tx_trans_done_op spi)
+else if spi.state = tx_trans_next then  (tx_trans_next_op spi)
+else (spi with err := T, NONE)`
+
 (* return specific datatype from above function *)
-val tx_trans_done_op_state_def = Define `
-tx_trans_done_op_state (spi:spi_state) =
-let (spi', v_option) = tx_trans_done_op spi in spi'`
+val tx_TX_op_state_def = Define `
+tx_TX_op_state (spi:spi_state) =
+let (spi', v_option) = tx_TX_op spi in spi'`
 
 val tx_trans_done_op_value_def = Define `
-tx_trans_done_op_value (spi:spi_state) =
-let (spi', v_option) = tx_trans_done_op spi in v_option`
+tx_TX_op_value (spi:spi_state) =
+let (spi', v_option) = tx_TX_op spi in v_option`
 
 (* SPI data transition for RX label *)
 (* rx_receive_data_op: spi_state -> word8 option -> spi_state *)

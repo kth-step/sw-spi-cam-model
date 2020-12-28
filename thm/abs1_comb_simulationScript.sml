@@ -62,6 +62,8 @@ rw [comb_abs1_hold_ref_rel_TX],
 rw [comb_abs1_hold_ref_rel_RX],
 rw [comb_abs1_hold_ref_rel_XFER]]);
 
+
+(* 
 val comb_abs1_hold_ref_rel_tau_spi = store_thm("comb_abs1_hold_ref_rel_tau_spi",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_spi_tr ds_abs1 tau_spi ds_abs1') ==>
@@ -80,7 +82,7 @@ val comb_abs1_hold_ref_rel_tau_comb = store_thm("comb_abs1_hold_ref_rel_tau_comb
 ?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ (ref_rel ds_abs1' dr' spi')``,
 cheat);
 
-(* bi-simulation (dr',spi') when lbl is tau 
+bi-simulation (dr',spi') when lbl is tau 
 val comb_abs1_hold_ref_rel_tau = store_thm("comb_abs1_hold_ref_rel_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
 (ref_rel ds_abs1 dr spi) /\ (ds_abs1_tr ds_abs1 tau ds_abs1') ==>
