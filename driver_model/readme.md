@@ -29,7 +29,7 @@ Driver tx (transmit):
 
 Driver rx (receive):
 
-<img src="https://user-images.githubusercontent.com/34090109/101761287-3cab2f80-3adc-11eb-86e3-c427771c72ce.png" width="90%"></img>  
+<img src="https://user-images.githubusercontent.com/34090109/103527897-56ddf080-4e83-11eb-8be3-1d9fc6f27cbc.png" width="90%"></img>  
 
 Driver xfer (transfer, full-duplex):
 
