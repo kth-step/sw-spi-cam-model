@@ -12,7 +12,7 @@ SPI init:
 
 SPI tx:
 
-<img src="https://user-images.githubusercontent.com/34090109/101759452-e937e200-3ad9-11eb-8193-8c78c9e49d3d.png" width="90%"></img> 
+<img src="https://user-images.githubusercontent.com/34090109/103527392-8d673b80-4e82-11eb-90bc-113dc4803284.png" width="90%"></img> 
 
 SPI rx:
 
