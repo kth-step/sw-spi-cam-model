@@ -3,7 +3,7 @@ open ds_abs1_stateTheory;
 
 val _ = new_theory "ds_abs1_init";
 
-(* call_init_ds_abs1:ds_abs1_state -> ds_abs1_state *)
+(* call_init_ds_abs1: ds_abs1_state -> ds_abs1_state *)
 val call_init_ds_abs1_def = Define `
 call_init_ds_abs1 (ds_abs1:ds_abs1_state) =
 ds_abs1 with state := abs1_init_start`

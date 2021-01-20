@@ -102,7 +102,7 @@ then (comb_abs1_xfer_reset_op ds_abs1)
 else ds_abs1 with err := T`
 
 (* XFER label functions *)
-(* abs1_xfer_exchange_op: ds_abs1_state -> word8 option *)
+(* abs1_xfer_exchange_op: ds_abs1_state -> word8 option -> ds_abs1_state * word8 option *)
 val abs1_xfer_exchange_op_def = Define `
 abs1_xfer_exchange_op (ds_abs1:ds_abs1_state) (data: word8 option) =
 if (data <> NONE) then

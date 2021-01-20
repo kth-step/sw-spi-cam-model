@@ -22,16 +22,15 @@ val abs0_rx_idle_op_def = Define `
 abs0_rx_idle_op (ds_abs0:ds_abs0_state) (data:word8 option) =
 ds_abs0 with
 <| state := abs0_rx_update;
-ds_abs0_rx := ds_abs0.ds_abs0_rx with
-<| rx_data_buffer := ds_abs0.ds_abs0_rx.rx_data_buffer ++ [THE data];
-   rx_left_length := ds_abs0.ds_abs0_rx.rx_left_length - 1 |> |>`
+ds_abs0_rx := ds_abs0.ds_abs0_rx with temp_RSR := THE data |>`
 
 (* abs0_rx_reading_op: ds_abs0_state -> word8 option -> ds_abs0_state *)
 val abs0_rx_reading_op_def = Define `
 abs0_rx_reading_op (ds_abs0:ds_abs0_state) (data:word8 option) =
 ds_abs0 with 
 <| state := abs0_rx_next;
-ds_abs0_rx := ds_abs0.ds_abs0_rx with temp_value := THE data |>`
+ds_abs0_rx := ds_abs0.ds_abs0_rx with 
+<| temp_RSR := THE data; temp_value := ds_abs0.ds_abs0_rx.temp_RSR |> |>`
 
 (* abs0_rx_op: ds_abs0_state -> word8 option -> ds_abs0_state *)
 val abs0_rx_op_def = Define `
@@ -52,7 +51,11 @@ state := if ds_abs0.ds_abs0_rx.rx_left_length > 0 then abs0_rx_reading else abs0
 (* abs0_rx_reading_op: ds_abs0_state -> ds_abs0_state *)
 val abs0_rx_reading_op_def = Define `
 abs0_rx_reading_op (ds_abs0:ds_abs0_state) =
-ds_abs0 with state := abs0_rx_idle`
+ds_abs0 with 
+<| state := abs0_rx_idle;
+ds_abs0_rx := ds_abs0.ds_abs0_rx with
+<| rx_data_buffer := ds_abs0.ds_abs0_rx.rx_data_buffer ++ [ds_abs0.ds_abs0_rx.temp_RSR];
+   rx_left_length := ds_abs0.ds_abs0_rx.rx_left_length - 1 |> |>`
 
 (* abs0_rx_next_op: ds_abs0_state -> ds_abs0_state *)
 val abs0_rx_next_op_def = Define `

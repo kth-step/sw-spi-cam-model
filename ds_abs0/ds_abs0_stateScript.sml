@@ -22,13 +22,15 @@ tx_cur_length: num |>`
 val _ = Datatype `ds_abs0_rx_state = <|
 rx_data_buffer: word8 list;
 rx_left_length: num;
-temp_value: word8 |>`
+temp_value: word8;
+temp_RSR: word8 |>`
 
 (* ds_abs0_xfer_state: the state of ds_abs0 xfer automaton *)
 val _ = Datatype `ds_abs0_xfer_state = <|
 xfer_dataIN_buffer: word8 list;
 xfer_dataOUT_buffer: word8 list;
-xfer_cur_length: num |>`
+xfer_cur_length: num;
+xfer_RSR: word8 |>`
 
 (* ds_abs0_state: the state of the spi controller and driver combined abstract level0 model *)
 val _ = Datatype `ds_abs0_state = <|
