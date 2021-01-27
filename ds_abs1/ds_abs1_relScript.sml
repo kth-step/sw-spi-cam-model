@@ -72,27 +72,9 @@ ds_abs1_tau_only_1_state (ds_abs1:ds_abs1_state) =
 (ds_abs1.state <> abs1_rx_next) /\
 (ds_abs1.state <> abs1_xfer_fetch_data))`
 
-(* An abstract transition system for ds_abs1 that removes some tau transition 
-val (ds_abs1_abs_tr_rules, ds_abs1_abs_tr_ind, ds_abs1_abs_tr_cases) = Hol_reln `
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 tau ds_abs1') /\ 
-(ds_abs1_tr ds_abs1' lbl ds_abs1'') /\ (ds_abs1_tau_only_1_state ds_abs1) ==>
-ds_abs1_abs_tr ds_abs1 lbl ds_abs1'') /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ds_abs1.state = abs1_rx_ready \/ ds_abs1.state = abs1_xfer_fetch_data) ==>
-ds_abs1_abs_tr ds_abs1 tau ds_abs1') /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 lbl ds_abs1') /\
-(ds_abs1.state = abs1_rx_fetch_data) ==>
-ds_abs1_abs_tr ds_abs1 lbl ds_abs1') /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ds_abs1_tr ds_abs1 tau ds_abs1'') /\
-(ds_abs1' <> ds_abs1'') /\ (ds_abs1.state = abs1_tx_trans) /\
-(ds_abs1_abs_tr ds_abs1' lbl ds_abs1''') /\ (ds_abs1_abs_tr ds_abs1'' lbl ds_abs1''') ==>
-ds_abs1_abs_tr ds_abs1 lbl ds_abs1''') /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ds_abs1_tr ds_abs1 tau ds_abs1'') /\
-(ds_abs1' <> ds_abs1'') /\ (ds_abs1.state = abs1_rx_next) /\
-(ds_abs1_tr ds_abs1' tau ds_abs1''') /\ (ds_abs1_tr ds_abs1'' tau ds_abs1''') /\ (ds_abs1_abs_tr ds_abs1''' lbl ds_abs1'''')  ==>
-ds_abs1_abs_tr ds_abs1 lbl ds_abs1'''') /\
-(!(ds_abs1:ds_abs1_state). (ds_abs1_tr ds_abs1 lbl ds_abs1') /\ (lbl <> tau) ==>
-ds_abs1_abs_tr ds_abs1 lbl ds_abs1')`
- *)
+(* ds_abs1_tau_linked_only: ds_abs1_state -> ds_abs1_state -> bool *)
+val ds_abs1_tau_linked_only_def = Define `
+ds_abs1_tau_linked_only (ds_abs1:ds_abs1_state) (ds_abs1':ds_abs1_state) =
+((ds_abs1_tau_only_1_state ds_abs1) /\ (ds_abs1_tr ds_abs1 tau ds_abs1'))`
 
 val _ = export_theory();

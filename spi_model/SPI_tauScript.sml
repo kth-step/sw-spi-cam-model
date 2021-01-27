@@ -43,7 +43,7 @@ val tx_trans_data_op_def = Define `
 tx_trans_data_op (spi:spi_state) =
 spi with <| TX_SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-with <|EOT := 0w; TXS := 1w|>; (* cleat EOT bit, set TXS *)  
+with <| EOT := 0w; TXS := 1w|>; (* cleat EOT bit, set TXS *)  
 state := tx_trans_done |>`
 
 (* tx_trans_update_op: spi_state -> spi_state *)
@@ -51,7 +51,7 @@ val tx_trans_update_op_def = Define `
 tx_trans_update_op (spi:spi_state) =
 spi with <| TX_SHIFT_REG := w2w spi.regs.TX0;
 regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-with <|EOT := 0w; TXS := 1w|>;
+with <| EOT := 0w; TXS := 1w|>;
 state := tx_trans_done |>`
 
 (* internal operations for rx automaton *)
@@ -83,10 +83,10 @@ state := rx_data_ready |>`
 val xfer_channel_enabled_op_def = Define `
 xfer_channel_enabled_op (spi:spi_state) = 
 spi with <| regs := spi.regs with CH0STAT := spi.regs.CH0STAT
-with <|RXS := 0w; TXS := 1w |>;
+with <| RXS := 0w; TXS := 1w |>;
 state := xfer_ready_for_trans |>`
 
-(* Update theTX_SHIFT_REG after TX0 was written.
+(* Update the TX_SHIFT_REG after TX0 was written.
  * TX0 -> SPI TX_SHIFT_REG
  * xfer_trans_data_op : spi_state -> spi_state
  *)

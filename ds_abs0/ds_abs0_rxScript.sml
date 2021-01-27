@@ -43,14 +43,14 @@ else ds_abs0 with err := T`
 
 (* tau functions for rx automaton *)
 (* abs0_rx_update_op: ds_abs0_state -> ds_abs0_state *)
-val abs0_rx_update_op_def = Define `
-abs0_rx_update_op (ds_abs0:ds_abs0_state) =
+val abs0_rx_update_tau_op_def = Define `
+abs0_rx_update_tau_op (ds_abs0:ds_abs0_state) =
 ds_abs0 with
 state := if ds_abs0.ds_abs0_rx.rx_left_length > 0 then abs0_rx_reading else abs0_ready`
 
 (* abs0_rx_reading_op: ds_abs0_state -> ds_abs0_state *)
-val abs0_rx_reading_op_def = Define `
-abs0_rx_reading_op (ds_abs0:ds_abs0_state) =
+val abs0_rx_reading_tau_op_def = Define `
+abs0_rx_reading_tau_op (ds_abs0:ds_abs0_state) =
 ds_abs0 with 
 <| state := abs0_rx_idle;
 ds_abs0_rx := ds_abs0.ds_abs0_rx with
@@ -58,8 +58,8 @@ ds_abs0_rx := ds_abs0.ds_abs0_rx with
    rx_left_length := ds_abs0.ds_abs0_rx.rx_left_length - 1 |> |>`
 
 (* abs0_rx_next_op: ds_abs0_state -> ds_abs0_state *)
-val abs0_rx_next_op_def = Define `
-abs0_rx_next_op (ds_abs0:ds_abs0_state) =
+val abs0_rx_next_tau_op_def = Define `
+abs0_rx_next_tau_op (ds_abs0:ds_abs0_state) =
 ds_abs0 with 
 <| state := abs0_rx_update;
 ds_abs0_rx := ds_abs0.ds_abs0_rx with

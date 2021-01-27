@@ -19,9 +19,9 @@ case ds_abs0.state of
   | abs0_ready => ds_abs0 with err := T
   | abs0_tx => ds_abs0 with err := T
   | abs0_rx_idle => ds_abs0 with err := T
-  | abs0_rx_update => abs0_rx_update_op ds_abs0
-  | abs0_rx_reading => abs0_rx_reading_op ds_abs0
-  | abs0_rx_next => abs0_rx_next_op ds_abs0
+  | abs0_rx_update => abs0_rx_update_tau_op ds_abs0
+  | abs0_rx_reading => abs0_rx_reading_tau_op ds_abs0
+  | abs0_rx_next => abs0_rx_next_tau_op ds_abs0
   | abs0_xfer_idle => ds_abs0 with err := T
   | abs0_xfer_done => abs0_xfer_tau_op ds_abs0`
 

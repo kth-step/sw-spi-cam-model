@@ -13,7 +13,8 @@ val abs_rel_holds_abs1_tau_spi_tx = store_thm("abs_rel_holds_abs1_tau_spi_tx",
 rw [SPI_ABS1_TX_ENABLE_def, spi_abs1_tx_operations_def, spi_abs1_tx_idle_op_def, 
 spi_abs1_tx_data_1_op_def, spi_abs1_tx_data_2_op_def, spi_abs1_tx_update_op_def,
 spi_abs1_tx_last_update_op_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def]);
+fs [abs_rel_def, IS_ABS_STATE_REL_def] >>
+METIS_TAC []);
 
 (* abs_rel holds for abs1 rx automaton tau_spi transitions *)
 val abs_rel_holds_abs1_tau_spi_rx = store_thm("abs_rel_holds_abs1_tau_spi_rx",
@@ -32,7 +33,6 @@ val abs_rel_holds_abs1_tau_spi_xfer = store_thm("abs_rel_holds_abs1_tau_spi_xfer
 rw [SPI_ABS1_XFER_ENABLE_def, spi_abs1_xfer_operations_def, spi_abs1_xfer_idle_op_def,
 spi_abs1_xfer_data_op_def, spi_abs1_xfer_update_op_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]);
-
 
 (* abs_rel holds when ds_abs1 peforms tau_spi *)
 val abs_rel_holds_abs1_tau_spi = store_thm("abs_rel_holds_abs1_tau_spi",

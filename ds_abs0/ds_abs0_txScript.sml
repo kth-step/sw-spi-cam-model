@@ -15,7 +15,7 @@ state := abs0_tx |>`
 val abs0_tx_op_def = Define `
 abs0_tx_op (ds_abs0:ds_abs0_state) =
 (ds_abs0 with <|
-state := if ds_abs0.ds_abs0_tx.tx_cur_length < ((LENGTH ds_abs0.ds_abs0_tx.tx_data_buffer) - 1) then abs0_ready else abs0_tx;
+state := if ds_abs0.ds_abs0_tx.tx_cur_length < ((LENGTH ds_abs0.ds_abs0_tx.tx_data_buffer) - 1) then abs0_tx else abs0_ready;
 ds_abs0_tx := ds_abs0.ds_abs0_tx with tx_cur_length := ds_abs0.ds_abs0_tx.tx_cur_length + 1 |>,
 SOME (EL (ds_abs0.ds_abs0_tx.tx_cur_length) (ds_abs0.ds_abs0_tx.tx_data_buffer)))`
 

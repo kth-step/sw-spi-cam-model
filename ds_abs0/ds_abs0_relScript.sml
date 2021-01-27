@@ -20,7 +20,7 @@ ds_abs0_tr ds_abs0 (call_xfer buffer) (call_xfer_ds_abs0 ds_abs0 buffer)) /\
 ds_abs0_tr ds_abs0 (TX (abs0_tx_op_value ds_abs0)) (abs0_tx_op_state ds_abs0)) /\
 (!(ds_abs0:ds_abs0_state). (ABS0_RX_LBL_ENABLE ds_abs0) /\ (data <> NONE) ==>
 ds_abs0_tr ds_abs0 (RX data) (abs0_rx_op ds_abs0 data)) /\
-(!(ds_abs0:ds_abs0_state). (ds_abs0.state = abs0_idle) /\ (dataIN <> NONE) ==>
+(!(ds_abs0:ds_abs0_state). (ds_abs0.state = abs0_xfer_idle) /\ (dataIN <> NONE) ==>
 ds_abs0_tr ds_abs0 (XFER dataIN (abs0_xfer_op_value ds_abs0 dataIN))
 (abs0_xfer_op_state ds_abs0 dataIN)) /\
 (* tau transitions *)
