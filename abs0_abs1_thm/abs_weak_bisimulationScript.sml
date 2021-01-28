@@ -39,8 +39,7 @@ val abs0_weak_simulation = store_thm("abs0_weak_simulation",
 rw [ds_abs0_tr_cases] >> 
 rw [abs0_abs_rel_call_init, abs0_abs_rel_call_tx, abs0_abs_rel_call_rx,
 abs0_abs_rel_call_xfer, abs_rel_holds_abs_tau, abs_rel_holds_abs0_TX_lbl, 
-abs_rel_holds_abs0_RX_lbl, abs_rel_holds_abs0_XFER_lbl]
-(* TO PROVE: TX labels *));
+abs_rel_holds_abs0_RX_lbl, abs_rel_holds_abs0_XFER_lbl]);
 
 val abs1_weak_simulation = store_thm("abs1_weak_simulation",
 ``!ds_abs0 ds_abs1 lbl ds_abs1'.
