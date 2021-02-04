@@ -8,7 +8,7 @@ val _ = new_theory "abs_weak_bisimulation";
 
 (*
 val f_def = Define `
-f a = (T \/ (f a))`
+f a = (T /\ (?b.f b))`
 *)
 
 (* a state can be reached after n tau steps 
@@ -31,7 +31,7 @@ weak_bisim (r:'a -> 'b -> bool) (tr1:'a -> global_lbl_type -> 'a -> bool) (tr2:'
 (!lbl s2'. tr2 s2 lbl s2' ==> ?s1'. weak_tr tr1 s1 lbl s1' /\ r s1' s2'))`
 *)
 
-val abs0_weak_simulation = store_thm("abs0_weak_simulation",
+val abs0_abs1_weak_simulation = store_thm("abs0_abs1_weak_simulation",
 ``!ds_abs0 ds_abs1 lbl ds_abs0'.
 (abs_rel ds_abs0 ds_abs1) /\ (ds_abs0_tr ds_abs0 lbl ds_abs0') ==>
 (?ds_abs1'.(ds_abs1_tr ds_abs1 lbl ds_abs1') /\ (abs_rel ds_abs0' ds_abs1')) \/
@@ -41,7 +41,7 @@ rw [abs0_abs_rel_call_init, abs0_abs_rel_call_tx, abs0_abs_rel_call_rx,
 abs0_abs_rel_call_xfer, abs_rel_holds_abs_tau, abs_rel_holds_abs0_TX_lbl, 
 abs_rel_holds_abs0_RX_lbl, abs_rel_holds_abs0_XFER_lbl]);
 
-val abs1_weak_simulation = store_thm("abs1_weak_simulation",
+val abs1_abs0_weak_simulation = store_thm("abs1_abs0_weak_simulation",
 ``!ds_abs0 ds_abs1 lbl ds_abs1'.
 (abs_rel ds_abs0 ds_abs1) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
 (lbl = tau ==> 
@@ -56,9 +56,9 @@ abs_rel_holds_abs1_TX_lbl, abs_rel_holds_abs1_RX_lbl, abs_rel_holds_abs1_XFER_lb
 METIS_TAC [abs_rel_holds_abs1_tau_spi, abs_rel_holds_abs1_tau_dr, 
 abs_rel_holds_abs1_tau_comb]);
 
-val weak_bisim_abs0_abs1 = store_thm("weak_bisim_abs0_abs1",
+val weak_bisimulation_abs0_abs1 = store_thm("weak_bisimulation_abs0_abs1",
 ``weak_bisim abs_rel ds_abs0_tr ds_abs1_tr``,
 rw [weak_bisim_def, weak_tr_def] >>
-METIS_TAC [abs0_weak_simulation, abs1_weak_simulation]);
+METIS_TAC [abs0_abs1_weak_simulation, abs1_abs0_weak_simulation]);
 
 val _ = export_theory();

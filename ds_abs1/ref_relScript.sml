@@ -114,9 +114,9 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((dr.state = dr_xfer_issue_disable /\ spi.state = xfer_ready_for_trans) \/
 (dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled))))`
 
-(* ref_rel: ds_abs1_state -> driver_state -> spi_state -> bool *)
+(* ref_rel: ds_abs1_state -> driver_state * spi_state -> bool *)
 val ref_rel_def = Define `
-ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
+ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state, spi:spi_state) =
 ((* err flag *)
 (ds_abs1.err = (dr.dr_err \/ spi.err)) /\
 (* states of the abstract and concrete models are related *)
@@ -145,11 +145,14 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (dr.state = dr_init_check_rep ==> dr.dr_last_read_ad = SOME SPI0_SYSSTATUS) /\
 (dr.state = dr_tx_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
 (dr.state = dr_tx_check_eot ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
-(dr.state = dr_rx_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
-(dr.state = dr_rx_fetch_data ==> dr.dr_last_read_ad = SOME SPI0_RX0) /\
+(dr.state = dr_rx_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
+?v. dr.dr_last_read_v = SOME v) /\
+(dr.state = dr_rx_fetch_data ==> dr.dr_last_read_ad = SOME SPI0_RX0 /\ 
+?v. dr.dr_last_read_v = SOME v) /\
 (dr.state = dr_xfer_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
 (dr.state = dr_xfer_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
-(dr.state = dr_xfer_fetch_dataI ==> dr.dr_last_read_ad = SOME SPI0_RX0) /\
+(dr.state = dr_xfer_fetch_dataI ==> dr.dr_last_read_ad = SOME SPI0_RX0 /\ 
+?v. dr.dr_last_read_v = SOME v) /\
 (* for init automaton *)
 (spi.state = init_reset /\ dr.state = dr_init_check_rep ==>
 (0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\

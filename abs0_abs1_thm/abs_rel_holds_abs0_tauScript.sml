@@ -5,14 +5,6 @@ open ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_a
 
 val _ = new_theory "abs_rel_holds_abs0_tau";
 
-(* a lemma for n_tau_tr *)
-val n_tau_tr_SUC = store_thm("n_tau_tr_SUC",
-``!tr s s' n lbl. (n > 0) ==> 
-n_tau_tr n tr s lbl s' = n_tau_tr (SUC (n - 1)) tr s lbl s'``, 
-rw [] >>
-`n = SUC (n - 1)` by  fs[] >>
-METIS_TAC[]);
-
 (* abs_rel holds when ds_abs0.state = abs0_rx_update *)
 val abs_rel_holds_tau_abs0_rx_update = store_thm("abs_rel_holds_tau_abs0_rx_update",
 ``!(ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state).

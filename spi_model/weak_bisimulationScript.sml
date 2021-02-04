@@ -6,7 +6,15 @@ val _ = new_theory "weak_bisimulation";
 (* A state can be reached after n tau steps *)
 val n_tau_tr_def = Define `
 (n_tau_tr (0:num) (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = (tr s lbl s')) /\
-(n_tau_tr (n:num) (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = ?(s'':'a). (tr s tau s'') /\ (n_tau_tr (n-1) tr s'' lbl s'))`
+(n_tau_tr (n:num) (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = 
+?(s'':'a). (tr s tau s'') /\ (n_tau_tr (n-1) tr s'' lbl s'))`
+
+val n_tau_tr_SUC = store_thm("n_tau_tr_SUC",
+``!tr s s' n lbl. (n > 0) ==> 
+n_tau_tr n tr s lbl s' = n_tau_tr (SUC (n - 1)) tr s lbl s'``, 
+rw [] >>
+`n = SUC (n - 1)` by  fs[] >>
+METIS_TAC[]);
 
 (* define the weak transition relation *)
 val weak_tr_def = Define `
