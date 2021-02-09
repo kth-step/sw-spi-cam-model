@@ -40,8 +40,7 @@ METIS_TAC[ref_rel_def, ABS1_TX_LBL_ENABLE_def],
 FULL_SIMP_TAC std_ss [ABS1_TX_LBL_ENABLE_def] >>
 rw [abs1_tx_trans_done_op_state_def, abs1_tx_trans_done_op_def,
 tx_TX_op_state_def, tx_TX_op_def, tx_trans_done_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [],
+fs [ref_rel_def, IS_STATE_REL_def],
 (* output data equals when spi.state = tx_trans_next *)
 rw [tx_TX_op_value_def, tx_TX_op_def, tx_trans_next_op_def,
 abs1_tx_trans_done_op_value_def, abs1_tx_trans_done_op_def] >>
@@ -50,8 +49,7 @@ METIS_TAC[ref_rel_def, ABS1_TX_LBL_ENABLE_def],
 FULL_SIMP_TAC std_ss [ABS1_TX_LBL_ENABLE_def] >>
 rw [abs1_tx_trans_done_op_state_def, abs1_tx_trans_done_op_def,
 tx_TX_op_state_def, tx_TX_op_def, tx_trans_next_op_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]]);
 
 (* (dr',spi') exists for TX label *)
 val abs1_comb_hold_ref_rel_TX = store_thm("abs1_comb_hold_ref_rel_TX",

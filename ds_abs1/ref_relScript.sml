@@ -142,15 +142,20 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state, spi:spi_state) =
 (spi.state = xfer_trans_data ==>
 (w2w spi.regs.TX0 = EL (dr.dr_xfer.xfer_cur_length - 1) dr.dr_xfer.xfer_dataOUT_buf)) /\
 (* rules for simulation proof, dr tau part *)
-(dr.state = dr_init_check_rep ==> dr.dr_last_read_ad = SOME SPI0_SYSSTATUS) /\
-(dr.state = dr_tx_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
-(dr.state = dr_tx_check_eot ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_init_check_rep ==> dr.dr_last_read_ad = SOME SPI0_SYSSTATUS /\
+?v. dr.dr_last_read_v = SOME v) /\
+(dr.state = dr_tx_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
+?v. dr.dr_last_read_v = SOME v) /\
+(dr.state = dr_tx_check_eot ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
+?v. dr.dr_last_read_v = SOME v) /\
 (dr.state = dr_rx_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
 ?v. dr.dr_last_read_v = SOME v) /\
 (dr.state = dr_rx_fetch_data ==> dr.dr_last_read_ad = SOME SPI0_RX0 /\ 
 ?v. dr.dr_last_read_v = SOME v) /\
-(dr.state = dr_xfer_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
-(dr.state = dr_xfer_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT) /\
+(dr.state = dr_xfer_check_txs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
+?v. dr.dr_last_read_v = SOME v) /\
+(dr.state = dr_xfer_check_rxs ==> dr.dr_last_read_ad = SOME SPI0_CH0STAT /\
+?v. dr.dr_last_read_v = SOME v) /\
 (dr.state = dr_xfer_fetch_dataI ==> dr.dr_last_read_ad = SOME SPI0_RX0 /\ 
 ?v. dr.dr_last_read_v = SOME v) /\
 (* for init automaton *)
@@ -180,7 +185,7 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state, spi:spi_state) =
 (spi.state = tx_trans_update /\ dr.state = dr_tx_check_eot ==>
 (1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\
 (spi.state = tx_channel_enabled ==> spi.regs.CH0STAT.TXS = 0w) /\
-(spi.state = tx_ready_for_trans ==> spi.regs.CH0STAT.TXS = 1w) /\
+(spi.state = tx_ready_for_trans ==> spi.regs.CH0STAT.TXS = 1w /\ spi.regs.CH0STAT.EOT = 1w) /\
 (spi.state = tx_trans_data ==> spi.regs.CH0STAT.TXS = 0w) /\
 (spi.state = tx_trans_done ==> spi.regs.CH0STAT.TXS = 1w /\ spi.regs.CH0STAT.EOT = 0w) /\
 (spi.state = tx_trans_next ==> spi.regs.CH0STAT.TXS = 0w /\ spi.regs.CH0STAT.EOT = 0w) /\

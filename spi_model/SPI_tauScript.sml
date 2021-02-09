@@ -32,7 +32,7 @@ state := init_setregs (* enter the next init state, set up SPI registers *) |>`
 val tx_channel_enabled_op_def = Define `
 tx_channel_enabled_op (spi:spi_state) =
 spi with <|regs := spi.regs with CH0STAT := spi.regs.CH0STAT 
-with TXS := 1w;
+with <| EOT := 1w; TXS := 1w |>;
 state := tx_ready_for_trans |>`
 
 (* SPI controller's operation after TX0 register was set. 

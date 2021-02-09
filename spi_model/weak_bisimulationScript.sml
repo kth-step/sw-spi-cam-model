@@ -30,4 +30,5 @@ weak_bisim (r:'a -> 'b -> bool) (tr1:'a -> global_lbl_type -> 'a -> bool) (tr2:'
 (!lbl s1'. tr1 s1 lbl s1' ==> ?s2'. weak_tr tr2 s2 lbl s2' /\ r s1' s2') /\
 (!lbl s2'. tr2 s2 lbl s2' ==> ?s1'. weak_tr tr1 s1 lbl s1' /\ r s1' s2'))`
 
+
 val _ = export_theory();
