@@ -162,11 +162,25 @@ ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state, spi:spi_state) =
 (spi.state = init_reset /\ dr.state = dr_init_check_rep ==>
 (0 >< 0) (THE dr.dr_last_read_v) = 0w:word1) /\
 (spi.state = init_reset ==> spi.regs.SYSSTATUS = 0w) /\
+(spi.state = init_setregs ==> spi.regs.SYSSTATUS = 1w) /\
+((dr.state = dr_init_read_req /\ spi.state = init_reset) \/
+(dr.state = dr_init_check_rep /\ spi.state = init_reset) \/
+(dr.state = dr_init_read_req /\ spi.state = init_setregs) \/
+(dr.state = dr_init_check_rep /\ spi.state = init_setregs) ==>
+~ dr.dr_init.issue_wr_sysconfig /\ ~ dr.dr_init.issue_wr_modulctrl /\
+~ dr.dr_init.issue_wr_ch0conf_wl /\ ~ dr.dr_init.issue_wr_ch0conf_mode /\
+~ dr.dr_init.issue_wr_ch0conf_speed /\ ~ spi.init.sysconfig_mode_done /\ 
+~ spi.init.modulctrl_bus_done /\ ~ spi.init.ch0conf_wordlen_done /\ 
+~ spi.init.ch0conf_mode_done /\ ~ spi.init.ch0conf_speed_done) /\
 (dr.dr_init.issue_wr_sysconfig = spi.init.sysconfig_mode_done) /\
 (dr.dr_init.issue_wr_modulctrl = spi.init.modulctrl_bus_done) /\
 (dr.dr_init.issue_wr_ch0conf_wl = spi.init.ch0conf_wordlen_done) /\
 (dr.dr_init.issue_wr_ch0conf_mode = spi.init.ch0conf_mode_done) /\
 (dr.dr_init.issue_wr_ch0conf_speed = spi.init.ch0conf_speed_done) /\
+(~ dr.dr_init.issue_wr_sysconfig ==> ~ dr.dr_init.issue_wr_modulctrl) /\
+(~ dr.dr_init.issue_wr_modulctrl ==> ~ dr.dr_init.issue_wr_ch0conf_wl) /\
+(~ dr.dr_init.issue_wr_ch0conf_wl ==> ~ dr.dr_init.issue_wr_ch0conf_mode) /\
+(~ dr.dr_init.issue_wr_ch0conf_mode ==> ~ dr.dr_init.issue_wr_ch0conf_speed) /\
 (* for tx automaton *)
 (spi.state = tx_channel_enabled /\ dr.state = dr_tx_check_txs ==>
 (1 >< 1) (THE dr.dr_last_read_v) = 0w:word1) /\

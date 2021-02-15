@@ -30,8 +30,7 @@ rw [] >>
 Cases_on `spi.state` >>
 rw [] >>
 rw [write_SYSCONFIG_comb_def, write_SOFTRESET_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]]);
 
 
 (* relation holds for ds_abs1 or ds_abs1' when driver state is dr_init_setting *)
@@ -45,8 +44,7 @@ val ref_rel_hold_dr_init_setting_WR = store_thm("ref_rel_hold_dr_init_setting_WR
 rw [spi_tr_cases] >>
 rw [dr_write_state_def, dr_write_address_def, dr_write_value_def,dr_write_def] >|
 [ (* update SYSCONFIG *)
-rw [dr_write_sysconfig_def, write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def,
-SPI0_START_def, SPI0_END_def] >|
+rw [dr_write_sysconfig_def, write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def,SPI0_START_def, SPI0_END_def] >|
 [DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
 FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>

@@ -16,12 +16,10 @@ val ref_rel_hold_dr_init_read_req = store_thm("ref_rel_hold_dr_init_read_req",
 ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
 rw [spi_tr_cases, dr_read_def, dr_read_sysstatus_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
-rw [read_SPI_regs_def] >|
-[FULL_SIMP_TAC (std_ss++WORD_ss++PRED_SET_ss) 
-[SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def],
-FULL_SIMP_TAC (std_ss++WORD_ss) [SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def],
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_SYSSTATUS_def] >>
+Cases_on `spi.state` >>
+rw []);
 
 (* relation holds when driver state is dr_tx_read_txs *)
 val ref_rel_hold_dr_tx_read_txs = store_thm("ref_rel_hold_dr_tx_read_txs",

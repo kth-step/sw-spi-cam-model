@@ -20,7 +20,8 @@ rw [] >>
 Cases_on `spi.state` >>
 rw [] >>
 FULL_SIMP_TAC (std_ss++WORD_ss) [],
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >>
 rw []]);
 
 (* driver tau transition to check TXS Bit for tx automaton *)
