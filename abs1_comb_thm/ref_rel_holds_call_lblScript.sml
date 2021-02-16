@@ -13,8 +13,8 @@ val dr_init_pre_imply_abs1_init_pre = store_thm("dr_init_pre_imply_abs1_init_pre
 (ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_init_pre) ==>
 ds_abs1.state = abs1_init_pre``,
 rw [] >>
-`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC[ref_rel_def] >>
-FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
+fs [IS_STATE_REL_def] >>
 Cases_on `spi.state` >>
 rw [] >>
 `(dr.state <> dr_init_idle) /\
@@ -59,8 +59,8 @@ val dr_ready_imply_abs1_ready = store_thm("dr_ready_imply_abs1_ready",
 (ref_rel ds_abs1 (dr,spi)) /\ (dr.state = dr_ready) ==>
 ds_abs1.state = abs1_ready``,
 rw [] >>
-`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC[ref_rel_def] >>
-FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
+fs [IS_STATE_REL_def] >>
 Cases_on `spi.state` >>
 rw [] >>
 `(dr.state <> dr_init_pre) /\
@@ -110,15 +110,13 @@ METIS_TAC [dr_init_pre_imply_abs1_init_pre],
 (* ref_rel ds_abs1' dr' spi*)
 `ds_abs1.state = abs1_init_pre` by METIS_TAC [dr_init_pre_imply_abs1_init_pre] >>
 rw [call_init_ds_abs1_def, call_init_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [],
+fs [ref_rel_def, IS_STATE_REL_def],
 (* abs1_ready *)
 METIS_TAC [dr_ready_imply_abs1_ready],
 (* ref_rel when abs1_init_done *)
 `ds_abs1.state = abs1_ready` by METIS_TAC [dr_ready_imply_abs1_ready] >>
 rw [call_init_ds_abs1_def, call_init_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]]);
 
 (* (dr',spi') exists for call_init label *)
 val abs1_comb_hold_ref_rel_call_init = store_thm("abs1_comb_hold_ref_rel_call_init",
@@ -147,8 +145,7 @@ METIS_TAC [dr_ready_imply_abs1_ready],
 (* check the ref_rel *)
 `ds_abs1.state = abs1_ready` by METIS_TAC [dr_ready_imply_abs1_ready] >>
 rw [call_tx_ds_abs1_def, call_tx_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]]);
 
 (* (dr',spi') exists for call_tx label *)
 val abs1_comb_hold_ref_rel_call_tx = store_thm("abs1_comb_hold_ref_rel_call_tx",
@@ -173,8 +170,7 @@ METIS_TAC [dr_ready_imply_abs1_ready],
 (* check the ref_rel *)
 `ds_abs1.state = abs1_ready` by METIS_TAC[dr_ready_imply_abs1_ready] >>
 rw [call_rx_ds_abs1_def, call_rx_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]]);
 
 (* bisimulation: (ds',spi') exists for call_rx label *)
 val abs1_comb_hold_ref_rel_call_rx = store_thm("abs1_comb_hold_ref_rel_call_rx",
@@ -194,14 +190,13 @@ val comb_abs1_hold_ref_rel_call_xfer = store_thm("comb_abs1_hold_ref_rel_call_xf
 (ref_rel ds_abs1 (dr, spi)) /\ (driver_tr dr (call_xfer buffer) dr') ==>
 ?ds_abs1'. (ds_abs1_tr ds_abs1 (call_xfer buffer) ds_abs1') /\ 
 (ref_rel ds_abs1' (dr', spi))``,
-rw [driver_tr_cases, ds_abs1_tr_cases] >|
-[(* check the state *)
-METIS_TAC [dr_ready_imply_abs1_ready],
+rw [driver_tr_cases, ds_abs1_tr_cases] >-
+((* check the state *)
+METIS_TAC [dr_ready_imply_abs1_ready]) >>
 (* check the ref_rel *)
 `ds_abs1.state = abs1_ready` by METIS_TAC [dr_ready_imply_abs1_ready] >>
 rw [call_xfer_ds_abs1_def, call_xfer_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+fs [ref_rel_def, IS_STATE_REL_def]);
 
 (* bisimulation: (dr',spi') exists for call_xfer label *)
 val abs1_comb_hold_ref_rel_call_xfer = store_thm("abs1_comb_hold_ref_rel_call_xfer",

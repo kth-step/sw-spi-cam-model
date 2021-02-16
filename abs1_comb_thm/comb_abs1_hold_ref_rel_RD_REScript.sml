@@ -31,10 +31,9 @@ rw [spi_tr_cases, dr_read_def, dr_read_ch0stat_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
-SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_CH0STAT_def, build_CH0STAT_def] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
+SPI0_CH0CONF_def, build_CH0STAT_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* relation holds when driver state is dr_tx_read_eot *)
 val ref_rel_hold_dr_tx_read_eot = store_thm("ref_rel_hold_dr_tx_read_eot",
@@ -46,10 +45,9 @@ rw [spi_tr_cases, dr_read_def, dr_read_ch0stat_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
-SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_CH0STAT_def, build_CH0STAT_def] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
+SPI0_CH0CONF_def, build_CH0STAT_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* relation holds when driver state is dr_rx_read_rxs *)
 val ref_rel_hold_dr_rx_read_rxs = store_thm("ref_rel_hold_dr_rx_read_rxs",
@@ -61,10 +59,9 @@ rw [spi_tr_cases, dr_read_def, dr_read_ch0stat_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
-SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_CH0STAT_def, build_CH0STAT_def] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
+SPI0_CH0CONF_def, build_CH0STAT_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* lemma: if dr.state = dr_rx_read_rx0 then ds_abs1.state = abs1_rx_read
    according to ref_rel *)
@@ -74,8 +71,8 @@ store_thm("dr_rx_read_rx0_imply_abs1_rx_ready",
 (ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_rx_read_rx0) ==>
 ds_abs1.state = abs1_rx_read``,
 rw [] >>
-`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
-FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
+fs [IS_STATE_REL_def] >>
 Cases_on `spi.state` >>
 rw [] >>
 `(dr.state <> dr_init_pre) /\
@@ -130,13 +127,10 @@ rw [COMB_ABS1_RX_ENABLE_def, read_SPI_regs_def, SPI0_RX0_def, SPI0_PA_RANGE_def,
 SPI0_START_def, SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, 
 SPI0_MODULCTRL_def, SPI0_CH0CONF_def, SPI0_CH0STAT_def, SPI0_CH0CTRL_def,
 SPI0_TX0_def, SPI0_RX0_def, comb_abs1_rx_operations_def, 
-comb_abs1_rx_read_op_def, read_RX0_def] >|
-[FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_RX0_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [],
-FULL_SIMP_TAC std_ss [ref_rel_def, CHECK_RXS_BIT_def]]);
+comb_abs1_rx_read_op_def, read_RX0_def] >-
+(fs [ref_rel_def, IS_STATE_REL_def, SPI0_RX0_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []) >>
+fs [ref_rel_def, CHECK_RXS_BIT_def]);
 
 (* relation holds when driver state is dr_xfer_read_txs *)
 val ref_rel_hold_dr_xfer_read_txs = store_thm("ref_rel_hold_dr_xfer_read_txs",
@@ -148,10 +142,9 @@ rw [spi_tr_cases, dr_read_def, dr_read_ch0stat_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
-SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_CH0STAT_def, build_CH0STAT_def] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
+SPI0_CH0CONF_def, build_CH0STAT_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* relation holds when driver state is dr_xfer_read_rxs *)
 val ref_rel_hold_dr_xfer_read_rxs = store_thm("ref_rel_hold_dr_xfer_read_rxs",
@@ -163,10 +156,9 @@ rw [spi_tr_cases, dr_read_def, dr_read_ch0stat_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
-SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_CH0STAT_def, build_CH0STAT_def] >> 
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [] >>
+SPI0_CH0CONF_def, build_CH0STAT_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [] >>
 EVAL_TAC);
 
 (* lemma: if dr.state = dr_xfer_read_rx0, then ds_abs1.state = abs1_xfer_ready 
@@ -177,8 +169,8 @@ store_thm("dr_xfer_read_rx0_imply_abs1_xfer_ready",
 (ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_xfer_read_rx0) ==>
 ds_abs1.state = abs1_xfer_ready``,
 rw [] >>
-`IS_STATE_REL ds_abs1 dr spi` by METIS_TAC [ref_rel_def] >>
-FULL_SIMP_TAC std_ss [IS_STATE_REL_def] >>
+`IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
+fs [IS_STATE_REL_def] >>
 Cases_on `spi.state` >>
 rw [] >>
 `(dr.state <> dr_init_pre) /\
@@ -233,13 +225,10 @@ rw [COMB_ABS1_XFER_ENABLE_def, read_SPI_regs_def, SPI0_RX0_def, SPI0_PA_RANGE_de
 SPI0_START_def, SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, 
 SPI0_MODULCTRL_def, SPI0_CH0CONF_def, SPI0_CH0STAT_def, SPI0_CH0CTRL_def,
 SPI0_TX0_def, SPI0_RX0_def, comb_abs1_xfer_operations_def, 
-comb_abs1_xfer_ready_op_def, read_RX0_def] >|
-[FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw [SPI0_RX0_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-FULL_SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [],
-FULL_SIMP_TAC std_ss [ref_rel_def, CHECK_RXS_BIT_def]]);
+comb_abs1_xfer_ready_op_def, read_RX0_def] >-
+(fs [ref_rel_def, IS_STATE_REL_def, SPI0_RX0_def] >>
+SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []) >>
+fs [ref_rel_def, CHECK_RXS_BIT_def]);
 
 (* simulation: ref_rel holds for ds_abs1 or ds_abs1' when driver and controller perform READ and RETURN operations *)
 val comb_abs1_hold_ref_rel_RD_RE = store_thm("comb_abs1_hold_ref_rel_RD_RE",

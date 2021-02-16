@@ -38,10 +38,10 @@ val SPI0_CH0STAT_def = Define `SPI0_CH0STAT = 0x48030130w:word32`
 (* SPI0_CH0CTRL: channel 0 control register *)
 val SPI0_CH0CTRL_def = Define `SPI0_CH0CTRL = 0x48030134w:word32`
 
-(* SPI0_TX0: channel 0 FIFO transmit buffer register *)
+(* SPI0_TX0: channel 0 transmit buffer register *)
 val SPI0_TX0_def = Define `SPI0_TX0 = 0x48030138w:word32`
 
-(* SPI0_RX0: channel 0 FIFO receive buffer register *)
+(* SPI0_RX0: channel 0 receive buffer register *)
 val SPI0_RX0_def = Define `SPI0_RX0 = 0x4803013Cw:word32`
 
 val _ = export_theory();

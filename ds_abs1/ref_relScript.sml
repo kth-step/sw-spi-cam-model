@@ -1,9 +1,6 @@
 open HolKernel bossLib boolLib Parse;
 open wordsTheory listTheory;
-open SPI_stateTheory;
-open driver_stateTheory;
-open ds_abs1_stateTheory;
-open board_memTheory;
+open SPI_stateTheory driver_stateTheory ds_abs1_stateTheory board_memTheory;
 
 val _ = new_theory "ref_rel";
 

@@ -1,6 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open listTheory;
-open ds_abs0_stateTheory;
+open listTheory ds_abs0_stateTheory;
 
 val _ = new_theory "ds_abs0_rx";
 

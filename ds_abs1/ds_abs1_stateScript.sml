@@ -2,7 +2,7 @@ open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory;
 open SPI_stateTheory driver_stateTheory;
 
-(* ds_abs1: SPI driver and controller combined abstract model states.
+(* ds_abs1: SPI driver and controller combined abstract model state.
  * This abstract model removes the interactions of the driver and spi controller, 
  * including Write/Update, Read/Return, and some spi and driver tau transitions.
  *)

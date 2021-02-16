@@ -1,6 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open listTheory;
-open ds_abs0_stateTheory;
+open listTheory ds_abs0_stateTheory;
 
 val _ = new_theory "ds_abs0_xfer";
 
@@ -8,9 +7,7 @@ val _ = new_theory "ds_abs0_xfer";
 val call_xfer_ds_abs0_def = Define `
 call_xfer_ds_abs0 (ds_abs0:ds_abs0_state) (buffer:word8 list) =
 ds_abs0 with <| ds_abs0_xfer := ds_abs0.ds_abs0_xfer with
-<| xfer_dataOUT_buffer := buffer;
-   xfer_dataIN_buffer := [];
-   xfer_cur_length := 0 |>;
+<|xfer_dataOUT_buffer := buffer; xfer_dataIN_buffer := []; xfer_cur_length := 0|>;
 state := abs0_xfer_idle |>`
 
 (* XFER label functions *)

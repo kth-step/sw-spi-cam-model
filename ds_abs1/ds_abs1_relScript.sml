@@ -1,6 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open SPI_stateTheory;
-open ds_abs1_stateTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
+open SPI_stateTheory ds_abs1_stateTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
 
 val _ = new_theory "ds_abs1_rel"
 
@@ -72,9 +71,10 @@ ds_abs1_tau_only_1_state (ds_abs1:ds_abs1_state) =
 (ds_abs1.state <> abs1_rx_next) /\
 (ds_abs1.state <> abs1_xfer_fetch_data))`
 
-(* ds_abs1_tau_linked_only: ds_abs1_state -> ds_abs1_state -> bool *)
+(* ds_abs1_tau_linked_only: ds_abs1_state -> ds_abs1_state -> bool 
 val ds_abs1_tau_linked_only_def = Define `
 ds_abs1_tau_linked_only (ds_abs1:ds_abs1_state) (ds_abs1':ds_abs1_state) =
-((ds_abs1_tau_only_1_state ds_abs1) /\ (ds_abs1_tr ds_abs1 tau ds_abs1'))`
+((ds_abs1_tau_only_1_state ds_abs1) /\ (ds_abs1_tr ds_abs1 tau ds_abs1'))` 
+ *)
 
 val _ = export_theory();

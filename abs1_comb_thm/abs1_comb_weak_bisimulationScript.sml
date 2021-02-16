@@ -82,10 +82,10 @@ METIS_TAC [abs1_comb_weak_simulation_tau, abs1_comb_weak_simulation_lbl_not_tau]
 val weak_bisimulation_abs1_comb = store_thm("weak_bisimulation_abs1_comb",
 ``weak_bisim ref_rel ds_abs1_tr local_tr``,
 rw [weak_bisim_def, weak_tr_def] >>
-Cases_on `s2` >|
-[METIS_TAC [abs1_comb_weak_simulation],
+Cases_on `s2` >-
+(METIS_TAC [abs1_comb_weak_simulation]) >>
 Cases_on `s2'` >>
-METIS_TAC [comb_abs1_weak_simulation]]);
+METIS_TAC [comb_abs1_weak_simulation]);
 
 
 val _ = export_theory();
