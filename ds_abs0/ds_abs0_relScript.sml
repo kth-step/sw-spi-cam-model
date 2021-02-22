@@ -26,4 +26,36 @@ ds_abs0_tr ds_abs0 (XFER dataIN (abs0_xfer_op_value ds_abs0 dataIN))
 (!(ds_abs0:ds_abs0_state). (ABS0_TAU_LBL_ENABLE ds_abs0) ==>
 ds_abs0_tr ds_abs0 tau (abs0_tau_op ds_abs0))`
 
+(* the global state transition relation for 2 ds_abs0 devices *)
+val (abs0_global_tr_rules, abs0_global_tr_ind, abs0_global_tr_cases) = Hol_reln `
+(!d0 d1 d0'. ds_abs0_tr d0 call_init d0' ==>
+abs0_global_tr (d0, d1) tau (d0', d1)) /\
+(!d0 d1 d1'. ds_abs0_tr d1 call_init d1' ==>
+abs0_global_tr (d0, d1) tau (d0, d1')) /\
+(!d0 d1 d0' buffer. ds_abs0_tr d0 (call_tx buffer) d0' ==>
+abs0_global_tr (d0, d1) tau (d0', d1)) /\
+(!d0 d1 d1' buffer. ds_abs0_tr d1 (call_tx buffer) d1' ==>
+abs0_global_tr (d0, d1) tau (d0, d1')) /\
+(!d0 d1 d0' l. ds_abs0_tr d0 (call_rx l) d0' ==>
+abs0_global_tr (d0, d1) tau (d0', d1)) /\
+(!d0 d1 d1' l. ds_abs0_tr d1 (call_rx l) d1' ==>
+abs0_global_tr (d0, d1) tau (d0, d1')) /\
+(!d0 d1 buffer0 d0'. 
+ds_abs0_tr d0 (call_xfer buffer0) d0' ==>
+abs0_global_tr (d0, d1) tau (d0', d1)) /\
+(!d0 d1 buffer1 d1'. 
+ds_abs0_tr d1 (call_xfer buffer1) d1' ==>
+abs0_global_tr (d0, d1) tau (d0, d1')) /\
+(!d0 d1 d0'. ds_abs0_tr d0 tau d0' ==>
+abs0_global_tr (d0, d1) tau (d0', d1)) /\
+(!d0 d1 d1'. ds_abs0_tr d1 tau d1' ==>
+abs0_global_tr (d0, d1) tau (d0, d1')) /\
+(!d0 d1 data d0' d1'. ds_abs0_tr d0 (TX data) d0' /\ ds_abs0_tr d1 (RX data) d1' ==>
+abs0_global_tr (d0, d1) tau (d0', d1')) /\
+(!d0 d1 data d0' d1'. ds_abs0_tr d0 (RX data) d0' /\ ds_abs0_tr d1 (TX data) d1' ==>
+abs0_global_tr (d0, d1) tau (d0', d1')) /\
+(!d0 d1 dataI dataO d0' d1'. 
+ds_abs0_tr d0 (XFER dataI dataO) d0' /\ ds_abs0_tr d1 (XFER dataO dataI) d1' ==>
+abs0_global_tr (d0, d1) tau (d0', d1'))`
+
 val _ = export_theory();

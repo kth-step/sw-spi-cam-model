@@ -69,45 +69,45 @@ spi_tr spi (XFER dataIN dataOUT) spi' ==> local_tr (dr, spi) (XFER dataIN dataOU
 val (global_tr_rules, global_tr_ind, global_tr_cases) = Hol_reln `
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) call_init (dr1', spi1') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2, spi2)) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) call_init (dr2', spi2') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1, spi1, dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) (call_tx buffer) (dr1', spi1') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2, spi2)) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) (call_tx buffer) (dr2', spi2') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1, spi1, dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) (call_rx length) (dr1', spi1') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2, spi2)) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) (call_rx length) (dr2', spi2') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1, spi1, dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) (call_xfer buffer) (dr1', spi1') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2, spi2)) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) (call_xfer buffer) (dr2', spi2') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1, spi1, dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) tau (dr1', spi1') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2, spi2)) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) tau (dr2', spi2') ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1, spi1, dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 (local_tr (dr1, spi1) (TX data) (dr1', spi1')) /\
 (local_tr (dr2, spi2) (RX data) (dr2', spi2')) ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 (local_tr (dr1, spi1) (RX data) (dr1', spi1')) /\
 (local_tr (dr2, spi2) (TX data) (dr2', spi2')) ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2', spi2')) /\
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 (local_tr (dr1, spi1) (XFER dataI dataO) (dr1', spi1')) /\
 (local_tr (dr2, spi2) (XFER dataO dataI) (dr2', spi2')) ==>
-global_tr (dr1, spi1, dr2, spi2) (dr1', spi1', dr2', spi2'))`
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2', spi2'))`
 
 val _ = export_theory();

@@ -6,31 +6,6 @@ open abs_rel_holds_abs1_tau_spiTheory abs_rel_holds_abs1_tau_drTheory abs_rel_ho
 
 val _ = new_theory "abs_weak_bisimulation";
 
-(*
-val f_def = Define `
-f a = (T /\ (?b.f b))`
-*)
-
-(* a state can be reached after n tau steps 
-val n_tau_tr_def = Define `
-(n_tau_tr (0:num) (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = (tr s lbl s')) /\
-(n_tau_tr (n:num) (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = ?(s'':'a). (tr s tau s'') /\ (n_tau_tr (n-1) tr s'' lbl s'))`
-
-(* define the weak transition relation *)
-val weak_tr_def = Define `
-weak_tr (tr:'a -> global_lbl_type -> 'a -> bool) (s:'a) (lbl:global_lbl_type) (s':'a) = 
-((tr s lbl s') \/
-(s = s' /\ lbl = tau) \/
-(?n. n_tau_tr n tr s lbl s'))`
-
-(* define the weak bisimulation realtion *)
-val weak_bisim_def = Define `
-weak_bisim (r:'a -> 'b -> bool) (tr1:'a -> global_lbl_type -> 'a -> bool) (tr2:'b -> global_lbl_type -> 'b -> bool) =
-(!s1 s2. r s1 s2 ==>
-(!lbl s1'. tr1 s1 lbl s1' ==> ?s2'. weak_tr tr2 s2 lbl s2' /\ r s1' s2') /\
-(!lbl s2'. tr2 s2 lbl s2' ==> ?s1'. weak_tr tr1 s1 lbl s1' /\ r s1' s2'))`
-*)
-
 val abs0_abs1_weak_simulation = store_thm("abs0_abs1_weak_simulation",
 ``!ds_abs0 ds_abs1 lbl ds_abs0'.
 (abs_rel ds_abs0 ds_abs1) /\ (ds_abs0_tr ds_abs0 lbl ds_abs0') ==>
