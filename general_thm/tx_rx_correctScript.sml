@@ -142,7 +142,7 @@ d0.state = abs0_tx /\ d0.ds_abs0_tx.tx_data_buffer = l1 ++ [a] /\
 d0.ds_abs0_tx.tx_cur_length = LENGTH l1 /\
 d1.state = abs0_rx_idle /\ d1.ds_abs0_rx.rx_left_length = n - LENGTH l1 /\
 d1.ds_abs0_rx.rx_data_buffer = l1 /\ n > LENGTH l1 /\ l1 <> [] ==>
-?n1 d0' d1'.
+?d0' d1'.
 n_tau_tr 2 abs0_global_tr (d0,d1) tau (d0',d1') /\
 d1'.ds_abs0_rx.rx_data_buffer = l1 ++ [a]``,
 REPEAT STRIP_TAC >>
@@ -190,5 +190,44 @@ d1 with <|state := abs0_rx_reading;
 ds_abs0_rx := d1.ds_abs0_rx with
 <|rx_data_buffer := []; rx_left_length := 1; temp_RSR := a|> |>)` >>
 rw [abs0_rx_reading_tau_op_def]);
+
+(* abs0 tx and rx modes are correct: if two devices apply tx and rx mode respectively, the data buffer can be transmitted from d0 to d1 *)
+val abs0_tx_rx_correct = store_thm ("abs0_tx_rx_correct",
+``!d0 d1 d0' d1' l n.
+d0.state = abs0_ready /\ d1.state = abs0_ready  ==> 
+ds_abs0_tr d0 (call_tx l) d0' /\ ds_abs0_tr d1 (call_rx n) d1' /\ l <> [] /\ n = LENGTH l ==>
+?n' d0'' d1''.
+n_tau_tr n' abs0_global_tr (d0', d1') tau (d0'', d1'') /\
+d1''.ds_abs0_rx.rx_data_buffer = l``,
+rw [] >> Cases_on `l` >> fs [] >>
+`t = [] \/ ?x l'. t = SNOC x l'` by rw [SNOC_CASES] >-
+(fs [] >> METIS_TAC [abs0_tx_rx_correct_single]) >>
+fs [SNOC_APPEND] >>
+`ds_abs0_tr d0 (call_tx (h::l'++[x])) d0'` by fs [] >>
+`h::l' ++ [x] <> []` by rw [] >>
+`SUC (LENGTH l' + 1) > 0` by rw [] >>
+`d0'.state = abs0_tx /\ d0'.ds_abs0_tx.tx_data_buffer = h::l'++[x] /\
+d0'.ds_abs0_tx.tx_cur_length = 0 /\
+d1'.state = abs0_rx_idle /\ 
+d1'.ds_abs0_rx.rx_left_length = SUC (LENGTH l' + 1) /\
+d1'.ds_abs0_rx.rx_data_buffer = []` by METIS_TAC [abs0_tx_rx_calls_correct] >>
+`SUC (LENGTH l' + 1) > LENGTH (h::l')` by rw [] >>
+`h::l' <> []` by rw [] >>
+`?n1 d0'' d1''.
+n_tau_tr n1 abs0_global_tr (d0',d1') tau (d0'',d1'') /\
+d0''.state = abs0_tx /\ d0''.ds_abs0_tx.tx_data_buffer = h::l'++[x] /\ 
+d0''.ds_abs0_tx.tx_cur_length = LENGTH (h::l') /\
+d1''.state = abs0_rx_idle /\ 
+d1''.ds_abs0_rx.rx_left_length = (SUC (LENGTH l' + 1)) - (LENGTH (h::l')) /\
+d1''.ds_abs0_rx.rx_data_buffer = h::l'` by METIS_TAC [abs0_tx_rx_data_left_last_one] >>
+`?d0''' d1'''.
+n_tau_tr 2 abs0_global_tr (d0'',d1'') tau (d0''',d1''') /\
+d1'''.ds_abs0_rx.rx_data_buffer = h::l' ++ [x]` by METIS_TAC [abs0_tx_rx_finish_last_one] >>
+Q.EXISTS_TAC `SUC (2 + n1)` >>
+Q.EXISTS_TAC `d0'''` >>
+Q.EXISTS_TAC `d1'''` >>
+fs [] >>
+`n1 + 2 = 2 + n1` by rw [] >>
+METIS_TAC [n_tau_tr_plus]);
 
 val _ = export_theory();

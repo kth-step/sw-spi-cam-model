@@ -111,7 +111,7 @@ xfer_RSR := x|> |>)` >>
  LENGTH l2 + 1 = SUC (LENGTH l2)` by rw [] >>
 rw []);
 
-(* abs0_xfer_correct theorem 2: abs0 can exchange data between devices with a loop *)
+(* abs0_xfer_correct theorem 2_1: abs0 can exchange data between devices with a loop *)
 val abs0_xfer_idle_exchange_data_correct = store_thm("abs0_xfer_idle_exchange_data_correct",
 ``!l1 l2 d0 d1 l1' l2'.
 d0.state = abs0_xfer_idle /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
@@ -159,7 +159,7 @@ Q.EXISTS_TAC `d0'''` >>
 Q.EXISTS_TAC `d1'''` >>
 METIS_TAC [n_tau_tr_plus]);
 
-(* theorem 2-1, for any initial xfer state, it can reach a state that 
+(* theorem 2_2, for any initial xfer state, it can reach a state that 
    only the last one byte is going to transmit *)
 val abs0_xfer_idle_last_one_correct = store_thm("abs0_xfer_idle_last_one_correct",
 ``!l1 l2 d0 d1 h h'.
@@ -246,51 +246,60 @@ ds_abs0_xfer := <|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [b];
 xfer_cur_length := 1; xfer_RSR := a|> |>)` >>
 rw []);
  
-
-(* After 4 steps, SPI device 0 and 1 exchanged one byte data a and b 
-val abs0_xfer_correct_single = store_thm("abs0_xfer_correct_single",
-``!d0 d1 a b.
-d0.state = abs0_ready /\ d1.state = abs0_ready  ==> 
-?d0' d1' d0'' d1'' d0''' d1''' d0'''' d1''''. 
-ds_abs0_tr d0 (call_xfer [a]) d0' /\ ds_abs0_tr d1 (call_xfer [b]) d1' /\
-abs0_global_tr (d0', d1') tau (d0'', d1'') /\ abs0_global_tr (d0'', d1'') tau (d0''', d1''') /\
-abs0_global_tr (d0''',d1''') tau (d0'''',d1'''') /\
-d0''''.ds_abs0_xfer.xfer_dataIN_buffer = [b] /\ d1''''.ds_abs0_xfer.xfer_dataIN_buffer = [a]``,
-rw [ds_abs0_tr_cases, call_xfer_ds_abs0_def, abs0_global_tr_cases, 
-abs0_xfer_op_state_def, abs0_xfer_op_value_def, abs0_xfer_op_def] >>
-Q.EXISTS_TAC `d0 with <|state := abs0_xfer_done; 
-ds_abs0_xfer :=
-<|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [a];
-xfer_cur_length := 1; xfer_RSR := b|> |>` >>
-Q.EXISTS_TAC `d1 with <|state := abs0_xfer_done;
-ds_abs0_xfer :=
-<|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [b];
-xfer_cur_length := 1; xfer_RSR := a|> |>` >>
-rw [abs0_tau_op_def, abs0_xfer_tau_op_def, ABS0_TAU_LBL_ENABLE_def] >>
-Q.EXISTS_TAC `d0 with <|state := abs0_xfer_done; 
-ds_abs0_xfer :=
-<|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [a];
-xfer_cur_length := 1; xfer_RSR := b|> |>` >>
-Q.EXISTS_TAC `d1 with <|state := abs0_ready; 
-ds_abs0_xfer :=
-<|xfer_dataIN_buffer := [a]; xfer_dataOUT_buffer := [b];
-xfer_cur_length := 1; xfer_RSR := a|> |>` >>
-rw [] >>
-Q.EXISTS_TAC `d0 with <|state := abs0_ready;
-ds_abs0_xfer := <|xfer_dataIN_buffer := [b]; xfer_dataOUT_buffer := [a];
-xfer_cur_length := 1; xfer_RSR := b|> |>` >>
-Q.EXISTS_TAC `d1 with <|state := abs0_ready; 
-ds_abs0_xfer :=
-<|xfer_dataIN_buffer := [a]; xfer_dataOUT_buffer := [b];
-xfer_cur_length := 1; xfer_RSR := a|> |>` >>
-rw []);
-*)
+(* abs0 xfer mode is correct: if two devices are called with xfer mode,
+   the data buffer will be received by another device *)
+val abs0_xfer_correct = store_thm("abs0_xfer_correct",
+``!d0 d1 l1 l2 d0' d1'.
+d0.state = abs0_ready /\ d1.state = abs0_ready /\ 
+LENGTH l1 = LENGTH l2 /\ l1 <> [] /\ l2 <> [] ==>
+ds_abs0_tr d0 (call_xfer l1) d0' /\
+ds_abs0_tr d1 (call_xfer l2) d1' ==>
+?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = l2 /\
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1``,
+rw [] >> Cases_on `l1` >> Cases_on `l2` >> fs [] >>
+`t = [] \/ ?x l'. t = SNOC x l'` by rw [SNOC_CASES] >-
+(`t' = []` by fs [] >> fs [] >>
+METIS_TAC [abs0_xfer_singleton_correct]) >>
+`t' = [] \/ ?x' l''. t' = SNOC x' l''`by rw [SNOC_CASES] >>
+fs [SNOC_APPEND] >>
+`ds_abs0_tr d0 (call_xfer (h::l'++[x])) d0' /\
+ds_abs0_tr d1 (call_xfer (h'::l''++[x'])) d1'` by fs [] >>
+`LENGTH (h::l' ++ [x]) = LENGTH (h'::l'' ++ [x'])` by rw [] >>
+`h::l' ++ [x] <> [] /\ h'::l'' ++ [x'] <> []` by rw [] >>
+`d0'.state = abs0_xfer_idle /\ d0'.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
+d0'.ds_abs0_xfer.xfer_dataOUT_buffer = h::l' ++ [x] /\ d0'.ds_abs0_xfer.xfer_cur_length = 0 /\
+d1'.state = abs0_xfer_idle /\ d1'.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
+d1'.ds_abs0_xfer.xfer_dataOUT_buffer = h'::l'' ++ [x'] /\ d1'.ds_abs0_xfer.xfer_cur_length = 0` by METIS_TAC [abs0_xfer_call_xfer_correct] >>
+`LENGTH (h::l') = LENGTH (h'::l'')` by rw [] >>
+`h::l' <> [] /\ h'::l'' <> []` by rw [] >>
+`?n1 d0'' d1''. n_tau_tr n1 abs0_global_tr (d0',d1') tau (d0'',d1'') /\
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = h'::l'' /\ d0''.state = abs0_xfer_idle /\
+d0''.ds_abs0_xfer.xfer_cur_length = LENGTH (h::l') /\
+d0''.ds_abs0_xfer.xfer_dataOUT_buffer = h::l' ++ [x] /\
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = h::l' /\ d1''.state = abs0_xfer_idle /\
+d1''.ds_abs0_xfer.xfer_dataOUT_buffer = h'::l'' ++ [x'] /\
+d1''.ds_abs0_xfer.xfer_cur_length  = LENGTH (h'::l'')` by METIS_TAC [abs0_xfer_idle_last_one_correct] >>
+`?d0''' d1'''. n_tau_tr (SUC 1) abs0_global_tr (d0'',d1'') tau (d0''',d1''') /\
+d0'''.ds_abs0_xfer.xfer_dataIN_buffer =  h'::l'' ++ [x'] /\ 
+d0'''.state = abs0_ready /\
+d0'''.ds_abs0_xfer.xfer_cur_length = LENGTH (h::l') + 1 /\
+d0'''.ds_abs0_xfer.xfer_dataOUT_buffer = h::l' ++ [x] /\
+d1'''.ds_abs0_xfer.xfer_dataIN_buffer = h::l' ++ [x] /\ 
+d1'''.state = abs0_ready /\
+d1'''.ds_abs0_xfer.xfer_dataOUT_buffer = h'::l'' ++ [x'] /\
+d1'''.ds_abs0_xfer.xfer_cur_length  = LENGTH (h'::l'') + 1` by METIS_TAC [abs0_xfer_finish_last_one] >>
+fs [] >>
+Q.EXISTS_TAC `SUC (2 + n1)` >>
+Q.EXISTS_TAC `d0'''` >>
+Q.EXISTS_TAC `d1'''` >>
+METIS_TAC [n_tau_tr_plus]);
 
 (* apply induct_on l1' or (length - cur_length)
  abs0 can apply xfer mode to exchange arbitary bytes between 2 devices *)
 (*
 val abs0_xfer_correct_list_idle = store_thm("abs0_xfer_correct_list_idle",
-``!l1 l2 l1' l2' d0 d1.
+:``!l1 l2 l1' l2' d0 d1.
 d0.state = abs0_xfer_idle /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
 d0.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ l1' /\ d0.ds_abs0_xfer.xfer_cur_length = 0 /\
 d1.state = abs0_xfer_idle /\ d1.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
