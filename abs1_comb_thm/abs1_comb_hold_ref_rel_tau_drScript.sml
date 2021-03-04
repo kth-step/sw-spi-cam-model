@@ -1,13 +1,9 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib optionTheory;
-open SPI_stateTheory SPI_relationTheory SPI_tauTheory SPI_return_regsTheory weak_bisimulationTheory;
-open driver_stateTheory driver_relationTheory driver_checkTheory driver_readTheory driver_writeTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib optionTheory;
+open SPI_stateTheory SPI_relationTheory SPI_tauTheory SPI_return_regsTheory weak_bisimulationTheory driver_stateTheory driver_relationTheory driver_checkTheory driver_readTheory driver_writeTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "abs1_comb_hold_ref_rel_tau_dr";
 
-(* theorems related to rx automaton *)
+(* related to rx automaton *)
 (* ref_rel holds if ds_abs1 has tau_dr transition and ds_abs1.state = abs1_rx_ready *)
 val ref_rel_holds_tau_dr_abs1_rx_ready = store_thm("ref_rel_holds_tau_dr_abs1_rx_ready",
 ``!spi dr ds_abs1.
@@ -140,7 +136,7 @@ rw [ref_rel_holds_tau_dr_abs1_rx_ready, ref_rel_holds_tau_dr_abs1_rx_fetch_data,
 ref_rel_holds_tau_dr_abs1_rx_next, ref_rel_holds_tau_dr_abs1_rx_next_ready]);
 
 
-(* theorems related to xfer automaton *)
+(* related to xfer automaton *)
 (* (dr',spi') exists for xfer *)
 val abs1_comb_hold_ref_rel_tau_dr_xfer = 
 store_thm("abs1_comb_hold_ref_rel_tau_dr_xfer",
@@ -155,8 +151,7 @@ driver_abs1_xfer_fetch_data_op_def] >>
 `dr.dr_last_read_ad = SOME SPI0_RX0 /\ ?v. dr.dr_last_read_v =  SOME v` by fs [ref_rel_def] >>
 rw [local_tr_cases, driver_tr_cases, DR_TAU_ENABLE_def] >>
 Q.EXISTS_TAC `dr_check dr SPI0_RX0 (THE dr.dr_last_read_v)` >>
-Q.EXISTS_TAC `spi` >>
-rw [] >-
+Q.EXISTS_TAC `spi` >> rw [] >-
 (`dr.dr_xfer.xfer_cur_length < (LENGTH dr.dr_xfer.xfer_dataOUT_buf)` by fs [ref_rel_def] >>
 rw [dr_check_def, dr_check_rx0_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]) >>

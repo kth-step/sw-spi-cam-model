@@ -1,19 +1,15 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib wordsTheory;
-open SPI_stateTheory SPI_relationTheory weak_bisimulationTheory SPI_tauTheory SPI_update_regsTheory SPI_return_regsTheory;
-open driver_stateTheory driver_relationTheory driver_writeTheory driver_readTheory driver_checkTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib wordsTheory;
+open SPI_stateTheory SPI_relationTheory weak_bisimulationTheory SPI_tauTheory SPI_update_regsTheory SPI_return_regsTheory driver_stateTheory driver_relationTheory driver_writeTheory driver_readTheory driver_checkTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "abs1_comb_hold_ref_rel_tau_comb";
 
-(* a basic lemma for word1: if it is not 1w, then it is 0w *)
+(* a basic theorem for word1: if it is not 1w, then it is 0w *)
 val word1_not_1w_eq_0w = store_thm("word1_not_1w_eq_0w",
 ``!w:word1. w <> 1w:word1 ==> w = 0w:word1``,
 Cases_on `w` >> rw [] >>
 FULL_SIMP_TAC (arith_ss++WORD_ss) []);
 
-(* theorems related to init automaton *)
+(* related to init automaton *)
 (* dr.state = dr_init_setting and spi.state = init_setregs, 1 step before the final one *)
 val n_tau_tr_dr_init_setting_1 = store_thm("n_tau_tr_dr_init_setting_1",
 ``!dr spi. 
@@ -1682,7 +1678,7 @@ ch0conf_speed_done := T|> |>` >>
 fs [n_tau_tr_dr_init_idle_8, ref_rel_def, IS_STATE_REL_def]]);
 
 
-(* theorems related to tx automaton *)
+(* related to tx automaton *)
 (* ref_rel holds when ds_abs1 has tau_comb_transition and ds_abs1.state = abs1_tx_trans *)
 val ref_rel_holds_tau_comb_abs1_tx_trans = store_thm("ref_rel_holds_tau_comb_abs1_tx_trans",
 ``!spi dr ds_abs1.
@@ -1993,7 +1989,7 @@ rw [ref_rel_holds_tau_comb_abs1_tx_trans, ref_rel_holds_tau_comb_abs1_tx_done_2,
 ref_rel_holds_tau_comb_abs1_tx_reset]);
 
 
-(* theorems related to rx automaton *)
+(* related to rx automaton *)
 (* ref_rel holds when ds_abs1 has tau_comb_transition and ds_abs1.state = abs1_rx_read *)
 val ref_rel_holds_tau_comb_abs1_rx_read = store_thm("ref_rel_holds_tau_comb_abs1_rx_read",
 ``!spi dr ds_abs1.
@@ -2066,7 +2062,7 @@ rw [COMB_ABS1_RX_ENABLE_def] >>
 rw [ref_rel_holds_tau_comb_abs1_rx_read, ref_rel_holds_tau_comb_abs1_rx_reset]);
 
 
-(* theorems related to xfer automaton *)
+(* related to xfer automaton *)
 (* ref_rel holds when ds_abs1 has tau_comb transition and ds_abs1.state = abs1_xfer_prepare *)
 val ref_rel_holds_tau_comb_abs1_xfer_prepare = store_thm("ref_rel_holds_tau_comb_abs1_xfer_prepare",
 ``!spi dr ds_abs1.

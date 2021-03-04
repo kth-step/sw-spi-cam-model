@@ -1,10 +1,5 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib pred_setLib;
-open SPI_stateTheory SPI_relationTheory SPI_return_regsTheory;
-open driver_stateTheory driver_relationTheory driver_readTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory 
-ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib pred_setLib;
+open SPI_stateTheory SPI_relationTheory SPI_return_regsTheory driver_stateTheory driver_relationTheory driver_readTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "comb_abs1_hold_ref_rel_RD_RE";
 
@@ -73,8 +68,7 @@ ds_abs1.state = abs1_rx_read``,
 rw [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_pre) /\
 (dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
@@ -108,8 +102,7 @@ rw [] >>
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exists and relation holds when driver state is dr_rx_read_rx0 *)
 val ref_rel_hold_dr_rx_read_rx0 = store_thm("ref_rel_hold_dr_rx_read_rx0",
@@ -171,8 +164,7 @@ ds_abs1.state = abs1_xfer_ready``,
 rw [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_pre) /\
 (dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
@@ -206,8 +198,7 @@ rw [] >>
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exists and relation holds when driver state is dr_xfer_read_rx0 *)
 val ref_rel_hold_dr_xfer_read_rx0 = store_thm("ref_rel_hold_dr_xfer_read_rx0",

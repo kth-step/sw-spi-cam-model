@@ -1,13 +1,9 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib;
-open SPI_stateTheory SPI_relationTheory weak_bisimulationTheory SPI_tauTheory SPI_update_regsTheory;
-open driver_stateTheory driver_relationTheory driver_writeTheory driver_readTheory driver_checkTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib;
+open SPI_stateTheory SPI_relationTheory weak_bisimulationTheory SPI_tauTheory SPI_update_regsTheory driver_stateTheory driver_relationTheory driver_writeTheory driver_readTheory driver_checkTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "abs1_comb_hold_ref_rel_tau_spi";
 
-(* theorems related to tx automaton *)
+(* related to tx automaton *)
 (* ref_rel holds if ds_abs1 has tau_spi transition and ds_abs1.state = abs1_tx_idle *)
 val ref_rel_holds_tau_spi_abs1_tx_idle = store_thm("ref_rel_holds_tau_spi_abs1_tx_idle",
 ``!spi dr ds_abs1.
@@ -167,7 +163,7 @@ ref_rel_holds_tau_spi_abs1_tx_data_2, ref_rel_holds_tau_spi_abs1_tx_update,
 ref_rel_holds_tau_spi_abs1_tx_last_update]);
 
 
-(* theorems related to rx automaton *)
+(* related to rx automaton *)
 (* ref_rel holds if ds_abs1 performs tau_spi transition and ds_abs1.state = abs1_rx_idle *)
 val ref_rel_holds_tau_spi_abs1_rx_idle = store_thm("ref_rel_holds_tau_spi_abs1_rx_idle",
 ``!spi dr ds_abs1.
@@ -298,7 +294,7 @@ rw [ref_rel_holds_tau_spi_abs1_rx_idle, ref_rel_holds_tau_spi_abs1_rx_update,
 ref_rel_holds_tau_spi_abs1_rx_next]);
 
 
-(* theorems related to xfer automaton *)
+(* related to xfer automaton *)
 (* ref_rel holds if ds_abs1 performs tau_spi transition and ds_abs1.state = abs1_xfer_idle *)
 val ref_rel_holds_tau_spi_abs1_xfer_idle = store_thm("ref_rel_holds_tau_spi_abs1_xfer_idle",
 ``!spi dr ds_abs1.
@@ -427,6 +423,7 @@ rw [SPI_ABS1_XFER_ENABLE_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 rw [ref_rel_holds_tau_spi_abs1_xfer_idle, ref_rel_holds_tau_spi_abs1_xfer_data,
 ref_rel_holds_tau_spi_abs1_xfer_update]);
+
 
 (* simulation: (dr',spi') exists and holds the ref_rel when ds_abs1 has tau_spi *)
 val abs1_comb_hold_ref_rel_tau_spi = store_thm("abs1_comb_hold_ref_rel_tau_spi",

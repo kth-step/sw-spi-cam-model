@@ -1,10 +1,5 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib wordsTheory;
-open SPI_stateTheory SPI_relationTheory;
-open driver_stateTheory driver_relationTheory driver_checkTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory 
-ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib wordsTheory;
+open SPI_stateTheory SPI_relationTheory driver_stateTheory driver_relationTheory driver_checkTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "comb_abs1_hold_ref_rel_dr_tr";
 
@@ -16,8 +11,7 @@ val ref_rel_check_sysstatus = store_thm("ref_rel_check_sysstatus",
 ref_rel ds_abs1 ((dr_check_sysstatus dr v), spi)``,
 rw [dr_check_sysstatus_def] >>
 fs [ref_rel_def, IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 FULL_SIMP_TAC (std_ss++WORD_ss) []);
 
 (* driver tau transition to check TXS Bit for tx automaton *)
@@ -28,8 +22,7 @@ val ref_rel_check_tx_txs = store_thm("ref_rel_check_tx_txs",
 (ref_rel ds_abs1 ((dr_check_tx_ch0stat dr v), spi))``,
 rw [dr_check_tx_ch0stat_def] >|
 [fs [ref_rel_def, IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >> 
+Cases_on `spi.state` >> rw [] >> 
 FULL_SIMP_TAC (std_ss++WORD_ss) [],
 fs [ref_rel_def, IS_STATE_REL_def],
 Cases_on `(1 >< 1) v: word1` >>
@@ -47,8 +40,7 @@ val ref_rel_check_tx_eot = store_thm("ref_rel_check_tx_eot",
 (ref_rel ds_abs1 ((dr_check_tx_ch0stat dr v), spi))``,
 rw [dr_check_tx_ch0stat_def] >>
 fs [ref_rel_def, IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw []);
+Cases_on `spi.state` >> rw []);
 
 (* driver tau transition to check RXS Bit for rx automaton *)
 val ref_rel_check_rx_rxs = store_thm("ref_rel_check_rx_rxs",
@@ -62,12 +54,9 @@ rw [dr_check_rx_ch0stat_def] >|
 [(* RXS = 1w /\ left_length > 0 *)
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 fs [ref_rel_def] >>
 DISJ2_TAC >>
 `ds_abs1.ds_abs1_rx.rx_left_length > 0` by fs [ref_rel_def] >>
@@ -79,12 +68,9 @@ fs [IS_STATE_REL_def],
 `~ (dr.dr_rx.rx_left_length > 0)` by fs [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 fs [ref_rel_def] >>
 DISJ2_TAC >>
 `~(ds_abs1.ds_abs1_rx.rx_left_length > 0)` by fs [ref_rel_def] >>
@@ -106,8 +92,7 @@ DRIVER_ABS1_RX_ENABLE ds_abs1``,
 rw [DRIVER_ABS1_RX_ENABLE_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_pre) /\
 (dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
@@ -141,8 +126,7 @@ rw [] >>
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 register for rx automaton *)
 val ref_rel_check_rx_rx0 = store_thm("ref_rel_check_rx_rx0",
@@ -167,8 +151,7 @@ val ref_rel_check_xfer_txs = store_thm("ref_rel_check_xfer_txs",
 (ref_rel ds_abs1 ((dr_check_xfer_ch0stat dr v), spi))``,
 rw [dr_check_xfer_ch0stat_def] >> 
 fs [ref_rel_def, IS_STATE_REL_def] >-
-(Cases_on `spi.state` >>
-rw [] >> 
+(Cases_on `spi.state` >> rw [] >> 
 FULL_SIMP_TAC (std_ss++WORD_ss) []) >>
 Cases_on `(1 >< 1) v: word1` >>
 FULL_SIMP_TAC (arith_ss ++ WORD_ss) [] >>
@@ -185,8 +168,7 @@ val ref_rel_check_xfer_rxs = store_thm("ref_rel_check_xfer_rxs",
 (ref_rel ds_abs1 ((dr_check_xfer_ch0stat dr v), spi))``,
 rw [dr_check_xfer_ch0stat_def] >>
 fs [ref_rel_def, IS_STATE_REL_def] >-
-(Cases_on `spi.state` >>
-rw [] >> 
+(Cases_on `spi.state` >> rw [] >> 
 FULL_SIMP_TAC (std_ss++WORD_ss) []) >>
 Cases_on `(0 >< 0) v: word1` >>
 FULL_SIMP_TAC (arith_ss ++ WORD_ss) [] >>
@@ -204,8 +186,7 @@ ds_abs1.state = abs1_xfer_fetch_data``,
 rw [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_pre) /\
 (dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
@@ -239,8 +220,7 @@ rw [] >>
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_issue_disable) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 for xfer automaton *)
 val ref_rel_check_xfer_rx0 = store_thm("ref_rel_check_xfer_rx0",

@@ -1,8 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open SPI_stateTheory;
-open driver_stateTheory driver_relationTheory driver_callTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory;
+open SPI_stateTheory driver_stateTheory driver_relationTheory driver_callTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory;
 
 val _ = new_theory "ref_rel_holds_call_lbl";
 

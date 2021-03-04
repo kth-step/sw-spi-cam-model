@@ -1,13 +1,7 @@
-open HolKernel bossLib boolLib Parse;
-open wordsLib pred_setLib;
-open SPI_stateTheory SPI_relationTheory SPI_update_regsTheory;
-open driver_stateTheory driver_relationTheory driver_writeTheory;
-open ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory 
-ds_abs1_rxTheory ds_abs1_xferTheory;
-open ref_relTheory board_memTheory;
+open HolKernel bossLib boolLib Parse wordsLib pred_setLib;
+open SPI_stateTheory SPI_relationTheory SPI_update_regsTheory driver_stateTheory driver_relationTheory driver_writeTheory ds_abs1_stateTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory ref_relTheory board_memTheory;
 
 val _ = new_theory "comb_abs1_hold_ref_rel_WR_UP";
-
 
 (* relation holds when driver state is dr_init_idle *)
 val ref_rel_hold_dr_init_idle_WR = store_thm("ref_rel_hold_dr_init_idle_WR",
@@ -21,12 +15,9 @@ dr_write_def, dr_write_softreset_def, write_SPI_regs_def, SPI0_SYSCONFIG_def,
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_SYSCONFIG_comb_def, write_SOFTRESET_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -46,12 +37,9 @@ rw [dr_write_sysconfig_def, write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANG
 [DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 EXISTS_TAC ``comb_abs1_init_operations ds_abs1`` >>
 rw [COMB_ABS1_INIT_ENABLE_def, write_SYSCONFIG_comb_def, write_SYSCONFIG_def, 
@@ -64,24 +52,18 @@ fs [ref_rel_def, IS_STATE_REL_def] >>
 METIS_TAC [],
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw []]],
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw []]],
 (* update MODULCTRL *)
 rw [dr_write_modulctrl_def, write_SPI_regs_def, SPI0_MODULCTRL_def, SPI0_SYSCONFIG_def, 
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def] >|
 [DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 EXISTS_TAC ``comb_abs1_init_operations ds_abs1`` >>
 rw [COMB_ABS1_INIT_ENABLE_def, write_MODULCTRL_def, comb_abs1_init_operations_def, 
@@ -94,25 +76,18 @@ fs [ref_rel_def, IS_STATE_REL_def] >>
 METIS_TAC [],
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw []]],
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw []]],
 (* update CH0CONF.WL *)
 rw [dr_write_ch0conf_wl_def, write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def, 
 SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def] >|
 [DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
-fs [IS_STATE_REL_def] >>
-rw [] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+fs [IS_STATE_REL_def] >> rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 EXISTS_TAC ``comb_abs1_init_operations ds_abs1`` >>
 rw [COMB_ABS1_INIT_ENABLE_def, write_CH0CONF_comb_def, write_CH0CONF_WL_def,
@@ -127,12 +102,9 @@ fs [ref_rel_def, IS_STATE_REL_def] >>
 METIS_TAC [],
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 UNDISCH_TAC ``~(7w:word5 >+ 2w:word5)`` >>
 EVAL_TAC]],
 (* update CH0CONF.IS,DPE,TRM etc bits *)
@@ -141,12 +113,9 @@ SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def] >|
 [DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 EXISTS_TAC ``comb_abs1_init_operations ds_abs1`` >>
 rw [COMB_ABS1_INIT_ENABLE_def, write_CH0CONF_comb_def, write_CH0CONF_def,
@@ -159,24 +128,18 @@ fs [ref_rel_def, IS_STATE_REL_def] >>
 METIS_TAC [],
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw []]],
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw []]],
 (* update CH0CONF.CLKD *)
 rw [dr_write_ch0conf_speed_def, write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def, 
 SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def] >>
 DISJ2_TAC >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 EXISTS_TAC ``comb_abs1_init_operations ds_abs1`` >>
 rw [COMB_ABS1_INIT_ENABLE_def, write_CH0CONF_comb_def, write_CH0CONF_speed_def,
@@ -197,12 +160,9 @@ dr_write_def, dr_write_ch0conf_tx_def, write_SPI_regs_def, SPI0_SYSCONFIG_def,
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,SPI0_MODULCTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CONF_comb_def, write_CH0CONF_tx_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -219,12 +179,9 @@ SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -238,12 +195,9 @@ val ref_rel_hold_dr_tx_write_data_WR = store_thm("ref_rel_hold_dr_tx_write_data_
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >|
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >|
 [(* abs1_tx_trans *)
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [COMB_ABS1_TX_ENABLE_def] >>
@@ -296,12 +250,9 @@ SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -315,12 +266,9 @@ val ref_rel_hold_dr_tx_reset_conf_WR = store_thm("ref_rel_hold_dr_tx_reset_conf_
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [COMB_ABS1_TX_ENABLE_def] >>
 rw [comb_abs1_tx_operations_def, comb_abs1_tx_reset_op_def, dr_write_state_def, 
@@ -341,14 +289,10 @@ rw [dr_write_state_def, dr_write_address_def, dr_write_value_def,
 dr_write_def, dr_write_ch0conf_rx_def, write_SPI_regs_def, SPI0_SYSCONFIG_def, 
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
-fs [IS_STATE_REL_def] >>
-rw [] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+fs [IS_STATE_REL_def] >> rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CONF_comb_def, write_CH0CONF_rx_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -365,12 +309,9 @@ SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -387,12 +328,9 @@ SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]); 
 
@@ -406,12 +344,9 @@ val ref_rel_hold_dr_rx_reset_conf_WR = store_thm("ref_rel_hold_dr_rx_reset_conf_
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
 rw [COMB_ABS1_RX_ENABLE_def] >>
 rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, dr_write_state_def, 
@@ -433,12 +368,9 @@ dr_write_def, dr_write_ch0conf_xfer_def, write_SPI_regs_def, SPI0_SYSCONFIG_def,
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CONF_comb_def, write_CH0CONF_xfer_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -454,14 +386,10 @@ dr_write_def, dr_write_ch0ctrl_def, write_SPI_regs_def, SPI0_SYSCONFIG_def,
 SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
-fs [IS_STATE_REL_def] >>
-rw [] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+fs [IS_STATE_REL_def] >> rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -475,12 +403,9 @@ val ref_rel_hold_dr_xfer_write_dataO_WR = store_thm("ref_rel_hold_dr_xfer_write_
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
 rw [COMB_ABS1_XFER_ENABLE_def] >>
 rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_prepare_op_def,
@@ -504,12 +429,9 @@ SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,
 SPI0_MODULCTRL_def, SPI0_CH0CTRL_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 rw [write_CH0CTRL_def] >>
 fs [ref_rel_def, IS_STATE_REL_def]);
 
@@ -523,12 +445,9 @@ val ref_rel_hold_dr_xfer_reset_conf_WR = store_thm("ref_rel_hold_dr_xfer_reset_c
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `dr.state` >>
-rw [] >>
-Cases_on `ds_abs1.state` >>
-rw [] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `dr.state` >> rw [] >>
+Cases_on `ds_abs1.state` >> rw [] >>
+Cases_on `spi.state` >> rw [] >>
 EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
 rw [COMB_ABS1_XFER_ENABLE_def] >>
 rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, dr_write_state_def, 
