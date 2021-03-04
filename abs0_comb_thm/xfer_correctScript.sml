@@ -3,9 +3,7 @@ open ds_abs0_stateTheory ds_abs0_xferTheory ds_abs0_tauTheory ds_abs0_initTheory
 
 val _ = new_theory "xfer_correct";
 
-val LIST_SNOC_INDUCT = INDUCT_THEN SNOC_INDUCT;
-
-(* abs0_xfer_correct theorem 1: from ready state, abs0 can work with xfer mode *)
+(* abs0 xfer mode correctness theorem 1: from ready state, abs0 can apply xfer mode *)
 val abs0_xfer_call_xfer_correct = store_thm("abs0_xfer_call_xfer_correct",
 ``!d0 d1 l1 l2 d0' d1'.
 d0.state = abs0_ready /\ d1.state = abs0_ready /\ LENGTH l1 = LENGTH l2 /\
@@ -17,8 +15,8 @@ d1'.state = abs0_xfer_idle /\ d1'.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
 d1'.ds_abs0_xfer.xfer_dataOUT_buffer = l2 /\ d1'.ds_abs0_xfer.xfer_cur_length = 0``,
 rw [ds_abs0_tr_cases, call_xfer_ds_abs0_def]);
 
-(* lemmas for abs0_xfer_correct theorem 2*)
-val abs0_xfer_idle_one_byte_n_tau_tr = store_thm("abs0_xfer_idle_one_byte_n_tau_tr",
+(* lemmas for abs0 xfer correctness theorem 2 *)
+val abs0_xfer_idle_first_one_byte = store_thm("abs0_xfer_idle_first_one_byte",
 ``!d0 d1 x x' l1' l2'.
 d0.state = abs0_xfer_idle /\ 
 d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
@@ -111,7 +109,7 @@ xfer_RSR := x|> |>)` >>
  LENGTH l2 + 1 = SUC (LENGTH l2)` by rw [] >>
 rw []);
 
-(* abs0_xfer_correct theorem 2_1: abs0 can exchange data between devices with a loop *)
+(* abs0 xfer correctness theorem 2_1: abs0 can exchange data between devices with a loop *)
 val abs0_xfer_idle_exchange_data_correct = store_thm("abs0_xfer_idle_exchange_data_correct",
 ``!l1 l2 d0 d1 l1' l2'.
 d0.state = abs0_xfer_idle /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
@@ -126,11 +124,11 @@ d0''.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ l1' /\
 d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\ d1''.state = abs0_xfer_idle /\
 d1''.ds_abs0_xfer.xfer_dataOUT_buffer = l2 ++ l2' /\
 d1''.ds_abs0_xfer.xfer_cur_length  = LENGTH l2``,
-LIST_SNOC_INDUCT STRIP_ASSUME_TAC >- (rw []) >>
-GEN_TAC >> LIST_SNOC_INDUCT STRIP_ASSUME_TAC >> rw [] >>
+INDUCT_THEN SNOC_INDUCT STRIP_ASSUME_TAC >- (rw []) >>
+GEN_TAC >> INDUCT_THEN SNOC_INDUCT STRIP_ASSUME_TAC >> rw [] >>
 Cases_on `l1 = []` >- 
 (`l2 = []` by fs [] >> fs [] >>
-METIS_TAC [abs0_xfer_idle_one_byte_n_tau_tr]) >>
+METIS_TAC [abs0_xfer_idle_first_one_byte]) >>
 Cases_on `l2 = []` >> fs [] >>
 `[x] ++ l1' <> [] /\ [x'] ++ l2' <> []` by rw [] >>
 `LENGTH l2 = LENGTH l2` by rw [] >>
@@ -220,7 +218,7 @@ ds_abs0_xfer := d1.ds_abs0_xfer with
 fs []);
 
 (* theorem 3_2, transfer a buffer that is a singleton *)
-val abs0_xfer_singleton_correct = store_thm("abs0_xfer_correct_single",
+val abs0_xfer_singleton_correct = store_thm("abs0_xfer_singleton_correct",
 ``!d0 d1 d0' d1' a b.
 d0.state = abs0_ready /\ d1.state = abs0_ready ==> 
 ds_abs0_tr d0 (call_xfer [a]) d0' /\
@@ -246,7 +244,8 @@ ds_abs0_xfer := <|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [b];
 xfer_cur_length := 1; xfer_RSR := a|> |>)` >>
 rw []);
  
-(* abs0 xfer mode is correct: if two devices are called with xfer mode,
+(* abs0 xfer mode is correct: 
+   if two devices are called with xfer mode,
    the data buffer will be received by another device *)
 val abs0_xfer_correct = store_thm("abs0_xfer_correct",
 ``!d0 d1 l1 l2 d0' d1'.
@@ -299,7 +298,7 @@ METIS_TAC [n_tau_tr_plus]);
  abs0 can apply xfer mode to exchange arbitary bytes between 2 devices *)
 (*
 val abs0_xfer_correct_list_idle = store_thm("abs0_xfer_correct_list_idle",
-:``!l1 l2 l1' l2' d0 d1.
+``!l1 l2 l1' l2' d0 d1.
 d0.state = abs0_xfer_idle /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
 d0.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ l1' /\ d0.ds_abs0_xfer.xfer_cur_length = 0 /\
 d1.state = abs0_xfer_idle /\ d1.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
@@ -325,6 +324,5 @@ Cases_on `t` >-
 fs []
 (* go back to the thm that needs induct_on l1 l2 *)
 *)
-
 
 val _ = export_theory();

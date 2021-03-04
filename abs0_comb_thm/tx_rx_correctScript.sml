@@ -3,9 +3,7 @@ open ds_abs0_stateTheory ds_abs0_txTheory ds_abs0_rxTheory ds_abs0_tauTheory ds_
 
 val _ = new_theory "tx_rx_correct";
 
-val LIST_SNOC_INDUCT = INDUCT_THEN SNOC_INDUCT;
-
-(* theorem 1: from ready state, two devices can enter tx and rx mode *)
+(* abs0 tx and rx modes correct, theorem 1: from ready state, two devices can apply tx and rx mode respectively *)
 val abs0_tx_rx_calls_correct = store_thm("abs0_tx_rx_calls_correct",
 ``!d0 d1 l n d0' d1'.
 d0.state = abs0_ready /\ d1.state = abs0_ready /\ l <> [] /\ n > 0 ==>
@@ -17,8 +15,8 @@ d1'.ds_abs0_rx.rx_data_buffer = []``,
 rw [ds_abs0_tr_cases, call_rx_ds_abs0_def, call_tx_ds_abs0_def]);
 
 
-(* some lemmas for theorem 2-1 *)
-val abs0_tx_rx_start_one_byte = store_thm("abs0_tx_rx_start_one_byte",
+(* some lemmas for theorem 2 *)
+val abs0_tx_rx_first_one_byte = store_thm("abs0_tx_rx_first_one_byte",
 ``!d0 d1 x l1' n.
 d0.state = abs0_tx /\ d0.ds_abs0_tx.tx_data_buffer = x::l1' /\
 d0.ds_abs0_tx.tx_cur_length = 0 /\
@@ -89,12 +87,11 @@ d0'.state = abs0_tx /\ d0'.ds_abs0_tx.tx_data_buffer = l1 ++ l1' /\
 d0'.ds_abs0_tx.tx_cur_length = LENGTH l1 /\
 d1'.state = abs0_rx_idle /\ d1'.ds_abs0_rx.rx_left_length = n - (LENGTH l1) /\
 d1'.ds_abs0_rx.rx_data_buffer = l1``,
-LIST_SNOC_INDUCT STRIP_ASSUME_TAC >-
+INDUCT_THEN SNOC_INDUCT STRIP_ASSUME_TAC >-
 rw [] >>
 REPEAT STRIP_TAC >>
 Cases_on `l1 = []` >>
-fs [] >-
-rw [abs0_tx_rx_start_one_byte] >>
+fs [] >- rw [abs0_tx_rx_first_one_byte] >>
 `[x] ++ l1' <> []` by rw [] >>
 `l1 ++ [x] ++ l1' = l1 ++ ([x] ++ l1')` by rw [] >>
 `n > LENGTH l1` by rw [] >>
@@ -105,8 +102,7 @@ d0''.ds_abs0_tx.tx_data_buffer = l1 ⧺ ([x] ++ l1') /\
 d0''.ds_abs0_tx.tx_cur_length = LENGTH l1 /\
 d1''.state = abs0_rx_idle /\
 d1''.ds_abs0_rx.rx_left_length = n − LENGTH l1 /\
-d1''.ds_abs0_rx.rx_data_buffer = l1` by METIS_TAC [] >>
-fs [] >>
+d1''.ds_abs0_rx.rx_data_buffer = l1` by METIS_TAC [] >> fs [] >>
 `?d0''' d1'''.
 n_tau_tr 2 abs0_global_tr (d0'',d1'') tau (d0''',d1''') /\
 d0'''.state = abs0_tx /\ d0'''.ds_abs0_tx.tx_data_buffer = l1 ++ [x] ++ l1' /\ 
@@ -120,7 +116,7 @@ fs [] >>
 `n1 + 2 = 2 + n1` by rw [] >>
 METIS_TAC [n_tau_tr_plus]);
 
-(* theorem 2-2, d0 can reach a state that only the last one is going to transmit *)
+(* theorem 2-2, devices can reach a state that only the last one is going to transmit *)
 val abs0_tx_rx_data_left_last_one = store_thm("abs0_tx_rx_data_left_last_one",
 ``!l1 d0 d1 a n.
 d0.state = abs0_tx /\ d0.ds_abs0_tx.tx_data_buffer = l1 ++ [a] /\
@@ -164,7 +160,7 @@ d1 with <|state := abs0_rx_reading;
 ds_abs0_rx := d1.ds_abs0_rx with temp_RSR := a|>)` >>
 rw []);
 
-(* theorem 3-2, applying tx and rx mode to tranmit a singeton *)
+(* theorem 3-2, applying tx and rx modes to tranmit a singeton *)
 val abs0_tx_rx_correct_single = store_thm("abs0_tx_rx_correct_single",
 ``!d0 d1 d0' d1' a.
 d0.state = abs0_ready /\ d1.state = abs0_ready  ==> 
@@ -191,7 +187,9 @@ ds_abs0_rx := d1.ds_abs0_rx with
 <|rx_data_buffer := []; rx_left_length := 1; temp_RSR := a|> |>)` >>
 rw [abs0_rx_reading_tau_op_def]);
 
-(* abs0 tx and rx modes are correct: if two devices apply tx and rx mode respectively, the data buffer can be transmitted from d0 to d1 *)
+(* abs0 tx and rx modes are correct: 
+   if two devices apply tx and rx mode respectively, 
+   the data buffer can be transmitted from d0 to d1 *)
 val abs0_tx_rx_correct = store_thm ("abs0_tx_rx_correct",
 ``!d0 d1 d0' d1' l n.
 d0.state = abs0_ready /\ d1.state = abs0_ready  ==> 
