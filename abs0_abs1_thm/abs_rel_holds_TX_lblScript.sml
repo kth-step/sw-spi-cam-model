@@ -1,7 +1,5 @@
 open HolKernel bossLib boolLib Parse;
-open SPI_stateTheory ds_abs1_stateTheory weak_bisimulationTheory;
-open ds_abs0_relTheory abs_relTheory ds_abs0_txTheory;
-open ds_abs1_relTheory ds_abs1_txTheory;
+open SPI_stateTheory ds_abs1_stateTheory weak_bisimulationTheory ds_abs0_relTheory abs_relTheory ds_abs0_txTheory ds_abs1_relTheory ds_abs1_txTheory;
 
 val _ = new_theory "abs_rel_holds_TX_lbl";
 

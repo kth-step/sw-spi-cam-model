@@ -1,11 +1,10 @@
 open HolKernel bossLib boolLib Parse;
-open SPI_stateTheory weak_bisimulationTheory;
-open ds_abs0_relTheory abs_relTheory ds_abs0_initTheory ds_abs0_txTheory ds_abs0_rxTheory ds_abs0_xferTheory;
-open ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
+open SPI_stateTheory weak_bisimulationTheory ds_abs0_relTheory abs_relTheory ds_abs0_initTheory ds_abs0_txTheory ds_abs0_rxTheory ds_abs0_xferTheory ds_abs1_relTheory ds_abs1_initTheory ds_abs1_txTheory ds_abs1_rxTheory ds_abs1_xferTheory;
 
 val _ = new_theory "abs_rel_holds_call_lbl";
 
 (* Theorems for abs0_weak_simulation with call_label *)
+
 (* abs_rel holds for call_init label when ds_abs0 has call_init transition *)
 val abs0_abs_rel_call_init = store_thm("abs0_abs_rel_call_init",
 ``!ds_abs0 ds_abs1 ds_abs0'.
