@@ -2,10 +2,7 @@ open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory;
 open SPI_stateTheory driver_stateTheory;
 
-(* ds_abs1: SPI driver and controller combined abstract model state.
- * This abstract model removes the interactions of the driver and spi controller, 
- * including Write/Update, Read/Return, and some spi and driver tau transitions.
- *)
+(* ds_abs1: SPI driver and controller combined abstract model (level 1). *)
 val _ = new_theory "ds_abs1_state";
 
 (* ds_abs1_general_state: the general states of ds_abs1 model *)
@@ -40,7 +37,7 @@ val _ = Datatype `spi_abs1_state = <|
 TX_SHIFT_REG: word8;
 RX_SHIFT_REG: word8 |>`
 
-(* ds_abs1_state: the state of the spi controller and driver combined abstract level1 model *)
+(* ds_abs1_state: the state of ds_abs1 model *)
 val _ = Datatype `ds_abs1_state = <|
 err: bool;
 state: ds_abs1_general_state;
@@ -49,6 +46,7 @@ ds_abs1_tx: ds_abs1_tx_state;
 ds_abs1_rx: ds_abs1_rx_state;
 ds_abs1_xfer: ds_abs1_xfer_state |>`
 
+(* some labels to describe ds_abs1 internal operations *)
 val _ = Datatype `abs1_lbl_type =
 | tau_comb | tau_dr | tau_spi`
 

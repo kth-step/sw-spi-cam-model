@@ -4,7 +4,7 @@ open SPI_stateTheory driver_stateTheory ds_abs1_stateTheory board_memTheory;
 
 val _ = new_theory "ref_rel";
 
-(* IS_STATE_REL: ds_abs1_state -> driver_state -> spi_state -> bool *)
+(* IS_STATE_REL: check if the ds_abs1.state is related with the driver and controller states. *)
 val IS_STATE_REL_def = Define `
 IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 (((ds_abs1.state = abs1_init_pre) = 
@@ -111,7 +111,7 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((dr.state = dr_xfer_issue_disable /\ spi.state = xfer_ready_for_trans) \/
 (dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled))))`
 
-(* ref_rel: ds_abs1_state -> driver_state * spi_state -> bool *)
+(* ref_rel: refinement relation for the ds_abs1 and (dr,spi). *)
 val ref_rel_def = Define `
 ref_rel (ds_abs1:ds_abs1_state) (dr:driver_state, spi:spi_state) =
 ((* err flag *)
