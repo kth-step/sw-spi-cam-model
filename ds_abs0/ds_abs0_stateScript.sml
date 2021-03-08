@@ -1,14 +1,13 @@
 open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory;
 
-(* ds_abs0: a more abstract model for the SPI driver and controller than ds_abs1.
- * This abstract model removes all tau transitions in the combined model.
- *)
+(* ds_abs0: a more abstract model for the SPI driver and controller than ds_abs1. *)
 val _ = new_theory "ds_abs0_state";
 
 (* ds_abs0_general_state: the general states of ds_abs0 *)
 val _ = Datatype `ds_abs0_general_state =
-| abs0_init | abs0_ready
+| abs0_init 
+| abs0_ready
 | abs0_tx 
 | abs0_rx_idle | abs0_rx_update | abs0_rx_reading | abs0_rx_next
 | abs0_xfer_idle | abs0_xfer_done`
@@ -32,7 +31,7 @@ xfer_dataOUT_buffer: word8 list;
 xfer_cur_length: num;
 xfer_RSR: word8 |>`
 
-(* ds_abs0_state: the state of the spi controller and driver combined abstract level0 model *)
+(* ds_abs0_state: the state of the ds_abs0 model *)
 val _ = Datatype `ds_abs0_state = <|
 err: bool;
 state: ds_abs0_general_state;

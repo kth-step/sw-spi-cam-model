@@ -3,7 +3,7 @@ open SPI_stateTheory ds_abs0_stateTheory ds_abs0_initTheory ds_abs0_txTheory ds_
 
 val _ = new_theory "ds_abs0_rel";
 
-(* the state transition relation for ds_abs0 model *)
+(* ds_abs0_tr: the state transition relation for ds_abs0 model. *)
 val (ds_abs0_tr_rules, ds_abs0_tr_ind, ds_abs0_tr_cases) = Hol_reln `
 (* call_func labels *)
 (!(ds_abs0:ds_abs0_state). (ABS0_CALL_INIT_ENABLE ds_abs0) ==> 
@@ -26,7 +26,7 @@ ds_abs0_tr ds_abs0 (XFER dataIN (abs0_xfer_op_value ds_abs0 dataIN))
 (!(ds_abs0:ds_abs0_state). (ABS0_TAU_LBL_ENABLE ds_abs0) ==>
 ds_abs0_tr ds_abs0 tau (abs0_tau_op ds_abs0))`
 
-(* the global state transition relation for 2 ds_abs0 devices *)
+(* abs0_global_tr: the global state transition relation for 2 ds_abs0 devices. *)
 val (abs0_global_tr_rules, abs0_global_tr_ind, abs0_global_tr_cases) = Hol_reln `
 (!d0 d1 d0'. ds_abs0_tr d0 call_init d0' ==>
 abs0_global_tr (d0, d1) tau (d0', d1)) /\

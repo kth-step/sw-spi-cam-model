@@ -3,7 +3,7 @@ open ds_abs0_stateTheory ds_abs1_stateTheory ref_relTheory;
 
 val _ = new_theory "abs_rel"
 
-(* IS_ABS_STATE_REL: ds_abs0_state -> ds_abs1_state -> bool *)
+(* IS_ABS_STATE_REL: check if ds_abs0.state is related to ds_abs1.state. *)
 val IS_ABS_STATE_REL_def = Define `
 IS_ABS_STATE_REL (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 (((ds_abs0.state = abs0_init) =
@@ -47,7 +47,7 @@ IS_ABS_STATE_REL (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 (ds_abs1.state = abs1_xfer_ready) \/
 (ds_abs1.state = abs1_xfer_fetch_data))))`
 
-(* abs_rel: ds_abs0_state -> ds_abs1_state -> bool *)
+(* abs_rel: abstract relation for ds_abs0 and ds_abs1. *)
 val abs_rel_def = Define `
 abs_rel (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 ((ds_abs0.err = ds_abs1.err) /\
@@ -96,13 +96,12 @@ EL (ds_abs1.ds_abs1_tx.tx_cur_length - 1) (ds_abs1.ds_abs1_tx.tx_data_buffer)) /
 (ds_abs1.state = abs1_xfer_exchange ==> ds_abs1.spi_abs1.TX_SHIFT_REG = 
 EL (ds_abs1.ds_abs1_xfer.xfer_cur_length - 1) (ds_abs1.ds_abs1_xfer.xfer_dataOUT_buffer)))`
 
-(* abs0_comb_rel: ds_abs0_state -> (driver_state * spi_state) -> bool *)
+(* abs0_comb_rel: relation for ds_abs0 and (dr,spi). *)
 val abs0_comb_rel_def = Define `
 abs0_comb_rel (ds_abs0:ds_abs0_state) (dr:driver_state, spi:spi_state) = 
 (?ds_abs1:ds_abs1_state. abs_rel ds_abs0 ds_abs1 /\ ref_rel ds_abs1 (dr,spi))`
 
-(* global abs0_comb_rel:
-(ds_abs0_state * ds_abs0_state) -> (driver_state * spi_state * driver_state * spi_state) -> bool *)
+(* global abs0_comb_rel: relation for 2 ds_abs0 devices and 2 concrete devices. *)
 val global_abs0_comb_rel_def = Define `
 global_abs0_comb_rel (d0, d1) (dr0, spi0, dr1, spi1) =
 (abs0_comb_rel d0 (dr0,spi0) /\ abs0_comb_rel d1 (dr1,spi1))`

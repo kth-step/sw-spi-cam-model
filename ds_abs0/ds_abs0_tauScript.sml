@@ -3,7 +3,7 @@ open ds_abs0_stateTheory ds_abs0_rxTheory ds_abs0_xferTheory;
 
 val _ = new_theory "ds_abs0_tau";
 
-(* ABS0_TAU_LBL_ENABLE: ds_abs0_state -> bool *)
+(* ABS0_TAU_LBL_ENABLE: ds_abs0 is permitted to perform internal operations. *)
 val ABS0_TAU_LBL_ENABLE_def = Define `
 ABS0_TAU_LBL_ENABLE (ds_abs0:ds_abs0_state) =
 ((ds_abs0.state = abs0_rx_update) \/
@@ -11,7 +11,7 @@ ABS0_TAU_LBL_ENABLE (ds_abs0:ds_abs0_state) =
 (ds_abs0.state = abs0_rx_next) \/
 (ds_abs0.state = abs0_xfer_done))`
 
-(* abs0_tau_op: ds_abs0_state -> ds_abs0_state *)
+(* abs0_tau_op: combine the internal operations. *)
 val abs0_tau_op_def = Define `
 abs0_tau_op (ds_abs0:ds_abs0_state) =
 case ds_abs0.state of
