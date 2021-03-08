@@ -2,10 +2,9 @@ open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory listTheory;
 open driver_stateTheory board_memTheory;
 
-(* Driver checks the reply from the SPI controller for a read request *)
 val _ = new_theory "driver_check";
 
-(* DR_TAU_ENABLE: driver_state -> bool *)
+(* DR_TAU_ENABLE: driver's state that can perform internal operations. *)
 val DR_TAU_ENABLE_def = Define `
 DR_TAU_ENABLE (dr:driver_state) =
 (dr.state = dr_init_check_rep \/
@@ -17,7 +16,7 @@ dr.state = dr_xfer_check_txs \/
 dr.state = dr_xfer_check_rxs \/
 dr.state = dr_xfer_fetch_dataI)`
 
-(* dr_check_sysstatus: driver_state -> word32 -> driver_state *)
+(* dr_check_sysstatus: check the value of SYSSTATUS register. *)
 val dr_check_sysstatus_def = Define `
 dr_check_sysstatus (dr:driver_state) (rep_v:word32) =
 let v = (0 >< 0) rep_v:word1 in
@@ -25,7 +24,7 @@ if v = 1w (* RESET is done *)
 then dr with state := dr_init_setting
 else dr with state := dr_init_read_req`
 
-(* dr_check_tx_ch0stat:driver_state -> word32 -> driver_state *)
+(* dr_check_tx_ch0stat: check the value of CH0STAT register, when in tx mode. *)
 val dr_check_tx_ch0stat_def = Define `
 dr_check_tx_ch0stat (dr:driver_state) (rep_v:word32) =
 let v1 = (1 >< 1) rep_v:word1 and
@@ -40,7 +39,7 @@ else if (dr.state = dr_tx_check_eot) /\ (~((v2 = 1w) /\ (v1 = 1w))) then
 dr with state := dr_tx_read_eot
 else dr with dr_err := T`
 
-(* dr_check_rx_ch0stat:driver_state -> word32 -> driver_state *)
+(* dr_check_rx_ch0stat: check the value of CH0STAT register, when in rx mode. *)
 val dr_check_rx_ch0stat_def = Define `
 dr_check_rx_ch0stat (dr:driver_state) (rep_v:word32) =
 let v = (0 >< 0) rep_v:word1 in
@@ -50,7 +49,7 @@ else if (v = 1w)
 then dr with state := dr_rx_issue_disable
 else dr with state := dr_rx_read_rxs`
 
-(* dr_check_xfer_ch0stat:driver_state -> word32 -> driver_state *)
+(* dr_check_xfer_ch0stat: check the value of CH0STAT register, when in xfer mode. *)
 val dr_check_xfer_ch0stat_def = Define `
 dr_check_xfer_ch0stat (dr:driver_state) (rep_v:word32) =
 let rxs = (0 >< 0) rep_v:word1 and
@@ -65,7 +64,7 @@ else if (dr.state = dr_xfer_check_rxs) /\ (rxs = 0w) then
 dr with state := dr_xfer_read_rxs
 else dr with dr_err := T`
 
-(* dr_check_rx0:driver_state -> word32 -> driver_state *)
+(* dr_check_rx0: fetch the data of RX0 register. *)
 val dr_check_rx0_def = Define `
 dr_check_rx0 (dr:driver_state) (rep_v:word32) =
 let v = (7 >< 0) rep_v:word8 in
@@ -79,7 +78,7 @@ state := if (dr.dr_xfer.xfer_cur_length < (LENGTH dr.dr_xfer.xfer_dataOUT_buf))
 then dr_xfer_read_txs else dr_xfer_issue_disable |>
 else dr with dr_err := T`
 
-(* dr_check: driver_state -> word32 -> word32 -> driver_state *)
+(* dr_check: driver's internal operations *)
 val dr_check_def = Define `
 dr_check (dr:driver_state) (ad:word32) (v:word32) =
 case dr.state of

@@ -1,10 +1,8 @@
 open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory;
 
-(* SPI driver issues memory requests to SPI controller *)
 val _ = new_theory "driver_state";
 
-(* driver_state *)
 (* dr_general_state: spi driver general states *)
 val _ = Datatype `dr_general_state =
 | dr_init_pre | dr_init_idle | dr_init_read_req 
@@ -28,23 +26,23 @@ issue_wr_ch0conf_wl: bool;
 issue_wr_ch0conf_mode: bool;
 issue_wr_ch0conf_speed: bool |>`
 
-(* dr_tx_state: include the transimit buffer and length *)
+(* dr_tx_state: include the transimit buffer and a pointer *)
 val _ = Datatype `dr_tx_state = <|
 tx_data_buf: word8 list;
 tx_cur_length: num |>`
 
-(* dr_rx_state: include the receive buffer and length *)
+(* dr_rx_state: include the receive buffer and a pointer *)
 val _ = Datatype `dr_rx_state = <|
 rx_data_buf : word8 list;
 rx_left_length: num |>`
 
-(* dr_xfer_state: include the two data buffers for transmitting and receiving, and the length *)
+(* dr_xfer_state: include the two data buffers for transmitting and receiving, and a pointer *)
 val _ = Datatype `dr_xfer_state = <|
 xfer_dataIN_buf: word8 list;
 xfer_dataOUT_buf: word8 list;
 xfer_cur_length : num |>`
 
-(* driver_state: spi driver state, including init, tx, rx and xfer functions state *)
+(* driver_state: include an error flag, general state, reocrds for the last read operation, and init, tx, rx, xfer states.*)
 val _ = Datatype `driver_state = <|
 dr_err: bool;
 state: dr_general_state;

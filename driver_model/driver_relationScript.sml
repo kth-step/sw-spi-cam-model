@@ -7,7 +7,7 @@ val _ = new_theory "driver_relation";
 
 (* driver_tr: SPI driver transiton relation *)
 val (driver_tr_rules, driver_tr_ind, driver_tr_cases) = Hol_reln `
-(* driver interal operation, check the reply from spi controller *)
+(* driver interal operation, check the reply from the controller *)
 (!(dr:driver_state). (DR_TAU_ENABLE dr) /\ (dr.dr_last_read_ad = SOME a) /\ 
 (dr.dr_last_read_v = SOME v) ==> 
 driver_tr dr tau (dr_check dr a v)) /\
@@ -65,7 +65,7 @@ local_tr (dr, spi) (RX data) (dr, spi')) /\
 (!(dr:driver_state) (spi:spi_state).
 spi_tr spi (XFER dataIN dataOUT) spi' ==> local_tr (dr, spi) (XFER dataIN dataOUT) (dr, spi'))`
 
-(* global_tr: two SPI drivers with each own SPI controller, transition relation without labels *)
+(* global_tr: two SPI drivers with each own SPI controller, transition relation *)
 val (global_tr_rules, global_tr_ind, global_tr_cases) = Hol_reln `
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) call_init (dr1', spi1') ==>

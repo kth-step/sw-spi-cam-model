@@ -2,12 +2,9 @@ open HolKernel bossLib boolLib Parse;
 open wordsLib wordsTheory listTheory;
 open driver_stateTheory board_memTheory;
 
-(* Driver issues a write request to the SPI controller *)
 val _ = new_theory "driver_write";
 
-(* Driver is available to issue write commands.
- * DR_WR_ENABLE:driver_state -> bool
- *)
+(* DR_WR_ENABLE: driver is available to issue write commands. *)
 val DR_WR_ENABLE_def = Define `
 DR_WR_ENABLE (dr:driver_state) =
 (dr.state = dr_init_idle \/
@@ -27,7 +24,7 @@ dr.state = dr_xfer_write_dataO \/
 dr.state = dr_xfer_issue_disable \/
 dr.state = dr_xfer_reset_conf)`
 
-(* dr_write_softreset: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_softreset: write the SOFTRESET bit. *)
 val dr_write_softreset_def = Define `
 dr_write_softreset (dr:driver_state) =
 let addr = SPI0_SYSCONFIG:word32 and
@@ -38,7 +35,7 @@ issue_wr_modulctrl := F; issue_wr_ch0conf_wl := F;
 issue_wr_ch0conf_mode := F; issue_wr_ch0conf_speed := F |>;
 state := dr_init_read_req |>)`
 
-(* dr_write_sysconfig: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_sysconfig: set up the SYSCONFIG register. *)
 val dr_write_sysconfig_def = Define `
 dr_write_sysconfig (dr:driver_state) =
 let addr = SPI0_SYSCONFIG:word32 and
@@ -49,7 +46,7 @@ state := if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
 (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
 then dr_ready else dr_init_setting |>)`
 
-(* dr_write_modulctrl: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_modulctrl: set up the MODULCTRL register. *)
 val dr_write_modulctrl_def = Define `
 dr_write_modulctrl (dr:driver_state) =
 let addr = SPI0_MODULCTRL:word32 and
@@ -60,7 +57,7 @@ state := if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) 
 (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
 then dr_ready else dr_init_setting |>)`
 
-(* dr_write_ch0conf_wl: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_wl: set up the WL Bit. *)
 val dr_write_ch0conf_wl_def = Define `
 dr_write_ch0conf_wl (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -71,7 +68,7 @@ state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) 
 (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
 then dr_ready else dr_init_setting |>)`
 
-(* dr_write_ch0conf_mode: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_mode: set up common bits of CH0CONF register. *)
 val dr_write_ch0conf_mode_def = Define `
 dr_write_ch0conf_mode (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -82,7 +79,7 @@ state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) 
 (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
 then dr_ready else dr_init_setting |>)`
 
-(* dr_write_ch0conf_speed: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_speed: set up the speed. *)
 val dr_write_ch0conf_speed_def = Define `
 dr_write_ch0conf_speed (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -93,7 +90,7 @@ state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) 
 (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
 then dr_ready else dr_init_setting |>)`
 
-(* dr_write_ch0conf_tx: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_tx: set up the CH0CONF register for tx mode. *)
 val dr_write_ch0conf_tx_def = Define `
 dr_write_ch0conf_tx (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -105,7 +102,7 @@ else if (dr.state = dr_tx_reset_conf) then
 (SOME addr, SOME v2, dr with state := dr_ready)
 else (NONE, NONE, dr with dr_err := T)`
 
-(* dr_write_ch0conf_rx: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_rx: set up the CH0CONF register for rx mode. *)
 val dr_write_ch0conf_rx_def = Define `
 dr_write_ch0conf_rx (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -117,7 +114,7 @@ else if (dr.state = dr_rx_reset_conf) then
 (SOME addr, SOME v2, dr with state := dr_ready)
 else (NONE, NONE, dr with dr_err := T)`
 
-(* dr_write_ch0conf_xfer: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0conf_xfer: set up the CH0CONF register for xfer mode. *)
 val dr_write_ch0conf_xfer_def = Define `
 dr_write_ch0conf_xfer (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
@@ -129,7 +126,7 @@ else if (dr.state = dr_xfer_reset_conf) then
 (SOME addr, SOME v2, dr with state := dr_ready)
 else (NONE, NONE, dr with dr_err := T)`
 
-(* dr_write_ch0ctrl: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_ch0ctrl: set up the CH0CTRL register. *)
 val dr_write_ch0ctrl_def = Define `
 dr_write_ch0ctrl (dr:driver_state) =
 let addr = SPI0_CH0CTRL:word32 and
@@ -149,7 +146,7 @@ else if (dr.state = dr_xfer_issue_disable) then
 (SOME addr, SOME v2, dr with state := dr_xfer_reset_conf)
 else (NONE, NONE, dr with dr_err := T)`
 
-(* dr_write_tx0: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write_tx0: write the data to the TX0 register. *)
 val dr_write_tx0_def = Define `
 dr_write_tx0 (dr:driver_state) = 
 if (dr.state = dr_tx_write_data) /\ 
@@ -168,7 +165,7 @@ dr with <| dr_xfer := dr.dr_xfer with xfer_cur_length := dr.dr_xfer.xfer_cur_len
 state := dr_xfer_read_rxs |>)
 else (NONE, NONE, dr with dr_err := T)`
 
-(* dr_write: driver_state -> word32 option * word32 option * driver_state *)
+(* dr_write: driver issues a write command to the controller. *)
 val dr_write_def = Define `
 dr_write (dr:driver_state) =
 case dr.state of
@@ -211,17 +208,15 @@ case dr.state of
  | dr_xfer_issue_disable => (dr_write_ch0ctrl dr)
  | dr_xfer_reset_conf => (dr_write_ch0conf_xfer dr)`
 
-(* dr_write_address: driver_state -> word32 option *)
+(* dr_write_address, dr_write_value, dr_write_value: return specific types. *)
 val dr_write_address_def = Define `
 dr_write_address (dr:driver_state) =
 let (ad, v, dr') = dr_write dr in ad`
 
-(* dr_write_value: driver_state -> word32 option *)
 val dr_write_value_def = Define `
 dr_write_value (dr:driver_state) =
 let (ad, v, dr') = dr_write dr in v`
 
-(* dr_write_state: driver_state -> driver_state *)
 val dr_write_state_def = Define `
 dr_write_state (dr:driver_state) =
 let (ad, v, dr') = dr_write dr in dr'`
