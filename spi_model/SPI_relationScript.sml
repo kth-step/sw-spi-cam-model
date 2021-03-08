@@ -3,15 +3,15 @@ open SPI_stateTheory SPI_update_regsTheory SPI_return_regsTheory SPI_tauTheory S
 
 val _ = new_theory "SPI_relation";
 
-(* relation for spi transition (an SPI device). *)
+(* spi_tr: relation for spi transition (an SPI device). *)
 val (spi_tr_rules, spi_tr_ind, spi_tr_cases) = Hol_reln `
-(* two cases for the driver and spi interface *)
+(* update the SPI register or return the value: the interface for driver and SPI controller *)
 (!(spi:spi_state). T ==> spi_tr spi (Update a v) (write_SPI_regs a v spi)) /\
 (!(spi:spi_state). T ==> spi_tr spi 
 (Return a (read_SPI_regs_value a spi)) (read_SPI_regs_state a spi)) /\
-(* spi internal operations *)
+(* spi internal operation *)
 (!(spi:spi_state). (SPI_TAU_ENABLE spi) ==> spi_tr spi tau (spi_tau_operations spi)) /\
-(* 3 cases for spi to transfer data with another spi device *)
+(* TX, RX and XFER: 3 cases for spi to transfer data with another spi device *)
 (!(spi:spi_state). (spi.state = tx_trans_done \/ spi.state = tx_trans_next) ==> 
 spi_tr spi (TX (tx_TX_op_value spi)) (tx_TX_op_state spi)) /\
 (!(spi:spi_state). (spi.state = rx_receive_data) /\ (data <> NONE) ==> 
@@ -19,7 +19,7 @@ spi_tr spi (RX data) (rx_receive_data_op spi data)) /\
 (!(spi:spi_state). (spi.state = xfer_exchange_data) /\ (dataIN <> NONE) ==>
 spi_tr spi (XFER dataIN (xfer_exchange_data_op_value spi dataIN)) (xfer_exchange_data_op_state spi dataIN))`
 
-(* a relation for two spi controllers to test data interactions *)
+(* spi_cb_tr: a relation for two spi controllers to test data interactions. *)
 val (spi_cb_tr_rules, spi_cb_tr_ind, spi_cb_tr_cases) = Hol_reln `
 (!(spi1:spi_state) (spi2:spi_state). spi_tr spi1 (Update a v) spi1' ==>
 spi_cb_tr (spi1, spi2) (spi1', spi2)) /\

@@ -4,23 +4,22 @@ open board_memTheory;
 
 val _ = new_theory "SPI_state";
 
-(* spi_state, the SPI controller's state that contains registers, 
-   an error flag and automaton's states *)
+(* spi_state: the SPI controller's state that contains registers, an error flag and automaton's states *)
 
-(* SPI registers, only related registers and bits are included. *)
-(* Bits in SYSCONFIG register *)
+(* SPI registers: memory-mapped SPI registers, only related registers and bits are included. *)
+(* Bits in the SYSCONFIG register *)
 val _ = Datatype `sysconfig_bits = <|
 SIDLEMODE: word2; (* Smart-idle mode *)
 SOFTRESET: word1; (* Software reset *)
 AUTOIDLE: word1 (* Internal OCP clock gating strategy *) |>`
 
-(* Bits in MODULCTRL register *)
+(* Bits in the MODULCTRL register *)
 val _ = Datatype `modulctrl_bits = <|
 SYSTEM_TEST: word1; (* Enable system test mode *)
 MS: word1; (* Master/Slave *)
 SINGLE: word1 (* Single/multi channels, master mode only *)|>`
 
-(* Bits in CH0CONF register *)
+(* Bits in the CH0CONF register *)
 val _ = Datatype `ch0conf_bits = <|
 PHA: word1; (* SPICLK phase *)
 POL: word1; (* SPICLK polarity *)
@@ -34,13 +33,13 @@ IS: word1; (* Input select *)
 TURBO: word1; (* Turbo mode *)
 FORCE: word1 (* Manual SPIEN assertion to keep SPIEN active between SPI words *) |>`
 
-(* Bits in CH0STAT register *)
+(* Bits in the CH0STAT register *)
 val _ = Datatype `ch0stat_bits = <|
 RXS: word1; (* Channel 0 receiver register status *)
 TXS: word1; (* Channel 0 transmitter register status *)
 EOT: word1  (* Channel 0 end-of-transfer status *) |>`
 
-(* SPI registers *)
+(* SPI memory-mapped registers *)
 val _ = Datatype `spi_regs = <|
 SYSCONFIG: sysconfig_bits; (* system configuration register *)
 SYSSTATUS: word1; (* system status register, only RESETDONE bit *)
@@ -81,26 +80,28 @@ RX_SHIFT_REG : word8; (* Shift register to receive data, not memory-mapped SPI r
 init: init_flags; (* initialization flags *) |>`
 
 (* Some simple functions related to the spi_state *)
-(* check SPI register CH0STAT RXS bit. CHECK_RXS_BIT_def: spi_state -> bool *)
+(* CHECK_RXS_BIT: check SPI register CH0STAT RXS Bit. *)
 val CHECK_RXS_BIT_def = Define `
 CHECK_RXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.RXS = 1w)`
 
-(* check SPI register CH0STAT TXS bit. CHECK_TXS_BIT_def: spi_state -> bool *)
+(* CHECK_TXS_BIT: check SPI register CH0STAT TXS Bit. *)
 val CHECK_TXS_BIT_def = Define `
 CHECK_TXS_BIT (spi:spi_state) = (spi.regs.CH0STAT.TXS = 1w)`
 
-(* check SPI register CH0STAT EOT bit. CHECK_EOT_BIT_def: spi_state -> bool *)
+(* CHECK_EOT_BIT: check SPI register CH0STAT EOT Bit. *)
 val CHECK_EOT_BIT_def = Define `
 CHECK_EOT_BIT (spi:spi_state) = (spi.regs.CH0STAT.EOT = 1w)`
 
-(* Externel environment connected to the SPI bus *)
+(* Externel environment connected to the SPI bus 
 val _ = Datatype `environment = <|
 read_reg : word32 (* An arbitrary value *)|>`
+*)
 
-(* Datatype for global labels, used by the relationScript.sml *)
+(* global_lbl_type: describe the labeled state transitions. *)
 (* tau means internal transition, TX, RX and XFER: SPI devices transmit and receive data, 
  * Write and Read are CPU/driver-issued commands to SPI memory-mapped registers.
  * Update and Return are SPI opertations according to CPU Write and Read commands, respectively.
+ * call_... : driver's interface for other programs to call its specific functions.
  *)
 val _ = Datatype `global_lbl_type = 
 | tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)

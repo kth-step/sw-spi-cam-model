@@ -4,19 +4,19 @@ open board_memTheory SPI_stateTheory;
 
 val _ = new_theory "SPI_return_regs";
 
-(* concat sysconfig bits into a 32-bits word *)
+(* build_SYSCONFIG: connect sysconfig bits into a 32-bits word. *)
 val build_SYSCONFIG_def = Define `
 build_SYSCONFIG (SYSCONFIG:sysconfig_bits) =
 (* During reads bit SOFRRESET always returns 0 *)
 let v1 = (0w:word2 @@ SYSCONFIG.AUTOIDLE): word3 in
 (SYSCONFIG.SIDLEMODE @@ v1) :word32`
 
-(* concat modulctrl bits into a 32-bits word *)
+(* build_MODULCTRL: connect modulctrl bits into a 32-bits word. *)
 val build_MODULCTRL_def = Define `
 build_MODULCTRL (MODULCTRL:modulctrl_bits) =
 (MODULCTRL.MS @@ ((0w:word1 @@ MODULCTRL.SINGLE):word2)) :word32`
 
-(* concat ch0conf bits into a 32-bits word*)
+(* build_CH0CONF: connect ch0conf bits into a 32-bits word. *)
 val build_CH0CONF_def = Define `
 build_CH0CONF (CH0CONF:ch0conf_bits) = 
 let v1 = (CH0CONF.FORCE @@ ((CH0CONF.TURBO @@ ((CH0CONF.IS @@ 
@@ -29,14 +29,12 @@ v2 = ((((0w:word2 @@ CH0CONF.TRM):word4) @@
 :word2)):word6)):word7)):word12)):word16) in
 (v1 @@ v2) :word32`
 
-(* concat ch0stat bits into a 32-bits word *)
+(* build_CH0STAT: connect ch0stat bits into a 32-bits word. *)
 val build_CH0STAT_def = Define `
 build_CH0STAT (CH0STAT:ch0stat_bits) =
 (CH0STAT.EOT @@ ((CH0STAT.TXS @@ CH0STAT.RXS):word2)):word32`
 
-(* read the value of RX0 with certain word-length
- * read_RX0: spi_state -> spi_state * word32
- *)
+(* read_RX0: fetch the data in the RX0 register. *)
 val read_RX0_def = Define `
 read_RX0 (spi:spi_state) =
 if (CHECK_RXS_BIT spi) /\ (spi.state = rx_data_ready) then
@@ -49,9 +47,7 @@ state := xfer_ready_for_trans |>,
 (7 >< 0) spi.regs.RX0:word32)
 else (spi with err := T, ARB)`
 
-(* read_register returns a new spi state and the value of pa
- * read_SPI_regs: word32 -> spi_state -> spi_state * word32
- *)
+(* read_SPI_regs: returns a new spi state and the value of the memory-mapped register. *)
 val read_SPI_regs_def = Define `
 read_SPI_regs (pa:word32) (spi:spi_state) =
 (* pa is not in the SPI region, no changes *)
@@ -69,7 +65,7 @@ else if pa = SPI0_RX0 then (read_RX0 spi)
 (* other addresses in SPI are not modeled, return an arbitrary value *)
 else (spi, ARB)`
 
-(* functions return specific datatypes *)
+(* read_SPI_regs_state, read_SPI_regs_value: return specific datatypes *)
 val read_SPI_regs_state_def = Define `
 read_SPI_regs_state (pa:word32) (spi:spi_state) =
 let (spi', v) = read_SPI_regs pa spi in spi'`
