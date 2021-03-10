@@ -294,35 +294,4 @@ Q.EXISTS_TAC `d0'''` >>
 Q.EXISTS_TAC `d1'''` >>
 METIS_TAC [n_tau_tr_plus]);
 
-(* apply induct_on l1' or (length - cur_length)
- abs0 can apply xfer mode to exchange arbitary bytes between 2 devices *)
-(*
-val abs0_xfer_correct_list_idle = store_thm("abs0_xfer_correct_list_idle",
-``!l1 l2 l1' l2' d0 d1.
-d0.state = abs0_xfer_idle /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
-d0.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ l1' /\ d0.ds_abs0_xfer.xfer_cur_length = 0 /\
-d1.state = abs0_xfer_idle /\ d1.ds_abs0_xfer.xfer_dataIN_buffer = [] /\
-d1.ds_abs0_xfer.xfer_dataOUT_buffer = l2 ++ l2' /\ d1.ds_abs0_xfer.xfer_cur_length = 0 /\ LENGTH l1 = LENGTH l2 /\
-l1 <> [] /\ l2 <> [] /\ l1' <> [] /\ l2' <> [] ==>
-?n d0'' d1''. n_tau_tr n abs0_global_tr (d0,d1) tau (d0'',d1'') /\
-d0''.ds_abs0_xfer.xfer_dataIN_buffer = l2 /\ d0''.state = abs0_xfer_idle /\
-d0''.ds_abs0_xfer.xfer_cur_length = LENGTH l1 /\
-d0''.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ l1' /\
-d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\ d1''.state = abs0_xfer_idle /\
-d1''.ds_abs0_xfer.xfer_dataOUT_buffer = l2 ++ l2' /\
-d1''.ds_abs0_xfer.xfer_cur_length  = LENGTH l2``,
-NTAC 4 GEN_TAC >>
-Induct_on `LENGTH (l1 ++ l1') - LENGTH l1` >>
-Induct_on `LENGTH (l2 ++ l2') - LENGTH l2` >>
-fs [NOT_NIL_EQ_LENGTH_NOT_0] >>
-rw [] >>
-Cases_on `l1'` >>
-Cases_on `l2'` >>
-fs [] >>
-Cases_on `t` >-
-(`t' = []` by cheat >>
-fs []
-(* go back to the thm that needs induct_on l1 l2 *)
-*)
-
 val _ = export_theory();
