@@ -1,4 +1,4 @@
-This folder is the driver model.
+SPI driver model
 
 ### Files
 - `driver_writeScript`: defines the `dr_write` function and related functions that issue write requests to the SPI controller according to the driver state.
