@@ -1,8 +1,6 @@
 # sw-spi-cam-model
 
-This repository is for the formal model and verification of the SPI driver and controller, as well as an abstract model.
-
-### TODO
+Formal verification of the Serial Peripheral Interface (SPI).
 
 
 ### Related documents
