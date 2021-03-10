@@ -1,4 +1,4 @@
-This folder is the abstract model that combines SPI driver and controller.
+The abstract (level 1) model.
 
 ### State transition
 
