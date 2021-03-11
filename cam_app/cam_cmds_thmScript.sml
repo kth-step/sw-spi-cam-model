@@ -5,16 +5,15 @@ val _ = new_theory "cam_cmds_thm"
 
 (* camera can receive the command to update the CTRL register through ds_abs0. *)
 val cam_rec_capture_cmd = store_thm("cam_rec_capture_cmd",
-``!cam d0 d0' d1'.
+``!cam d0 d0' d1' a1 a2.
 cam.d1.state = abs0_ready /\ d0.state = abs0_ready ==>
 ds_abs0_tr d0 (call_xfer [0x84w; 0x01w]) d0' /\
-ds_abs0_tr cam.d1 (call_xfer [0x00w; 0x00w]) d1' ==>
+ds_abs0_tr cam.d1 (call_xfer [a1; a2]) d1' ==>
 ?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
-d0''.ds_abs0_xfer.xfer_dataIN_buffer = [0x00w;0x00w] /\
 d1''.ds_abs0_xfer.xfer_dataIN_buffer = [0x84w;0x01w]``,
 rw [] >>
-`LENGTH [0x84w:word8;0x01w:word8] = LENGTH [0x00w:word8;0x00w:word8]` by rw [] >>
-`[0x84w:word8;0x01w:word8] <> [] /\ [0x00w:word8;0x00w:word8] <> []` by rw [] >>
+`LENGTH [0x84w:word8;0x01w:word8] = LENGTH [a1;a2]` by rw [] >>
+`[0x84w:word8;0x01w:word8] <> [] /\ [a1;a2] <> []` by rw [] >>
 METIS_TAC [abs0_xfer_correct]);
 
 (* With correct command, capture can start capture. *)
@@ -28,19 +27,18 @@ rw [cam_update_regs_def, CAM_CTRL_PA_def, cam_update_ctrl_def]);
 
 (* Camera can receive the read commands *)
 val cam_rec_read_cmds = store_thm("cam_rec_read_cmds",
-``!cam d0 d0' d1' ad.
+``!cam d0 d0' d1' ad a.
 cam.d1.state = abs0_ready /\ d0.state = abs0_ready ==>
 ad = CAM_CTRL_PA \/ ad = CAM_TRIG_PA \/ ad = CAM_DATA_PA ==>
 ds_abs0_tr d0 (call_xfer [ad]) d0' /\
-ds_abs0_tr cam.d1 (call_xfer [0w]) d1' ==>
+ds_abs0_tr cam.d1 (call_xfer [a]) d1' ==>
 ?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
-d0''.ds_abs0_xfer.xfer_dataIN_buffer = [0w] /\
 d1''.ds_abs0_xfer.xfer_dataIN_buffer = [ad]``,
 rw [] >>
-`LENGTH [CAM_CTRL_PA] = LENGTH [0w:word8] /\
- LENGTH [CAM_TRIG_PA] = LENGTH [0w:word8] /\
- LENGTH [CAM_DATA_PA] = LENGTH [0w:word8]` by rw [] >>
-`[CAM_CTRL_PA] <> [] /\ [CAM_TRIG_PA] <> [] /\ [CAM_DATA_PA] <> [] /\ [0w:word8] <> []` by rw [] >>
+`LENGTH [CAM_CTRL_PA] = LENGTH [a] /\
+ LENGTH [CAM_TRIG_PA] = LENGTH [a] /\
+ LENGTH [CAM_DATA_PA] = LENGTH [a]` by rw [] >>
+`[CAM_CTRL_PA] <> [] /\ [CAM_TRIG_PA] <> [] /\ [CAM_DATA_PA] <> [] /\ [a] <> []` by rw [] >>
 METIS_TAC [abs0_xfer_correct]);
 
 (* Camera will return corresponding register value *)
@@ -70,18 +68,17 @@ cam'.d1 = call_xfer_ds_abs0 cam.d1 [cam.regs.CAM_DATA]``,
 rw [cam_return_regs_def, CAM_TRIG_PA_def, CAM_CTRL_PA_def, CAM_DATA_PA_def,
 cam_return_data_def]);
 
-(* camera can send back the register vaule *)
+(* camera can send back the register vaule, the main device can receive it. *)
 val cam_rec_read_cmds = store_thm("cam_rec_read_cmds",
-``!cam d0 d0' d1' v.
+``!cam d0 d0' d1' v a.
 cam.d1.state = abs0_ready /\ d0.state = abs0_ready ==>
-ds_abs0_tr d0 (call_xfer [0w]) d0' /\
+ds_abs0_tr d0 (call_xfer [a]) d0' /\
 ds_abs0_tr cam.d1 (call_xfer [v]) d1' ==>
 ?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
-d0''.ds_abs0_xfer.xfer_dataIN_buffer = [v] /\
-d1''.ds_abs0_xfer.xfer_dataIN_buffer = [0w]``,
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = [v]``,
 rw [] >>
-`LENGTH [v] = LENGTH [0w:word8]` by rw [] >>
-`[v] <> [] /\ [0w:word8] <> []` by rw [] >>
+`LENGTH [v] = LENGTH [a]` by rw [] >>
+`[v] <> [] /\ [a] <> []` by rw [] >>
 METIS_TAC [abs0_xfer_correct]);
 
 val _ = export_theory ();
