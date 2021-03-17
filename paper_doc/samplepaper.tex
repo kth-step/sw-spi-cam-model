@@ -1,0 +1,194 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+\usepackage{amsmath}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{Formal Verification of the Serial Peripheral Interface (SPI)}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{First Author\orcidID{0000-0000-0000-0000} \and
+Second Author\orcidID{0000-0000-0000-0000} \and
+Third Author\orcidID{0000-0000-0000-0000}}
+%
+\authorrunning{F. Author et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{University, City, Country\\ 
+\email{\{person1, person2, person3\}@x.y}}
+
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in
+15--250 words.
+
+\keywords{Serial Peripheral Interface(SPI) \and Formal verification \and Weak bisimulation \and Correctness \and HOL4}
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+I/O devices are indispensable components of current computing platforms for multiple functionalities, especially interactions with the external environment (e.g., print documents, transmit data, and receive user's commands). However, corresponding poorly written device drivers are the predominant reason for operating system crashes \cite{chou2001empirical,ganapathi2006windows,orgovan2003introduction}. Moreover, I/O devices are shown as vulnerable targets for side-channel attacks\cite{}. Therefore, the reliability and security of I/O devices are critical to building a trustworthy computing system. Among other properties, the fundamental requirement is the functional correctness of I/O devices. There are some previous papers regarding this topic. But either they focus only on a specific I/O interface such as the UART port\cite{alkassar2007,duan2010correctness}, which makes their work hard to extend for other interfaces, or the general device model leaves the hardware correctness as an assumption\cite{chen2016toward} but not always guaranteed in realistic. In order to address these issues, we present a general device model that can be instantiated with various I/O devices, and also consider the hardware correctness in the concrete device model level.
+ 
+ In practice, I/O devices consist of two main parts, the hardware controller (hardware part) and the device driver (software part). The controller manages the low-level hardware operations, like interactions with the processor. And the driver issues command to control the hardware from the processor perspective. Different than regular software which usually concentrates on program code, formal verification of I/O devices should consider not only the driver code but also the hardware behaviors.   
+ 
+ simplify the functional correctness proofs of concrete hardware and software models through the weak bisimulation relation.
+
+side channel information to be added
+
+Contribution
+
+\section{Background}
+
+Something to mention here
+\begin{itemize}
+    \item BeagleBone Black and ARMv7
+    \item Serial Peripheral Interface(SPI): support half-duplex and full-duplex modes.
+    \item HOL4
+\end{itemize}
+    
+\section{SPI models}
+In this section, we introduce a concrete SPI model, as an example to show how the processor controls an I/O device. 
+It is based on the BeagleBone Black development board with an ARMv7 processor. 
+The SPI model includes a controller and a driver model. 
+Since the controller model has memory-mapped registers, the driver model simply issues memory operations (\textit{Read} and \textit{Write}) to operate the controller.
+
+\subsection{SPI controller model}
+The state of the SPI controller is represented by a tuple \textit{spi} = (\textit{regs,shift\_regs,state}).
+\textit{regs} describes memory-mapped SPI registers, while \textit{shift\_regs} is the hardware-controlled shift register for data transmissions between SPI devices.
+Because it is not mapped into the processor memory, \textit{shift\_regs} cannot be accessed directly by the device driver. 
+\textit{state} represents the behaviours of four functionalities, including \textit{init}(initialization), \textit{tx}(transmission), \textit{rx}(reception) and \textit{xfer}(transferring). 
+Especially the automaton \textit{xfer} supports full-duplex communication that transmits and receives data simultaneously.
+And \textit{tx} and \textit{rx} are half-duplex transmissions, transmitting and receiving data alternatively.
+
+An SPI controller will enter into an erroneous state $\bot$ if one of the following conditions hold:(1) the controller receives \textit{Read} or \textit{Write} commands that are against the SPI specification\cite{am335x} (e.g., the receiving data register \textbf{RX0} is read when its value is indeterminate.);
+(2)internal operations that the controller's state is not allowed to perform according to the specification (e.g., update the shift register before the initialization is done); 
+(3) the operation is undefined in the formal SPI model (e.g., the unrelated registers are accessed).
+
+A labeled state transition relation $spi \xrightarrow[]{l} spi' $ specifies the interactions of the controller with the driver and the external environment, where \textit{spi} and \textit{spi'} represents the original and updated SPI controller states, and \textit{l} indicates the transition label. 
+The relation satisfies the following rules:
+\begin{gather*}
+    \frac{}{spi \xrightarrow{Update(a,v)} spi'} \ \ \ \ 
+    \frac{}{spi \xrightarrow{Return(a,v)} spi'} \ \ \ \
+    \frac{tau\_enable\ spi}{spi \xrightarrow{\tau} spi'} \\
+    \frac{tx\_data\_enable\ spi}{spi \xrightarrow{TX (SOME\ d)} spi'} \ \ \ \ 
+    \frac{rx\_data\_enable\ spi}{spi \xrightarrow{RX (SOME\ d)} spi'}\\
+    \frac{xfer\_data\_enable\ spi}{spi \xrightarrow{XFER (SOME\ d1,\ SOME\ d0)} spi'}
+\end{gather*}
+The first two rules show how the controller processes the driver's memory requests. 
+If the driver issues a \textit{Write} command to the SPI register at the address \textit{a} with the value \textit{v}, the controller performs an update ($spi \xrightarrow{Update(a,v)} spi'$) according to the \textit{a} and \textit{v}. 
+Similarly, the SPI returns the corresponding register's value \textit{v} at the address \textit{a} for a \textit{Read} command. 
+$\tau$ transitions collect the controller's internal operations in specific states that are not visible from the outside. 
+For instance, the controller will reset some registers internally after the Bit \textbf{SOFTRESET} of Register \textbf{SYSCONFIG} was written. 
+The last three rules indicate the data transmission between the SPI controller and an external SPI device applying different automatons. 
+As mentioned above, \textit{TX} and \textit{RX} states transmit and receive one byte (\textit{d}) to/from another device on the specific controller states. 
+On the other hand, \textit{XFER} allows the controller to transmit and receive one byte (\textit{d1} and \textit{d0}) simultaneously. 
+
+
+\subsection{SPI driver model}
+The driver part, correctly control the hardware
+
+States
+
+4 corresponding functions
+
+Operations: internal, write and read
+
+
+\subsection{Combined state transition}
+How the controller and driver models work together
+
+Own tau transitions
+
+Write/Update
+
+Read/Return
+
+\section{Abstraction}
+The basic SPI model has complicated state transitions and workflow, so it is hard to reason about directly. Then we developed abstract models step by step.
+
+\subsection{Level 1 abstract model}
+Level 1 abstract model, remove the hardware details, e.g. registers of SPI controller, use a single model to describe the combined model of SPI controller and driver.
+
+\subsection{Level 0 abstract model}
+Level 0 abstract model, further remove unnecessary internal steps, use a simply way to represent the 4 automatons
+
+\section{Weak bisimulation}
+To validate the abstract models, we prove the weak bisimulation between models in different level.
+
+\subsection{ds\_abs1 and the concrete model}
+
+\subsection{ds\_abs0 and ds\_abs1}
+
+\subsection{ds\_abs0 abd the concrete model}
+Based on 2 previous theorems.
+ 
+\section{Functional Correctness}
+\subsection{Initialize mode}
+\begin{theorem}
+From the start state, abs can reach the ready state which means initialization can be done in the concrete level.
+\end{theorem}
+
+\subsection{Half duplex modes}
+
+\subsubsection{Transmit mode}
+An SPI master device can transmit bytes to another SPI slave device by choosing TX mode.
+
+\subsubsection{Receive mode}
+An SPI device can receive bytes from another SPI device by choosing RX mode.
+
+\subsection{Full duplex mode}
+
+\subsubsection{Transmit and receive}
+An SPI device can transmit and receive data simultaneously with another SPI slave device by choosing full duplex mode.
+
+\section{Challenges in HOL4}
+Difficult to apply the ARMv7 model in HOL4
+
+From HOL4 code to generator binary code
+
+\section{Application: a random number generator via SPI}
+introduce the usage of SPI, using our RNG example
+
+\section{Related work}
+
+\textbf{Formal models for device drivers}
+
+\textbf{Trusted I/0}
+
+\section{Conclusion and future work}
+What we have done, what is the meaning,
+
+future work
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+% \bibliographystyle{splncs04}
+% \bibliography{mybibliography}
+%
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+
+\end{document}
