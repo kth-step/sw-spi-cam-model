@@ -88,8 +88,11 @@ case dr.state of
   | dr_init_check_rep => if (ad = SPI0_SYSSTATUS) then (dr_check_sysstatus dr v)
     else dr with dr_err := T
   | dr_init_setting => dr with dr_err := T
+  | dr_init_read_conf => dr with dr_err := T
+  | dr_init_set_conf => dr with dr_err := T
   | dr_ready => dr with dr_err := T
   | dr_tx_idle => dr with dr_err := T
+  | dr_tx_fetch_conf => dr with dr_err := T
   | dr_tx_conf_issued => dr with dr_err := T
   | dr_tx_read_txs => dr with dr_err := T
   | dr_tx_check_txs => if (ad = SPI0_CH0STAT) then (dr_check_tx_ch0stat dr v)
@@ -99,8 +102,10 @@ case dr.state of
   | dr_tx_check_eot => if (ad = SPI0_CH0STAT) then (dr_check_tx_ch0stat dr v)
     else dr with dr_err := T
   | dr_tx_issue_disable => dr with dr_err := T
+  | dr_tx_read_conf => dr with dr_err := T
   | dr_tx_reset_conf => dr with dr_err := T
   | dr_rx_idle => dr with dr_err := T
+  | dr_rx_fetch_conf => dr with dr_err := T
   | dr_rx_conf_issued => dr with dr_err := T
   | dr_rx_read_rxs => dr with dr_err := T
   | dr_rx_check_rxs => if (ad = SPI0_CH0STAT) then (dr_check_rx_ch0stat dr v)
@@ -109,8 +114,10 @@ case dr.state of
   | dr_rx_fetch_data => if (ad = SPI0_RX0) then (dr_check_rx0 dr v)
     else dr with dr_err := T
   | dr_rx_issue_disable => dr with dr_err := T
+  | dr_rx_read_conf => dr with dr_err := T
   | dr_rx_reset_conf => dr with dr_err := T
   | dr_xfer_idle => dr with dr_err := T
+  | dr_xfer_fetch_conf => dr with dr_err := T
   | dr_xfer_conf_issued => dr with dr_err := T
   | dr_xfer_read_txs => dr with dr_err := T
   | dr_xfer_check_txs => if (ad = SPI0_CH0STAT) then (dr_check_xfer_ch0stat dr v)
@@ -123,6 +130,7 @@ case dr.state of
   | dr_xfer_fetch_dataI => if (ad = SPI0_RX0) then (dr_check_rx0 dr v)
     else dr with dr_err := T
   | dr_xfer_issue_disable => dr with dr_err := T
+  | dr_xfer_read_conf => dr with dr_err := T
   | dr_xfet_reset_conf => dr with dr_err := T`
 
 val _ = export_theory();

@@ -189,17 +189,21 @@ else spi with err := T`
 (* write_CH0CONF_comb: combine the functions updateing the CH0CONF register *)
 val write_CH0CONF_comb_def = Define `
 write_CH0CONF_comb (value:word32) (spi:spi_state) =
-if ((11 >< 7) value:word5 <> 0w) 
+if ((11 >< 7) value:word5 <> spi.regs.CH0CONF.WL) 
 then (write_CH0CONF_WL value spi) 
-else if ((17 >< 16) value:word2 <> 0w) 
+else if ((17 >< 17) value:word1 <> spi.regs.CH0CONF.DPE1 /\ 
+(16 >< 16) value: word1 <> spi.regs.CH0CONF.DPE0) 
 then (write_CH0CONF value spi) 
-else if ((5 >< 2) value:word4 <> 0w) 
+else if ((5 >< 2) value:word4 <> spi.regs.CH0CONF.CLKD) 
 then (write_CH0CONF_speed value spi) 
-else if ((13 >< 12) value:word2 = 2w) \/ (value = 0w /\ spi.state = tx_channel_disabled)
+else if ((13 >< 12) value:word2 = 2w) \/ 
+((20 >< 20) value:word1 <> spi.regs.CH0CONF.FORCE /\ spi.state = tx_channel_disabled)
 then (write_CH0CONF_tx value spi)
-else if ((13 >< 12) value:word2 = 1w) \/ (value = 0w /\ spi.state = rx_channel_disabled)
+else if ((13 >< 12) value:word2 = 1w) \/ 
+((20 >< 20) value:word1 <> spi.regs.CH0CONF.FORCE /\ spi.state = rx_channel_disabled)
 then (write_CH0CONF_rx value spi) 
-else if ((13 >< 12) value:word2 = 0w) \/ (value = 0w /\ spi.state = xfer_channel_disabled) 
+else if ((13 >< 12) value:word2 = 0w) \/ 
+((20 >< 20) value:word1 <> spi.regs.CH0CONF.FORCE /\ spi.state = xfer_channel_disabled) 
 then (write_CH0CONF_xfer value spi)
 else spi with err := T`
 

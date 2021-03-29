@@ -8,17 +8,18 @@ val _ = new_theory "driver_write";
 val DR_WR_ENABLE_def = Define `
 DR_WR_ENABLE (dr:driver_state) =
 (dr.state = dr_init_idle \/
-dr.state = dr_init_setting \/ 
-dr.state = dr_tx_idle \/
+dr.state = dr_init_setting \/
+dr.state = dr_init_set_conf \/ 
+dr.state = dr_tx_fetch_conf \/
 dr.state = dr_tx_conf_issued \/ 
 dr.state = dr_tx_write_data \/
 dr.state = dr_tx_issue_disable \/
 dr.state = dr_tx_reset_conf \/
-dr.state = dr_rx_idle \/
+dr.state = dr_rx_fetch_conf \/
 dr.state = dr_rx_conf_issued \/
 dr.state = dr_rx_issue_disable \/
 dr.state = dr_rx_reset_conf \/
-dr.state = dr_xfer_idle \/
+dr.state = dr_xfer_fetch_conf \/
 dr.state = dr_xfer_conf_issued \/
 dr.state = dr_xfer_write_dataO \/
 dr.state = dr_xfer_issue_disable \/
@@ -42,9 +43,7 @@ let addr = SPI0_SYSCONFIG:word32 and
     v = 0x00000011w:word32 in 
 (SOME addr, SOME v,
 dr with <| dr_init := dr.dr_init with issue_wr_sysconfig := T;
-state := if (dr.dr_init.issue_wr_modulctrl) /\ (dr.dr_init.issue_wr_ch0conf_wl) /\ 
-(dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-then dr_ready else dr_init_setting |>)`
+state := if dr.dr_init.issue_wr_modulctrl then dr_init_read_conf else dr_init_setting |>)`
 
 (* dr_write_modulctrl: set up the MODULCTRL register. *)
 val dr_write_modulctrl_def = Define `
@@ -53,50 +52,45 @@ let addr = SPI0_MODULCTRL:word32 and
     v = 0x00000001w:word32 in
 (SOME addr, SOME v,
 dr with <| dr_init := dr.dr_init with issue_wr_modulctrl := T;
-state := if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_ch0conf_wl) /\ 
-(dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-then dr_ready else dr_init_setting |>)`
+state := if dr.dr_init.issue_wr_sysconfig then dr_init_read_conf else dr_init_setting |>)`
 
 (* dr_write_ch0conf_wl: set up the WL Bit. *)
 val dr_write_ch0conf_wl_def = Define `
 dr_write_ch0conf_wl (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v = 0x00000380w:word32 in
+     v:word32 = (THE dr.dr_last_read_v) && (0xFFFFF07Fw:word32) || (0x00000380w:word32) in
 (SOME addr, SOME v,
 dr with <| dr_init := dr.dr_init with issue_wr_ch0conf_wl := T;
-state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
-(dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
-then dr_ready else dr_init_setting |>)`
+state :=  if (dr.dr_init.issue_wr_ch0conf_mode) /\ (dr.dr_init.issue_wr_ch0conf_speed)
+then dr_ready else dr_init_read_conf |>)`
 
 (* dr_write_ch0conf_mode: set up common bits of CH0CONF register. *)
 val dr_write_ch0conf_mode_def = Define `
 dr_write_ch0conf_mode (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v = 0x00010040w:word32 in
+    v:word32 =  (THE dr.dr_last_read_v) && (0xFFF8CFBCw:word32) || (0x00010040w:word32) in
 (SOME addr, SOME v,
 dr with <| dr_init := dr.dr_init with issue_wr_ch0conf_mode := T;
-state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\
-(dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
-then dr_ready else dr_init_setting |>)`
+state :=  if (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_speed) 
+then dr_ready else dr_init_read_conf |>)`
 
 (* dr_write_ch0conf_speed: set up the speed. *)
 val dr_write_ch0conf_speed_def = Define `
 dr_write_ch0conf_speed (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v = 0x00000018w:word32 in
+    v:word32 = (THE dr.dr_last_read_v) && (0xFFFFFFC3w:word32) || (0x00000018w:word32) in
 (SOME addr, SOME v,
 dr with <| dr_init := dr.dr_init with issue_wr_ch0conf_speed := T;
-state :=  if (dr.dr_init.issue_wr_sysconfig) /\ (dr.dr_init.issue_wr_modulctrl) /\ 
-(dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
-then dr_ready else dr_init_setting |>)`
+state :=  if (dr.dr_init.issue_wr_ch0conf_wl) /\ (dr.dr_init.issue_wr_ch0conf_mode) 
+then dr_ready else dr_init_read_conf |>)`
 
 (* dr_write_ch0conf_tx: set up the CH0CONF register for tx mode. *)
 val dr_write_ch0conf_tx_def = Define `
 dr_write_ch0conf_tx (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v1 = 0x00102000w:word32 and
-    v2 = 0x00000000w:word32 in
-if (dr.state = dr_tx_idle) then
+    v1:word32 = (THE dr.dr_last_read_v) && (0xFFEFCFFFw:word32) || (0x00102000w:word32) and
+    v2:word32 = (THE dr.dr_last_read_v) && (0xFFEFFFFFw:word32) in
+if (dr.state = dr_tx_fetch_conf) then
 (SOME addr, SOME v1, dr with state := dr_tx_conf_issued)
 else if (dr.state = dr_tx_reset_conf) then 
 (SOME addr, SOME v2, dr with state := dr_ready)
@@ -106,9 +100,9 @@ else (NONE, NONE, dr with dr_err := T)`
 val dr_write_ch0conf_rx_def = Define `
 dr_write_ch0conf_rx (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v1 = 0x00101000w:word32 and
-    v2 = 0x00000000w:word32 in
-if (dr.state = dr_rx_idle) then
+    v1:word32 = (THE dr.dr_last_read_v) && (0xFFEFCFFFw:word32) || (0x00101000w:word32) and
+    v2:word32 = (THE dr.dr_last_read_v) && (0xFFEFFFFFw:word32) in
+if (dr.state = dr_rx_fetch_conf) then
 (SOME addr, SOME v1, dr with state := dr_rx_conf_issued)
 else if (dr.state = dr_rx_reset_conf) then
 (SOME addr, SOME v2, dr with state := dr_ready)
@@ -118,9 +112,9 @@ else (NONE, NONE, dr with dr_err := T)`
 val dr_write_ch0conf_xfer_def = Define `
 dr_write_ch0conf_xfer (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v1 = 0x00100000w:word32 and
-    v2 = 0x00000000w:word32 in
-if (dr.state = dr_xfer_idle) then
+    v1:word32 = (THE dr.dr_last_read_v) && (0xFFEFCFFFw:word32) || 0x00100000w:word32 and
+    v2:word32 = (THE dr.dr_last_read_v) && (0xFFEFFFFFw:word32) in
+if (dr.state = dr_xfer_fetch_conf) then
 (SOME addr, SOME v1, dr with state := dr_xfer_conf_issued)
 else if (dr.state = dr_xfer_reset_conf) then
 (SOME addr, SOME v2, dr with state := dr_ready)
@@ -174,29 +168,35 @@ case dr.state of
  | dr_init_read_req => (NONE, NONE, dr with dr_err := T)
  | dr_init_check_rep => (NONE, NONE, dr with dr_err := T)
  | dr_init_setting => if (~ dr.dr_init.issue_wr_sysconfig) then (dr_write_sysconfig dr)
-   else if (~ dr.dr_init.issue_wr_modulctrl) then (dr_write_modulctrl dr)
-   else if (~ dr.dr_init.issue_wr_ch0conf_wl) then (dr_write_ch0conf_wl dr)
+   else (dr_write_modulctrl dr)
+ | dr_init_read_conf => (NONE, NONE, dr with dr_err := T)
+ | dr_init_set_conf => if (~ dr.dr_init.issue_wr_ch0conf_wl) then (dr_write_ch0conf_wl dr)
    else if (~ dr.dr_init.issue_wr_ch0conf_mode) then (dr_write_ch0conf_mode dr)
    else (dr_write_ch0conf_speed dr)
  | dr_ready => (NONE, NONE, dr with dr_err := T)
- | dr_tx_idle => (dr_write_ch0conf_tx dr)
+ | dr_tx_idle => (NONE, NONE, dr with dr_err := T)
+ | dr_tx_fetch_conf => (dr_write_ch0conf_tx dr)
  | dr_tx_conf_issued => (dr_write_ch0ctrl dr)
  | dr_tx_read_txs => (NONE, NONE, dr with dr_err := T)
  | dr_tx_check_txs => (NONE, NONE, dr with dr_err := T)
  | dr_tx_write_data => (dr_write_tx0 dr)
  | dr_tx_read_eot => (NONE, NONE, dr with dr_err := T)
- | dr_tx_check_eot => (NONE,NONE, dr with dr_err := T)
+ | dr_tx_check_eot => (NONE, NONE, dr with dr_err := T)
  | dr_tx_issue_disable => (dr_write_ch0ctrl dr)
+ | dr_tx_read_conf => (NONE, NONE, dr with dr_err := T)
  | dr_tx_reset_conf => (dr_write_ch0conf_tx dr)
- | dr_rx_idle => (dr_write_ch0conf_rx dr)
+ | dr_rx_idle => (NONE, NONE, dr with dr_err := T)
+ | dr_rx_fetch_conf => (dr_write_ch0conf_rx dr)
  | dr_rx_conf_issued => (dr_write_ch0ctrl dr)
  | dr_rx_read_rxs => (NONE, NONE, dr with dr_err := T)
  | dr_rx_check_rxs => (NONE, NONE, dr with dr_err := T)
  | dr_rx_read_rx0 => (NONE, NONE, dr with dr_err := T)
  | dr_rx_fetch_data => (NONE, NONE, dr with dr_err := T)
  | dr_rx_issue_disable => (dr_write_ch0ctrl dr)
+ | dr_rx_read_conf => (NONE, NONE, dr with dr_err := T)
  | dr_rx_reset_conf => (dr_write_ch0conf_rx dr)
- | dr_xfer_idle => (dr_write_ch0conf_xfer dr)
+ | dr_xfer_idle => (NONE, NONE, dr with dr_err := T)
+ | dr_xfer_fetch_conf => (dr_write_ch0conf_xfer dr)
  | dr_xfer_conf_issued => (dr_write_ch0ctrl dr)
  | dr_xfer_read_txs => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_check_txs => (NONE, NONE, dr with dr_err := T)
@@ -206,6 +206,7 @@ case dr.state of
  | dr_xfer_read_rx0 => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_fetch_dataI => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_issue_disable => (dr_write_ch0ctrl dr)
+ | dr_xfer_read_conf => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_reset_conf => (dr_write_ch0conf_xfer dr)`
 
 (* dr_write_address, dr_write_value, dr_write_value: return specific types. *)
