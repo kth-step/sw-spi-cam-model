@@ -1,5 +1,4 @@
-open HolKernel bossLib boolLib Parse;
-open wordsTheory wordsLib;
+open HolKernel bossLib boolLib Parse wordsTheory wordsLib;
 
 (* This script defines the memory space on the board for AM335x CPU. *)
 val _ = new_theory "board_mem";

@@ -13,8 +13,19 @@ rw [spi_tr_cases, dr_read_def, dr_read_sysstatus_def, read_SPI_regs_state_def,
 read_SPI_regs_value_def] >>
 rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_SYSSTATUS_def] >>
-Cases_on `spi.state` >>
-rw []);
+Cases_on `spi.state` >> rw []);
+
+(* relation holds when driver state is dr_tx_idle *)
+val ref_rel_hold_dr_tx_idle = store_thm("ref_rel_hold_dr_tx_idle",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_tx_idle) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
 
 (* relation holds when driver state is dr_tx_read_txs *)
 val ref_rel_hold_dr_tx_read_txs = store_thm("ref_rel_hold_dr_tx_read_txs",
@@ -28,6 +39,7 @@ rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
 SPI0_CH0CONF_def, build_CH0STAT_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+Cases_on `spi.state` >> rw [] >> 
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* relation holds when driver state is dr_tx_read_eot *)
@@ -42,7 +54,32 @@ rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
 SPI0_CH0CONF_def, build_CH0STAT_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+Cases_on `spi.state` >> rw [] >> 
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
+
+(* relation holds when driver state is dr_tx_read_conf *)
+val ref_rel_hold_dr_tx_read_conf = store_thm("ref_rel_hold_dr_tx_read_conf",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_tx_read_conf) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
+
+(* relation holds when driver state is dr_rx_idle *)
+val ref_rel_hold_dr_rx_idle = store_thm("ref_rel_hold_dr_rx_idle",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_rx_idle) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
 
 (* relation holds when driver state is dr_rx_read_rxs *)
 val ref_rel_hold_dr_rx_read_rxs = store_thm("ref_rel_hold_dr_rx_read_rxs",
@@ -56,6 +93,7 @@ rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
 SPI0_CH0CONF_def, build_CH0STAT_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+Cases_on `spi.state` >> rw [] >> 
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* lemma: if dr.state = dr_rx_read_rx0 then ds_abs1.state = abs1_rx_read
@@ -76,6 +114,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_init_setting) /\
 (dr.state <> dr_ready) /\
 (dr.state <> dr_tx_idle) /\
+(dr.state <> dr_tx_fetch_conf) /\
 (dr.state <> dr_tx_conf_issued) /\
 (dr.state <> dr_tx_read_txs) /\
 (dr.state <> dr_tx_check_txs) /\
@@ -83,15 +122,19 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_tx_read_eot) /\
 (dr.state <> dr_tx_check_eot) /\
 (dr.state <> dr_tx_issue_disable) /\
+(dr.state <> dr_tx_read_conf) /\
 (dr.state <> dr_tx_reset_conf) /\
 (dr.state <> dr_rx_idle) /\
+(dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_conf_issued) /\
 (dr.state <> dr_rx_read_rxs) /\
 (dr.state <> dr_rx_check_rxs) /\
 (dr.state <> dr_rx_fetch_data) /\
 (dr.state <> dr_rx_issue_disable) /\
+(dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_rx_reset_conf) /\
 (dr.state <> dr_xfer_idle) /\
+(dr.state <> dr_xfer_fetch_conf) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
 (dr.state <> dr_xfer_check_txs) /\
@@ -101,6 +144,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
+(dr.state <> dr_xfer_read_conf) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
@@ -125,6 +169,31 @@ comb_abs1_rx_read_op_def, read_RX0_def] >-
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []) >>
 fs [ref_rel_def, CHECK_RXS_BIT_def]);
 
+(* relation holds when driver state is dr_rx_read_conf *)
+val ref_rel_hold_dr_rx_read_conf = store_thm("ref_rel_hold_dr_rx_read_conf",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_rx_read_conf) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
+
+(* relation holds when driver state is dr_xfer_idle *)
+val ref_rel_hold_dr_xfer_idle = store_thm("ref_rel_hold_dr_xfer_idle",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_xfer_idle) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
+
+
 (* relation holds when driver state is dr_xfer_read_txs *)
 val ref_rel_hold_dr_xfer_read_txs = store_thm("ref_rel_hold_dr_xfer_read_txs",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
@@ -137,6 +206,7 @@ rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
 SPI0_CH0CONF_def, build_CH0STAT_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+Cases_on `spi.state` >> rw [] >> 
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []);
 
 (* relation holds when driver state is dr_xfer_read_rxs *)
@@ -151,6 +221,7 @@ rw [read_SPI_regs_def, SPI0_CH0STAT_def, SPI0_PA_RANGE_def, SPI0_START_def,
 SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_SYSSTATUS_def, SPI0_MODULCTRL_def,
 SPI0_CH0CONF_def, build_CH0STAT_def] >>
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0STAT_def] >>
+Cases_on `spi.state` >> rw [] >> 
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) [] >>
 EVAL_TAC);
 
@@ -197,7 +268,13 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_xfer_check_rxs) /\
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
-(dr.state <> dr_xfer_reset_conf)` by rw [] >>
+(dr.state <> dr_xfer_reset_conf) /\
+(dr.state <> dr_tx_fetch_conf) /\
+(dr.state <> dr_tx_read_conf) /\
+(dr.state <> dr_rx_fetch_conf) /\
+(dr.state <> dr_rx_read_conf) /\
+(dr.state <> dr_xfer_fetch_conf) /\
+(dr.state <> dr_xfer_read_conf)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exists and relation holds when driver state is dr_xfer_read_rx0 *)
@@ -221,6 +298,19 @@ comb_abs1_xfer_ready_op_def, read_RX0_def] >-
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []) >>
 fs [ref_rel_def, CHECK_RXS_BIT_def]);
 
+(* relation holds when driver state is dr_xfer_read_conf *)
+val ref_rel_hold_dr_xfer_read_conf = store_thm("ref_rel_hold_dr_xfer_read_conf",
+``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state) (v:word32).
+(ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_xfer_read_conf) /\
+(spi_tr spi (Return (THE (dr_read dr).dr_last_read_ad) v) spi') ==>
+ref_rel ds_abs1 ((dr_read dr with dr_last_read_v := SOME v), spi')``,
+rw [spi_tr_cases, dr_read_def, dr_read_ch0conf_def, read_SPI_regs_state_def,
+read_SPI_regs_value_def] >>
+rw [read_SPI_regs_def, SPI0_SYSSTATUS_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, SPI0_SYSSTATUS_def, SPI0_SYSCONFIG_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+fs [ref_rel_def, IS_STATE_REL_def, SPI0_CH0CONF_def] >>
+Cases_on `spi.state` >> rw []);
+
+
 (* simulation: ref_rel holds for ds_abs1 or ds_abs1' when driver and controller perform READ and RETURN operations *)
 val comb_abs1_hold_ref_rel_RD_RE = store_thm("comb_abs1_hold_ref_rel_RD_RE",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (dr':driver_state)
@@ -231,12 +321,18 @@ val comb_abs1_hold_ref_rel_RD_RE = store_thm("comb_abs1_hold_ref_rel_RD_RE",
 (?ds_abs1'.(ds_abs1_tr ds_abs1 tau ds_abs1') /\ (ref_rel ds_abs1' (dr', spi')))``,
 rw [driver_tr_cases, DR_RD_ENABLE_def] >|
 [METIS_TAC [ref_rel_hold_dr_init_read_req],
+METIS_TAC [ref_rel_hold_dr_tx_idle],
 METIS_TAC [ref_rel_hold_dr_tx_read_txs],
 METIS_TAC [ref_rel_hold_dr_tx_read_eot],
+METIS_TAC [ref_rel_hold_dr_tx_read_conf],
+METIS_TAC [ref_rel_hold_dr_rx_idle],
 METIS_TAC [ref_rel_hold_dr_rx_read_rxs],
 METIS_TAC [ref_rel_hold_dr_rx_read_rx0],
+METIS_TAC [ref_rel_hold_dr_rx_read_conf],
+METIS_TAC [ref_rel_hold_dr_xfer_idle],
 METIS_TAC [ref_rel_hold_dr_xfer_read_txs],
 METIS_TAC [ref_rel_hold_dr_xfer_read_rxs],
-METIS_TAC [ref_rel_hold_dr_xfer_read_rx0]]);
+METIS_TAC [ref_rel_hold_dr_xfer_read_rx0],
+METIS_TAC [ref_rel_hold_dr_xfer_read_conf]]);
 
 val _ = export_theory();

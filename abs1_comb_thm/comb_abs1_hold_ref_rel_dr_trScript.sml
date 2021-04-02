@@ -24,7 +24,8 @@ rw [dr_check_tx_ch0stat_def] >|
 [fs [ref_rel_def, IS_STATE_REL_def] >>
 Cases_on `spi.state` >> rw [] >> 
 FULL_SIMP_TAC (std_ss++WORD_ss) [],
-fs [ref_rel_def, IS_STATE_REL_def],
+fs [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >> rw [],
 Cases_on `(1 >< 1) v: word1` >>
 FULL_SIMP_TAC (arith_ss ++ WORD_ss) [] >>
 Cases_on `n` >>
@@ -79,7 +80,8 @@ EXISTS_TAC ``driver_abs1_rx_operations ds_abs1`` >>
 rw [driver_abs1_rx_operations_def, driver_abs1_rx_ready_op_def] >>
 fs [IS_STATE_REL_def],
 (* RXS = 0w *)
-fs[ref_rel_def, IS_STATE_REL_def]]);
+fs[ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >> rw []]);
 
 
 (* lemma:dr.state = dr_rx_fetch_data -> 
@@ -125,7 +127,13 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
-(dr.state <> dr_xfer_reset_conf)` by rw [] >>
+(dr.state <> dr_xfer_reset_conf) /\
+(dr.state <> dr_tx_fetch_conf) /\
+(dr.state <> dr_tx_read_conf) /\
+(dr.state <> dr_rx_fetch_conf) /\
+(dr.state <> dr_rx_read_conf) /\
+(dr.state <> dr_xfer_fetch_conf) /\
+(dr.state <> dr_xfer_read_conf)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 register for rx automaton *)
@@ -141,7 +149,8 @@ EXISTS_TAC ``driver_abs1_rx_operations ds_abs1`` >>
 fs [DRIVER_ABS1_RX_ENABLE_def] >>
 rw [dr_check_rx0_def, driver_abs1_rx_operations_def, driver_abs1_rx_fetch_data_op_def,
 driver_abs1_rx_next_op_def, driver_abs1_rx_next_ready_op_def] >>
-fs [ref_rel_def, IS_STATE_REL_def]);
+fs [ref_rel_def, IS_STATE_REL_def] >>
+Cases_on `spi.state` >> rw []);
 
 (* driver tau transition to check TXS for xfer automaton *)
 val ref_rel_check_xfer_txs = store_thm("ref_rel_check_xfer_txs",
@@ -219,7 +228,13 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_xfer_check_rxs) /\
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_issue_disable) /\
-(dr.state <> dr_xfer_reset_conf)` by rw [] >>
+(dr.state <> dr_xfer_reset_conf) /\
+(dr.state <> dr_tx_fetch_conf) /\
+(dr.state <> dr_tx_read_conf) /\
+(dr.state <> dr_rx_fetch_conf) /\
+(dr.state <> dr_rx_read_conf) /\
+(dr.state <> dr_xfer_fetch_conf) /\
+(dr.state <> dr_xfer_read_conf)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 for xfer automaton *)

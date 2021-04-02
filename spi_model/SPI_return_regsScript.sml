@@ -19,7 +19,7 @@ build_MODULCTRL (MODULCTRL:modulctrl_bits) =
 (* build_CH0CONF: connect ch0conf bits into a 32-bits word. *)
 val build_CH0CONF_def = Define `
 build_CH0CONF (CH0CONF:ch0conf_bits) = 
-let v1 = (CH0CONF.FORCE @@ ((CH0CONF.TURBO @@ ((CH0CONF.IS @@ 
+let v1 = (CH0CONF.FORCE @@ ((0w:word1 @@ ((CH0CONF.IS @@ 
 ((CH0CONF.DPE1 @@ CH0CONF.DPE0):word2)):word3)):word4)):word5 and
 v2 = ((((0w:word2 @@ CH0CONF.TRM):word4) @@
 ((CH0CONF.WL @@

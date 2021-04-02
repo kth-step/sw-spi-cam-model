@@ -12,14 +12,14 @@ ds_abs1.state = abs1_init_pre``,
 rw [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
 (dr.state <> dr_init_check_rep) /\
 (dr.state <> dr_init_setting) /\
 (dr.state <> dr_ready) /\
 (dr.state <> dr_tx_idle) /\
+(dr.state <> dr_tx_fetch_conf) /\
 (dr.state <> dr_tx_conf_issued) /\
 (dr.state <> dr_tx_read_txs) /\
 (dr.state <> dr_tx_check_txs) /\
@@ -27,16 +27,20 @@ rw [] >>
 (dr.state <> dr_tx_read_eot) /\
 (dr.state <> dr_tx_check_eot) /\
 (dr.state <> dr_tx_issue_disable) /\
+(dr.state <> dr_tx_read_conf) /\
 (dr.state <> dr_tx_reset_conf) /\
 (dr.state <> dr_rx_idle) /\
+(dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_conf_issued) /\
 (dr.state <> dr_rx_read_rxs) /\
 (dr.state <> dr_rx_check_rxs) /\
 (dr.state <> dr_rx_read_rx0) /\
 (dr.state <> dr_rx_fetch_data) /\
 (dr.state <> dr_rx_issue_disable) /\
+(dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_rx_reset_conf) /\
 (dr.state <> dr_xfer_idle) /\
+(dr.state <> dr_xfer_fetch_conf) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
 (dr.state <> dr_xfer_check_txs) /\
@@ -46,9 +50,9 @@ rw [] >>
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
+(dr.state <> dr_xfer_read_conf) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* If dr.state = dr_ready, then abs1.state = abs1_ready according to ref_rel *)
 val dr_ready_imply_abs1_ready = store_thm("dr_ready_imply_abs1_ready",
@@ -58,14 +62,14 @@ ds_abs1.state = abs1_ready``,
 rw [] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
-Cases_on `spi.state` >>
-rw [] >>
+Cases_on `spi.state` >> rw [] >>
 `(dr.state <> dr_init_pre) /\
 (dr.state <> dr_init_idle) /\
 (dr.state <> dr_init_read_req) /\
 (dr.state <> dr_init_check_rep) /\
 (dr.state <> dr_init_setting) /\
 (dr.state <> dr_tx_idle) /\
+(dr.state <> dr_tx_fetch_conf) /\
 (dr.state <> dr_tx_conf_issued) /\
 (dr.state <> dr_tx_read_txs) /\
 (dr.state <> dr_tx_check_txs) /\
@@ -73,16 +77,20 @@ rw [] >>
 (dr.state <> dr_tx_read_eot) /\
 (dr.state <> dr_tx_check_eot) /\
 (dr.state <> dr_tx_issue_disable) /\
+(dr.state <> dr_tx_read_conf) /\
 (dr.state <> dr_tx_reset_conf) /\
 (dr.state <> dr_rx_idle) /\
+(dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_conf_issued) /\
 (dr.state <> dr_rx_read_rxs) /\
 (dr.state <> dr_rx_check_rxs) /\
 (dr.state <> dr_rx_read_rx0) /\
 (dr.state <> dr_rx_fetch_data) /\
 (dr.state <> dr_rx_issue_disable) /\
+(dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_rx_reset_conf) /\
 (dr.state <> dr_xfer_idle) /\
+(dr.state <> dr_xfer_fetch_conf) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
 (dr.state <> dr_xfer_check_txs) /\
@@ -92,9 +100,9 @@ rw [] >>
 (dr.state <> dr_xfer_read_rx0) /\
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
+(dr.state <> dr_xfer_read_conf) /\
 (dr.state <> dr_xfer_reset_conf)` by rw [] >>
-Cases_on `ds_abs1.state` >>
-rw []);
+Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exits for call_init label *)
 val comb_abs1_hold_ref_rel_call_init = store_thm("comb_abs1_hold_ref_rel_call_init",
@@ -204,7 +212,6 @@ val abs1_comb_hold_ref_rel_call_xfer = store_thm("abs1_comb_hold_ref_rel_call_xf
 rw [ds_abs1_tr_cases, local_tr_cases, driver_tr_cases] >|
 [FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def],
 rw [call_xfer_ds_abs1_def, call_xfer_dr_def] >>
-FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >>
-rw []]);
+FULL_SIMP_TAC std_ss [ref_rel_def, IS_STATE_REL_def] >> rw []]);
 
 val _ = export_theory();

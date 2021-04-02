@@ -6,12 +6,12 @@ val _ = new_theory "comb_abs1_hold_ref_rel_spi_tr";
 (* ref_rel holds for ds_abs1 dr spi' in case of init tau transition *)
 val ref_rel_spi_init_tau = store_thm("ref_rel_spi_init_tau",
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state).
-(ref_rel ds_abs1 (dr, spi)) /\ (spi.state = init_reset) ==>
-(ref_rel ds_abs1 (dr, (spi_tau_operations spi)))``,
+ref_rel ds_abs1 (dr, spi) /\ spi.state = init_reset ==>
+ref_rel ds_abs1 (dr, spi_tau_operations spi)``,
 rw [spi_tau_operations_def, init_reset_op_def] >>
 fs [ref_rel_def, IS_STATE_REL_def] >>
-Cases_on `ds_abs1.state` >>
-rw [] >> rw []);
+Cases_on `ds_abs1.state` >> rw [] >> rw [] >>
+Cases_on `dr.state` >> rw []);
 
 
 (* a lemma: TX_TAU_ENABLE spi ==> SPI_ABS1_TX_ENABLE ds_abs1 based on ref_rel *)

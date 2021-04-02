@@ -8,16 +8,15 @@ val _ = new_theory "driver_read";
 val DR_RD_ENABLE_def = Define ` 
 DR_RD_ENABLE (dr:driver_state) =
 (dr.state = dr_init_read_req \/
-dr.state = dr_init_read_conf \/
 dr.state = dr_tx_idle \/
 dr.state = dr_tx_read_txs \/
 dr.state = dr_tx_read_eot \/
 dr.state = dr_tx_read_conf \/
-dr.state = dr_rx_fetch_conf \/
+dr.state = dr_rx_idle \/
 dr.state = dr_rx_read_rxs \/
 dr.state = dr_rx_read_rx0 \/
 dr.state = dr_rx_read_conf \/
-dr.state = dr_xfer_fetch_conf \/
+dr.state = dr_xfer_idle \/
 dr.state = dr_xfer_read_txs \/
 dr.state = dr_xfer_read_rxs \/
 dr.state = dr_xfer_read_rx0 \/
@@ -52,10 +51,7 @@ else dr with dr_err := T`
 (* dr_read_ch0conf: read the CH0CONF register. *)
 val dr_read_ch0conf_def = Define `
 dr_read_ch0conf (dr:driver_state) =
-if dr.state = dr_init_read_conf then
-dr with <| state := dr_init_set_conf;
-dr_last_read_ad := SOME SPI0_CH0CONF |>
-else if dr.state = dr_tx_idle then
+if dr.state = dr_tx_idle then
 dr with <| state := dr_tx_fetch_conf;
 dr_last_read_ad := SOME SPI0_CH0CONF |>
 else if dr.state = dr_tx_read_conf then
@@ -95,8 +91,6 @@ case dr.state of
   | dr_init_read_req => (dr_read_sysstatus dr)
   | dr_init_check_rep => dr with dr_err := T
   | dr_init_setting => dr with dr_err := T
-  | dr_init_read_conf => dr_read_ch0conf dr
-  | dr_init_set_conf => dr with dr_err := T
   | dr_ready => dr with dr_err := T
   | dr_tx_idle => dr_read_ch0conf dr
   | dr_tx_fetch_conf => dr with dr_err := T

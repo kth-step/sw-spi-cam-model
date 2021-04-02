@@ -6,8 +6,7 @@ val _ = new_theory "driver_state";
 (* dr_general_state: spi driver general states *)
 val _ = Datatype `dr_general_state =
 | dr_init_pre | dr_init_idle | dr_init_read_req 
-| dr_init_check_rep | dr_init_setting | dr_init_read_conf 
-| dr_init_set_conf | dr_ready
+| dr_init_check_rep | dr_init_setting | dr_ready
 | dr_tx_idle | dr_tx_fetch_conf | dr_tx_conf_issued 
 | dr_tx_read_txs | dr_tx_check_txs | dr_tx_write_data 
 | dr_tx_read_eot | dr_tx_check_eot | dr_tx_issue_disable 
@@ -23,10 +22,7 @@ val _ = Datatype `dr_general_state =
 (* dr_init_state: contains boolean flags to record init process *)
 val _ = Datatype `dr_init_state = <|
 issue_wr_sysconfig: bool;
-issue_wr_modulctrl: bool;
-issue_wr_ch0conf_wl: bool;
-issue_wr_ch0conf_mode: bool;
-issue_wr_ch0conf_speed: bool |>`
+issue_wr_modulctrl: bool |>`
 
 (* dr_tx_state: include the transimit buffer and a pointer *)
 val _ = Datatype `dr_tx_state = <|

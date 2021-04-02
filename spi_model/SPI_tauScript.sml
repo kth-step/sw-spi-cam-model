@@ -17,7 +17,9 @@ SPI_TAU_ENABLE (spi:spi_state) =
 (* SPI controller performs reset operation. *)
 val init_reset_op_def = Define `
 init_reset_op (spi:spi_state) = 
-spi with <| regs := spi.regs with SYSSTATUS := 1w (* indiciate reset is done *);
+spi with <| regs := spi.regs with <|SYSSTATUS := 1w (* indiciate reset is done *);
+CH0CONF := <|PHA := 0w; POL := 0w; CLKD := 0w; EPOL := 0w; WL := 0w;
+TRM := 0w; DPE0 := 0w; DPE1 := 1w; IS := 1w; FORCE := 0w |> |>;
 state := init_setregs (* enter the next init state, set up SPI registers *) |>`
 
 (* internal operations for tx automaton *)

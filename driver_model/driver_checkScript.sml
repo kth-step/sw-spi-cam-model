@@ -88,8 +88,6 @@ case dr.state of
   | dr_init_check_rep => if (ad = SPI0_SYSSTATUS) then (dr_check_sysstatus dr v)
     else dr with dr_err := T
   | dr_init_setting => dr with dr_err := T
-  | dr_init_read_conf => dr with dr_err := T
-  | dr_init_set_conf => dr with dr_err := T
   | dr_ready => dr with dr_err := T
   | dr_tx_idle => dr with dr_err := T
   | dr_tx_fetch_conf => dr with dr_err := T

@@ -30,7 +30,6 @@ TRM: word2; (* Transmit/receive mode *)
 DPE0: word1; (* Transmission enable for data line 0 *)
 DPE1: word1; (* Transmission enable for data line 1 *)
 IS: word1; (* Input select *)
-TURBO: word1; (* Turbo mode *)
 FORCE: word1 (* Manual SPIEN assertion to keep SPIEN active between SPI words *) |>`
 
 (* Bits in the CH0STAT register *)
@@ -65,10 +64,7 @@ val _ = Datatype `spi_general_state =
 (* boolean flags to record the init process *)
 val _ = Datatype `init_flags = <|
 sysconfig_mode_done: bool;
-modulctrl_bus_done: bool;
-ch0conf_wordlen_done: bool;
-ch0conf_mode_done: bool;
-ch0conf_speed_done: bool |>`
+modulctrl_bus_done: bool |>`
 
 (* spi_state: spi controller state *)
 val _ = Datatype `spi_state = <|
