@@ -56,7 +56,7 @@ state := dr_init_setting |>)`
 val dr_write_ch0conf_init_def = Define `
 dr_write_ch0conf_init (dr:driver_state) =
 let addr = SPI0_CH0CONF:word32 and
-    v = 0x000103DBw:word32 in
+    v = 0x000103D8w:word32 in
 (SOME addr, SOME v, dr with state := dr_ready)`
 
 (* dr_write_ch0conf_tx: set up the CH0CONF register for tx mode. *)

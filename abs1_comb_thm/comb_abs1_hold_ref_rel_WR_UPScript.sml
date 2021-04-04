@@ -68,9 +68,9 @@ Cases_on `dr.state` >> rw [] >>
 Cases_on `ds_abs1.state` >> rw [] >>
 Cases_on `spi.state` >> rw [] >>
 `spi.regs.CH0CONF.IS = 1w /\ spi.regs.CH0CONF.FORCE = 0w` by fs [ref_rel_def] >>
-`(19 >< 19) (66523w:word32):word1 <> spi.regs.CH0CONF.IS` 
+`(19 >< 19) (66520w:word32):word1 <> spi.regs.CH0CONF.IS` 
 by FULL_SIMP_TAC (std_ss++WORD_ss) [] >>
-`ch0conf_changed (66523w:word32) spi` by fs [ch0conf_changed_def] >>
+`ch0conf_changed (66520w:word32) spi` by fs [ch0conf_changed_def] >>
 rw [write_CH0CONF_comb_def, write_CH0CONF_init_def] >-
 (DISJ2_TAC >>
 rw [ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
