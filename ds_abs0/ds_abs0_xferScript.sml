@@ -10,6 +10,11 @@ ds_abs0 with <| ds_abs0_xfer := ds_abs0.ds_abs0_xfer with
 <|xfer_dataOUT_buffer := buffer; xfer_dataIN_buffer := []; xfer_cur_length := 0|>;
 state := abs0_xfer_idle |>`
 
+(* call_back_ds_abs0_xfer: return the received data buffer *)
+val call_back_ds_abs0_xfer_def = Define `
+call_back_ds_abs0_xfer (ds_abs0:ds_abs0_state) =
+(ds_abs0 with state := abs0_ready, ds_abs0.ds_abs0_xfer.xfer_dataIN_buffer)`
+
 (* XFER label related functions *)
 val abs0_xfer_op_def = Define `
 abs0_xfer_op (ds_abs0:ds_abs0_state) (data:word8 option) =
@@ -33,7 +38,7 @@ abs0_xfer_tau_op (ds_abs0: ds_abs0_state) =
 ds_abs0 with
 <| state := if ds_abs0.ds_abs0_xfer.xfer_cur_length < 
 (LENGTH ds_abs0.ds_abs0_xfer.xfer_dataOUT_buffer)
-then abs0_xfer_idle else abs0_ready;
+then abs0_xfer_idle else abs0_xfer_reply;
 ds_abs0_xfer := ds_abs0.ds_abs0_xfer with
 xfer_dataIN_buffer := ds_abs0.ds_abs0_xfer.xfer_dataIN_buffer ++ [ds_abs0.ds_abs0_xfer.xfer_RSR] |>`
 

@@ -11,9 +11,7 @@ IS_ABS_STATE_REL (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 ((ds_abs0.state = abs0_ready) =
 ((ds_abs1.state = abs1_init_start) \/
 (ds_abs1.state = abs1_ready) \/
-(ds_abs1.state = abs1_tx_reset) \/
-(ds_abs1.state = abs1_rx_reset) \/
-(ds_abs1.state = abs1_xfer_reset))) /\
+(ds_abs1.state = abs1_tx_reset))) /\
 ((ds_abs0.state = abs0_tx) =
 ((ds_abs1.state = abs1_tx_idle) \/
 (ds_abs1.state = abs1_tx_trans) \/
@@ -37,6 +35,8 @@ IS_ABS_STATE_REL (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 ((ds_abs0.state = abs0_rx_next) =
 ((ds_abs1.state = abs1_rx_next) \/
 (ds_abs1.state = abs1_rx_next_ready))) /\
+((ds_abs0.state = abs0_rx_reply) =
+(ds_abs1.state = abs1_rx_reset)) /\
 ((ds_abs0.state = abs0_xfer_idle) =
 ((ds_abs1.state = abs1_xfer_idle) \/
 (ds_abs1.state = abs1_xfer_prepare) \/
@@ -45,7 +45,9 @@ IS_ABS_STATE_REL (ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state) =
 ((ds_abs0.state = abs0_xfer_done) =
 ((ds_abs1.state = abs1_xfer_update) \/
 (ds_abs1.state = abs1_xfer_ready) \/
-(ds_abs1.state = abs1_xfer_fetch_data))))`
+(ds_abs1.state = abs1_xfer_fetch_data))) /\
+((ds_abs0.state = abs0_xfer_reply) =
+(ds_abs1.state = abs1_xfer_reset)))`
 
 (* abs_rel: abstract relation for ds_abs0 and ds_abs1. *)
 val abs_rel_def = Define `

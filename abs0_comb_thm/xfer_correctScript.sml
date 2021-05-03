@@ -184,10 +184,10 @@ d1.state = abs0_xfer_idle /\ d1.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\
 d1.ds_abs0_xfer.xfer_dataOUT_buffer = l2 ++ [h'] /\ d1.ds_abs0_xfer.xfer_cur_length = LENGTH l2 /\ 
 LENGTH l1 = LENGTH l2 /\ l1 <> [] /\ l2 <> [] ==>
 ?d0' d1'. n_tau_tr (SUC 1) abs0_global_tr (d0,d1) tau (d0',d1') /\
-d0'.ds_abs0_xfer.xfer_dataIN_buffer = l2 ++ [h'] /\ d0'.state = abs0_ready /\
+d0'.ds_abs0_xfer.xfer_dataIN_buffer = l2 ++ [h'] /\ d0'.state = abs0_xfer_reply /\
 d0'.ds_abs0_xfer.xfer_cur_length = LENGTH l1 + 1 /\
 d0'.ds_abs0_xfer.xfer_dataOUT_buffer = l1 ++ [h] /\
-d1'.ds_abs0_xfer.xfer_dataIN_buffer = l1 ++ [h] /\ d1'.state = abs0_ready /\
+d1'.ds_abs0_xfer.xfer_dataIN_buffer = l1 ++ [h] /\ d1'.state = abs0_xfer_reply /\
 d1'.ds_abs0_xfer.xfer_dataOUT_buffer = l2 ++ [h'] /\
 d1'.ds_abs0_xfer.xfer_cur_length  = LENGTH l2 + 1``,
 REPEAT STRIP_TAC >>
@@ -199,16 +199,16 @@ abs0_xfer_op_state_def, abs0_xfer_op_def, GSYM LEFT_EXISTS_AND_THM] >>
 fs [] >>
 `EL (LENGTH l2) (l1 ++ [h]) = h` by METIS_TAC [] >>
 fs [abs0_tau_op_def, abs0_xfer_tau_op_def] >>
-Q.EXISTS_TAC `d0 with <|state := abs0_ready;
+Q.EXISTS_TAC `d0 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := d0.ds_abs0_xfer with
 <|xfer_dataIN_buffer := l2 ++ [h'];
 xfer_cur_length := LENGTH l2 + 1; xfer_RSR := h'|> |>` >>
-Q.EXISTS_TAC `d1 with <|state := abs0_ready;
+Q.EXISTS_TAC `d1 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := d1.ds_abs0_xfer with
 <|xfer_dataIN_buffer := l1 ++ [h];
 xfer_cur_length := LENGTH l2 + 1;
 xfer_RSR := h|> |>` >>
-Q.EXISTS_TAC `(d0 with <|state := abs0_ready;
+Q.EXISTS_TAC `(d0 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := d0.ds_abs0_xfer with
 <|xfer_dataIN_buffer := l2 ++ [h'];
 xfer_cur_length := LENGTH l2 + 1; xfer_RSR := h'|> |>,
@@ -224,19 +224,19 @@ d0.state = abs0_ready /\ d1.state = abs0_ready ==>
 ds_abs0_tr d0 (call_xfer [a]) d0' /\
 ds_abs0_tr d1 (call_xfer [b]) d1' ==>
 ?d0'' d1''. n_tau_tr (SUC 1) abs0_global_tr (d0',d1') tau (d0'',d1'') /\
-d0''.ds_abs0_xfer.xfer_dataIN_buffer = [b] /\ d0''.state = abs0_ready /\
-d1''.ds_abs0_xfer.xfer_dataIN_buffer = [a] /\ d1''.state = abs0_ready``,
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = [b] /\ d0''.state = abs0_xfer_reply /\
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = [a] /\ d1''.state = abs0_xfer_reply``,
 rw [ds_abs0_tr_cases, call_xfer_ds_abs0_def, n_tau_tr_def, n_tau_tr_SUC,
 abs0_global_tr_cases, ABS0_CALL_INIT_ENABLE_def, ABS0_TAU_LBL_ENABLE_def,
 abs0_xfer_op_state_def, abs0_xfer_op_value_def, abs0_xfer_op_def, 
 abs0_tau_op_def, abs0_xfer_tau_op_def, GSYM LEFT_EXISTS_AND_THM] >>
-Q.EXISTS_TAC `d0 with <|state := abs0_ready;
+Q.EXISTS_TAC `d0 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := <|xfer_dataIN_buffer := [b]; xfer_dataOUT_buffer := [a];
 xfer_cur_length := 1; xfer_RSR := b|> |>` >>
-Q.EXISTS_TAC `d1 with <|state := abs0_ready;
+Q.EXISTS_TAC `d1 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := <|xfer_dataIN_buffer := [a]; xfer_dataOUT_buffer := [b];
 xfer_cur_length := 1; xfer_RSR := a|> |>` >>
-Q.EXISTS_TAC `(d0 with <|state := abs0_ready;
+Q.EXISTS_TAC `(d0 with <|state := abs0_xfer_reply;
 ds_abs0_xfer := <|xfer_dataIN_buffer := [b]; xfer_dataOUT_buffer := [a];
 xfer_cur_length := 1; xfer_RSR := b|> |>,
 d1 with <|state := abs0_xfer_done;
@@ -281,11 +281,11 @@ d1''.ds_abs0_xfer.xfer_dataOUT_buffer = h'::l'' ++ [x'] /\
 d1''.ds_abs0_xfer.xfer_cur_length  = LENGTH (h'::l'')` by METIS_TAC [abs0_xfer_idle_last_one_correct] >>
 `?d0''' d1'''. n_tau_tr (SUC 1) abs0_global_tr (d0'',d1'') tau (d0''',d1''') /\
 d0'''.ds_abs0_xfer.xfer_dataIN_buffer =  h'::l'' ++ [x'] /\ 
-d0'''.state = abs0_ready /\
+d0'''.state = abs0_xfer_reply /\
 d0'''.ds_abs0_xfer.xfer_cur_length = LENGTH (h::l') + 1 /\
 d0'''.ds_abs0_xfer.xfer_dataOUT_buffer = h::l' ++ [x] /\
 d1'''.ds_abs0_xfer.xfer_dataIN_buffer = h::l' ++ [x] /\ 
-d1'''.state = abs0_ready /\
+d1'''.state = abs0_xfer_reply /\
 d1'''.ds_abs0_xfer.xfer_dataOUT_buffer = h'::l'' ++ [x'] /\
 d1'''.ds_abs0_xfer.xfer_cur_length  = LENGTH (h'::l'') + 1` by METIS_TAC [abs0_xfer_finish_last_one] >>
 fs [] >>

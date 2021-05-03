@@ -21,8 +21,7 @@ rw [ds_abs1_tr_cases, call_init_ds_abs1_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def],
 (* ds_abs0.state = abs0_ready *)
 `ds_abs1.state = abs1_ready \/ ds_abs1.state = abs1_init_start \/
- ds_abs1.state = abs1_tx_reset \/ ds_abs1.state = abs1_rx_reset \/
- ds_abs1.state = abs1_xfer_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
+ ds_abs1.state = abs1_tx_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
 [(* ds_abs1.state = abs1_ready *)
 DISJ1_TAC >>
 rw [ds_abs1_tr_cases, call_init_ds_abs1_def] >>
@@ -42,22 +41,6 @@ rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases,
 COMB_ABS1_TX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [comb_abs1_tx_operations_def, comb_abs1_tx_reset_op_def, call_init_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* ds_abs1.state = abs1_rx_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_RX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, call_init_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* ds_abs1.state = abs1_xfer_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_XFER_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, call_init_ds_abs1_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]]]);
 
 (* abs_rel holds for call_tx label when ds_abs0 has call_tx transition *)
@@ -71,8 +54,7 @@ abs_rel (call_tx_ds_abs0 ds_abs0 buffer) ds_abs1')``,
 rw [call_tx_ds_abs0_def] >>
 `IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
 `ds_abs1.state = abs1_ready \/ ds_abs1.state = abs1_init_start \/
- ds_abs1.state = abs1_tx_reset \/ ds_abs1.state = abs1_rx_reset \/
- ds_abs1.state = abs1_xfer_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
+ ds_abs1.state = abs1_tx_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
 [(* ds_abs1.state = abs1_ready *)
 DISJ1_TAC >>
 rw [ds_abs1_tr_cases, call_tx_ds_abs1_def] >>
@@ -92,22 +74,6 @@ rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases,
 COMB_ABS1_TX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [comb_abs1_tx_operations_def, comb_abs1_tx_reset_op_def, call_tx_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* ds_abs1.state = abs1_rx_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_RX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, call_tx_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* ds_abs1.state = abs1_xfer_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_XFER_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, call_tx_ds_abs1_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]]);
 
 (* abs_rel holds for call_rx label when ds_abs0 has call_rx transition *)
@@ -121,8 +87,7 @@ abs_rel (call_rx_ds_abs0 ds_abs0 length) ds_abs1')``,
 rw [call_rx_ds_abs0_def] >>
 `IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
 `ds_abs1.state = abs1_ready \/ ds_abs1.state = abs1_init_start \/
- ds_abs1.state = abs1_tx_reset \/ ds_abs1.state = abs1_rx_reset \/
- ds_abs1.state = abs1_xfer_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
+ ds_abs1.state = abs1_tx_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
 [(* abs1_ready *)
 DISJ1_TAC >>
 rw [ds_abs1_tr_cases, call_rx_ds_abs1_def] >>
@@ -142,22 +107,6 @@ rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases,
 COMB_ABS1_TX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [comb_abs1_tx_operations_def, comb_abs1_tx_reset_op_def, call_rx_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* abs1_rx_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_RX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, call_rx_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* abs1_xfer_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_XFER_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, call_rx_ds_abs1_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]]);
 
 (* abs_rel holds for call_xfer label when ds_abs0 has call_xfer transition *)
@@ -171,8 +120,7 @@ abs_rel (call_xfer_ds_abs0 ds_abs0 buffer) ds_abs1')``,
 rw [call_xfer_ds_abs0_def] >>
 `IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
 `ds_abs1.state = abs1_ready \/ ds_abs1.state = abs1_init_start \/
- ds_abs1.state = abs1_tx_reset \/ ds_abs1.state = abs1_rx_reset \/
- ds_abs1.state = abs1_xfer_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
+ ds_abs1.state = abs1_tx_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >|
 [(* abs1_ready *)
 DISJ1_TAC >>
 rw [ds_abs1_tr_cases, call_xfer_ds_abs1_def] >>
@@ -192,24 +140,36 @@ rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases,
 COMB_ABS1_TX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
 EXISTS_TAC ``comb_abs1_tx_operations ds_abs1`` >>
 rw [comb_abs1_tx_operations_def, comb_abs1_tx_reset_op_def, call_xfer_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* abs1_rx_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_RX_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, call_xfer_ds_abs1_def] >>
-fs [abs_rel_def, IS_ABS_STATE_REL_def],
-(* abs1_xfer_reset *)
-DISJ2_TAC >>
-EXISTS_TAC ``SUC 0:num`` >>
-rw [n_tau_tr_def, ds_abs1_tr_cases, ds_abs1_comb_tr_cases, 
-COMB_ABS1_XFER_ENABLE_def, GSYM LEFT_EXISTS_AND_THM] >>
-EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, call_xfer_ds_abs1_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]]);
 
+(* abs_rel holds for call_back label when ds_abs0.state = abs0_rx_reply *)
+val abs0_abs_rel_call_back_rx_reply = store_thm("abs0_abs_rel_call_back_rx_reply",
+``!ds_abs0 ds_abs1.
+(abs_rel ds_abs0 ds_abs1) /\ (ds_abs0.state = abs0_rx_reply) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 (call_back (call_back_ds_abs0_data ds_abs0)) ds_abs1') /\ 
+(abs_rel (call_back_ds_abs0_state ds_abs0) ds_abs1')``,
+rw [call_back_ds_abs0_data_def,call_back_ds_abs0_state_def,call_back_ds_abs0_def,
+call_back_ds_abs0_rx_def] >>
+`IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
+`ds_abs1.state = abs1_rx_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >>
+rw [ds_abs1_tr_cases,call_back_ds_abs1_data_def,call_back_ds_abs1_state_def,
+call_back_ds_abs1_def] >>
+fs [abs_rel_def, IS_ABS_STATE_REL_def]);
+
+(* abs_rel holds for call_back label when ds_abs0.state = abs0_xfer_reply *)
+val abs0_abs_rel_call_back_xfer_reply = store_thm("abs0_abs_rel_call_back_xfer_reply",
+``!ds_abs0 ds_abs1.
+(abs_rel ds_abs0 ds_abs1) /\ (ds_abs0.state = abs0_xfer_reply) ==>
+?ds_abs1'. (ds_abs1_tr ds_abs1 (call_back (call_back_ds_abs0_data ds_abs0)) ds_abs1') /\ 
+(abs_rel (call_back_ds_abs0_state ds_abs0) ds_abs1')``,
+rw [call_back_ds_abs0_data_def,call_back_ds_abs0_state_def,call_back_ds_abs0_def,
+call_back_ds_abs0_xfer_def] >>
+`IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
+`ds_abs1.state = abs1_xfer_reset` by METIS_TAC [IS_ABS_STATE_REL_def] >>
+rw [ds_abs1_tr_cases,call_back_ds_abs1_data_def,call_back_ds_abs1_state_def,
+call_back_ds_abs1_def] >>
+fs [abs_rel_def, IS_ABS_STATE_REL_def]);
+        
 (* Theorems for abs1_weak_simulation with call labels *)
 (* abs_rel holds for call_init label when ds_abs1 state is abs1_init_pre *)
 val abs1_init_pre_abs_rel_call_init = store_thm("abs1_init_pre_abs_rel_call_init",
@@ -270,5 +230,33 @@ rw [call_xfer_ds_abs1_def] >>
 `ds_abs0.state = abs0_ready` by METIS_TAC [IS_ABS_STATE_REL_def] >>
 rw [ds_abs0_tr_cases, call_xfer_ds_abs0_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]);
+
+(* abs_rel holds for call_back label when ds_abs1.state = abs1_rx_reset *)
+val abs1_abs_rel_call_back_rx_reset = store_thm("abs1_abs_rel_call_back_rx_reset",
+``!ds_abs0 ds_abs1.
+(abs_rel ds_abs0 ds_abs1) /\ (ds_abs1.state = abs1_rx_reset) ==>
+?ds_abs0'.
+(ds_abs0_tr ds_abs0 (call_back (call_back_ds_abs1_data ds_abs1)) ds_abs0') /\
+(abs_rel ds_abs0' (call_back_ds_abs1_state ds_abs1))``,
+rw [call_back_ds_abs1_data_def,call_back_ds_abs1_state_def,call_back_ds_abs1_def] >>
+`IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
+`ds_abs0.state = abs0_rx_reply` by METIS_TAC [IS_ABS_STATE_REL_def] >>
+rw [ds_abs0_tr_cases, call_back_ds_abs0_state_def,call_back_ds_abs0_data_def,
+call_back_ds_abs0_def,call_back_ds_abs0_rx_def] >>
+fs [abs_rel_def, IS_ABS_STATE_REL_def]);
+
+(* abs_rel holds for call_back label when ds_abs1.state = abs1_xfer_reset *)
+val abs1_abs_rel_call_back_xfer_reset = store_thm("abs1_abs_rel_call_back_xfer_reset",
+``!ds_abs0 ds_abs1.
+(abs_rel ds_abs0 ds_abs1) /\ (ds_abs1.state = abs1_xfer_reset) ==>
+?ds_abs0'.
+(ds_abs0_tr ds_abs0 (call_back (call_back_ds_abs1_data ds_abs1)) ds_abs0') /\
+(abs_rel ds_abs0' (call_back_ds_abs1_state ds_abs1))``,
+rw [call_back_ds_abs1_data_def,call_back_ds_abs1_state_def,call_back_ds_abs1_def] >>
+`IS_ABS_STATE_REL ds_abs0 ds_abs1` by METIS_TAC [abs_rel_def] >>
+`ds_abs0.state = abs0_xfer_reply` by METIS_TAC [IS_ABS_STATE_REL_def] >>
+rw [ds_abs0_tr_cases, call_back_ds_abs0_state_def,call_back_ds_abs0_data_def,
+call_back_ds_abs0_def,call_back_ds_abs0_xfer_def] >>
+fs [abs_rel_def, IS_ABS_STATE_REL_def]);                                           
 
 val _ = export_theory();

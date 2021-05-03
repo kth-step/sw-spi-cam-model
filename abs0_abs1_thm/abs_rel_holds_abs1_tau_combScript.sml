@@ -29,8 +29,8 @@ val abs_rel_holds_abs1_tau_comb_rx = store_thm("abs_rel_holds_abs1_tau_comb_rx",
 ``!(ds_abs0:ds_abs0_state) (ds_abs1:ds_abs1_state).
 (abs_rel ds_abs0 ds_abs1) /\ (COMB_ABS1_RX_ENABLE ds_abs1) ==>
 (abs_rel ds_abs0 (comb_abs1_rx_operations ds_abs1))``,
-rw [COMB_ABS1_RX_ENABLE_def, comb_abs1_rx_operations_def] >>
-rw [comb_abs1_rx_read_op_def, comb_abs1_rx_reset_op_def] >>
+rw [COMB_ABS1_RX_ENABLE_def, comb_abs1_rx_operations_def,
+comb_abs1_rx_read_op_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]);
 
 (* abs_rel holds for ds_abs1 tau_comb in the xfer automaton *)
@@ -39,8 +39,7 @@ val abs_rel_holds_abs1_tau_comb_xfer = store_thm("abs_rel_holds_abs1_tau_comb_xf
 (abs_rel ds_abs0 ds_abs1) /\ (COMB_ABS1_XFER_ENABLE ds_abs1) ==>
 (abs_rel ds_abs0 (comb_abs1_xfer_operations ds_abs1))``,
 rw [COMB_ABS1_XFER_ENABLE_def, comb_abs1_xfer_operations_def] >>
-rw [comb_abs1_xfer_prepare_op_def, comb_abs1_xfer_ready_op_def, 
-comb_abs1_xfer_reset_op_def] >>
+rw [comb_abs1_xfer_prepare_op_def, comb_abs1_xfer_ready_op_def] >>
 fs [abs_rel_def, IS_ABS_STATE_REL_def]);
 
 (* abs_rel holds when ds_abs1 peforms tau_comb *)

@@ -6,11 +6,9 @@ val _ = new_theory "ds_abs0_state";
 
 (* ds_abs0_general_state: the general states of ds_abs0 *)
 val _ = Datatype `ds_abs0_general_state =
-| abs0_init 
-| abs0_ready
-| abs0_tx 
-| abs0_rx_idle | abs0_rx_update | abs0_rx_reading | abs0_rx_next
-| abs0_xfer_idle | abs0_xfer_done`
+| abs0_init | abs0_ready | abs0_tx | abs0_rx_idle 
+| abs0_rx_update | abs0_rx_reading | abs0_rx_next
+| abs0_rx_reply | abs0_xfer_idle | abs0_xfer_done | abs0_xfer_reply`
 
 (* ds_abs0_tx_state: the state of ds_abs0 tx automaton *)
 val _ = Datatype `ds_abs0_tx_state = <| 

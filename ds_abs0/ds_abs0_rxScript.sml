@@ -10,6 +10,11 @@ ds_abs0 with <| ds_abs0_rx := ds_abs0.ds_abs0_rx with
 <| rx_left_length := length; rx_data_buffer := [] |>;
 state := abs0_rx_idle |>`
 
+(* call_back_ds_abs0_rx: return the received data buffer *)
+val call_back_ds_abs0_rx_def = Define `
+call_back_ds_abs0_rx (ds_abs0:ds_abs0_state) =
+(ds_abs0 with state := abs0_ready, ds_abs0.ds_abs0_rx.rx_data_buffer)`
+
 (* RX label related functions *)
 val ABS0_RX_LBL_ENABLE_def = Define `
 ABS0_RX_LBL_ENABLE (ds_abs0:ds_abs0_state) =
@@ -41,7 +46,7 @@ else ds_abs0 with err := T`
 val abs0_rx_update_tau_op_def = Define `
 abs0_rx_update_tau_op (ds_abs0:ds_abs0_state) =
 ds_abs0 with
-state := if ds_abs0.ds_abs0_rx.rx_left_length > 0 then abs0_rx_reading else abs0_ready`
+state := if ds_abs0.ds_abs0_rx.rx_left_length > 0 then abs0_rx_reading else abs0_rx_reply`
 
 val abs0_rx_reading_tau_op_def = Define `
 abs0_rx_reading_tau_op (ds_abs0:ds_abs0_state) =

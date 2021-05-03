@@ -11,7 +11,8 @@ val abs0_abs1_weak_simulation = store_thm("abs0_abs1_weak_simulation",
 (?n ds_abs1'. (n_tau_tr n ds_abs1_tr ds_abs1 lbl ds_abs1') /\ (abs_rel ds_abs0' ds_abs1'))``,
 rw [ds_abs0_tr_cases] >> 
 rw [abs0_abs_rel_call_init, abs0_abs_rel_call_tx, abs0_abs_rel_call_rx,
-abs0_abs_rel_call_xfer, abs_rel_holds_abs_tau, abs_rel_holds_abs0_TX_lbl, 
+abs0_abs_rel_call_xfer,abs0_abs_rel_call_back_rx_reply,abs0_abs_rel_call_back_xfer_reply,
+abs_rel_holds_abs_tau, abs_rel_holds_abs0_TX_lbl, 
 abs_rel_holds_abs0_RX_lbl, abs_rel_holds_abs0_XFER_lbl]);
 
 (* weak simulation part 2: abs1 performs transitions, abs0 matches *)
@@ -26,6 +27,7 @@ val abs1_abs0_weak_simulation = store_thm("abs1_abs0_weak_simulation",
 rw [ds_abs1_tr_cases] >> 
 rw [abs1_init_pre_abs_rel_call_init, abs1_ready_abs_rel_call_init, 
 abs1_abs_rel_call_tx, abs1_abs_rel_call_rx, abs1_abs_rel_call_xfer,
+abs1_abs_rel_call_back_rx_reset,abs1_abs_rel_call_back_xfer_reset,    
 abs_rel_holds_abs1_TX_lbl, abs_rel_holds_abs1_RX_lbl, abs_rel_holds_abs1_XFER_lbl] >>
 METIS_TAC [abs_rel_holds_abs1_tau_spi, abs_rel_holds_abs1_tau_dr, 
 abs_rel_holds_abs1_tau_comb]);

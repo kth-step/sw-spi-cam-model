@@ -432,6 +432,32 @@ Q.EXISTS_TAC `n` >>
 (!d. call_xfer buffer1 <> RX d) /\
 (!d0 d1. call_xfer buffer1 <> XFER d0 d1)` by rw [] >>
 METIS_TAC [n_tau_tr_local_global_tr_second],
+`?s2'. weak_tr local_tr (q',q'') (call_back buffer0) s2' /\ abs0_comb_rel d0' s2'` by METIS_TAC [] >>
+Cases_on `s2'` >>
+Q.EXISTS_TAC `(q'''',r'',q''',r')` >>
+fs [global_abs0_comb_rel_def, weak_tr_def] >-
+(DISJ1_TAC >>
+rw [global_tr_cases] >>
+METIS_TAC []) >>
+REPEAT DISJ2_TAC >>
+Q.EXISTS_TAC `n` >>
+`(!d. call_back buffer0 <> TX d) /\
+(!d. call_back buffer0 <> RX d) /\
+(!d0 d1. call_back buffer0 <> XFER d0 d1)` by rw [] >>
+METIS_TAC [n_tau_tr_local_global_tr_first],
+`?s2'. weak_tr local_tr (q''',r') (call_back buffer1) s2' /\ abs0_comb_rel d1' s2'` by METIS_TAC [] >>
+Cases_on `s2'` >>
+Q.EXISTS_TAC `(q',q'',q'''',r'')` >>
+fs [global_abs0_comb_rel_def, weak_tr_def] >-
+(DISJ1_TAC >>
+rw [global_tr_cases] >>
+METIS_TAC []) >>
+REPEAT DISJ2_TAC >>
+Q.EXISTS_TAC `n` >>
+`(!d. call_back buffer1 <> TX d) /\
+(!d. call_back buffer1 <> RX d) /\
+(!d0 d1. call_back buffer1 <> XFER d0 d1)` by rw [] >>
+METIS_TAC [n_tau_tr_local_global_tr_second],       
 `?s2'. weak_tr local_tr (q',q'') tau s2' /\ abs0_comb_rel d0' s2'` by METIS_TAC [] >>
 Cases_on `s2'` >>
 Q.EXISTS_TAC `(q'''',r'',q''',r')` >>
@@ -574,6 +600,26 @@ rw [abs0_global_tr_cases] >>
 METIS_TAC [],
 Q.EXISTS_TAC `ds_abs1` >> rw [],
 Q.EXISTS_TAC `ds_abs1''` >> rw []],
+`call_back buffer <> tau` by rw [] >>
+`?ds_abs1''. (ds_abs1_tr ds_abs1 (call_back buffer) ds_abs1'') /\ (ref_rel ds_abs1'' (dr1', spi1'))` by METIS_TAC [comb_abs1_weak_simulation_lbl_not_tau] >>
+`?ds_abs0'. (ds_abs0_tr q (call_back buffer) ds_abs0') /\ (abs_rel ds_abs0' ds_abs1'')` by METIS_TAC [abs1_abs0_weak_simulation] >>
+Q.EXISTS_TAC `(ds_abs0',r)` >>
+rw [global_abs0_comb_rel_def, abs0_comb_rel_def, weak_tr_def] >|
+[DISJ1_TAC >>
+rw [abs0_global_tr_cases] >>
+METIS_TAC [],
+Q.EXISTS_TAC `ds_abs1''` >> rw [],
+Q.EXISTS_TAC `ds_abs1'` >> rw []],
+`call_back buffer <> tau` by rw [] >>
+`?ds_abs1''. (ds_abs1_tr ds_abs1' (call_back buffer) ds_abs1'') /\ (ref_rel ds_abs1'' (dr2', spi2'))` by METIS_TAC [comb_abs1_weak_simulation_lbl_not_tau] >>
+`?ds_abs0'. (ds_abs0_tr r (call_back buffer) ds_abs0') /\ (abs_rel ds_abs0' ds_abs1'')` by METIS_TAC [abs1_abs0_weak_simulation] >>
+Q.EXISTS_TAC `(q,ds_abs0')` >>
+rw [global_abs0_comb_rel_def, abs0_comb_rel_def, weak_tr_def] >|
+[DISJ1_TAC >>
+rw [abs0_global_tr_cases] >>
+METIS_TAC [],
+Q.EXISTS_TAC `ds_abs1` >> rw [],
+Q.EXISTS_TAC `ds_abs1''` >> rw []],        
 `ref_rel ds_abs1 (dr1',spi1') \/
 ?ds_abs1''. ds_abs1_tr ds_abs1 tau ds_abs1'' /\ ref_rel ds_abs1'' (dr1',spi1')` by METIS_TAC [comb_abs1_weak_simulation_tau] >-
 (Q.EXISTS_TAC `(q,r)` >>
