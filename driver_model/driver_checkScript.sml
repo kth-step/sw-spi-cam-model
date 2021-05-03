@@ -114,6 +114,7 @@ case dr.state of
   | dr_rx_issue_disable => dr with dr_err := T
   | dr_rx_read_conf => dr with dr_err := T
   | dr_rx_reset_conf => dr with dr_err := T
+  | dr_rx_sendback => dr with dr_err := T
   | dr_xfer_idle => dr with dr_err := T
   | dr_xfer_fetch_conf => dr with dr_err := T
   | dr_xfer_conf_issued => dr with dr_err := T
@@ -129,6 +130,7 @@ case dr.state of
     else dr with dr_err := T
   | dr_xfer_issue_disable => dr with dr_err := T
   | dr_xfer_read_conf => dr with dr_err := T
-  | dr_xfet_reset_conf => dr with dr_err := T`
+  | dr_xfet_reset_conf => dr with dr_err := T
+  | dr_xfer_sendback => dr with dr_err := T`
 
 val _ = export_theory();

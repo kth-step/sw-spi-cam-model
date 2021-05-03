@@ -80,7 +80,7 @@ let addr = SPI0_CH0CONF:word32 and
 if (dr.state = dr_rx_fetch_conf) then
 (SOME addr, SOME v1, dr with state := dr_rx_conf_issued)
 else if (dr.state = dr_rx_reset_conf) then
-(SOME addr, SOME v2, dr with state := dr_ready)
+(SOME addr, SOME v2, dr with state := dr_rx_sendback)
 else (NONE, NONE, dr with dr_err := T)`
 
 (* dr_write_ch0conf_xfer: set up the CH0CONF register for xfer mode. *)
@@ -92,7 +92,7 @@ let addr = SPI0_CH0CONF:word32 and
 if (dr.state = dr_xfer_fetch_conf) then
 (SOME addr, SOME v1, dr with state := dr_xfer_conf_issued)
 else if (dr.state = dr_xfer_reset_conf) then
-(SOME addr, SOME v2, dr with state := dr_ready)
+(SOME addr, SOME v2, dr with state := dr_xfer_sendback)
 else (NONE, NONE, dr with dr_err := T)`
 
 (* dr_write_ch0ctrl: set up the CH0CTRL register. *)
@@ -167,6 +167,7 @@ case dr.state of
  | dr_rx_issue_disable => (dr_write_ch0ctrl dr)
  | dr_rx_read_conf => (NONE, NONE, dr with dr_err := T)
  | dr_rx_reset_conf => (dr_write_ch0conf_rx dr)
+ | dr_rx_sendback => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_idle => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_fetch_conf => (dr_write_ch0conf_xfer dr)
  | dr_xfer_conf_issued => (dr_write_ch0ctrl dr)
@@ -179,7 +180,8 @@ case dr.state of
  | dr_xfer_fetch_dataI => (NONE, NONE, dr with dr_err := T)
  | dr_xfer_issue_disable => (dr_write_ch0ctrl dr)
  | dr_xfer_read_conf => (NONE, NONE, dr with dr_err := T)
- | dr_xfer_reset_conf => (dr_write_ch0conf_xfer dr)`
+ | dr_xfer_reset_conf => (dr_write_ch0conf_xfer dr)
+ | dr_xfer_sendback => (NONE, NONE, dr with dr_err := T)`
 
 (* dr_write_address, dr_write_value, dr_write_value: return specific types. *)
 val dr_write_address_def = Define `

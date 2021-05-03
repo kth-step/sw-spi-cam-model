@@ -27,4 +27,21 @@ dr with <| dr_xfer := dr.dr_xfer with <| xfer_dataOUT_buf := buffer; xfer_dataIN
 xfer_cur_length := 0 |>;
 state := dr_xfer_idle |>`
 
+(* call_back_dr: the driver returns the received data to other programs. *)
+val call_back_dr_def = Define `
+call_back_dr (dr:driver_state) =
+if dr.state = dr_rx_sendback then
+(dr with state := dr_ready,dr.dr_rx.rx_data_buf)
+else if dr.state = dr_xfer_sendback then
+(dr with state := dr_ready,dr.dr_xfer.xfer_dataIN_buf)
+else (dr with dr_err := T, [])`
+
+val call_back_dr_state = Define `
+call_back_dr_state (dr:driver_state) =
+let (dr',l) = call_back_dr dr in dr'`
+
+val call_back_dr_data = Define `
+call_back_dr_data (dr:driver_state) =
+let (dr',l) = call_back_dr dr in l`
+
 val _ = export_theory();

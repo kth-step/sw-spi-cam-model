@@ -1706,108 +1706,6 @@ SPI0_CH0CTRL_def, SPI0_CH0STAT_def, SPI0_TX0_def, read_RX0_def, CHECK_RXS_BIT_de
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_RX0_def] >>
 SIMP_TAC (std_ss ++ WORD_BIT_EQ_ss) []);
 
-(* ref_rel holds when ds_abs1 has tau_comb_transition and ds_abs1.state = abs1_rx_reset *)
-val ref_rel_holds_tau_comb_abs1_rx_reset = store_thm("ref_rel_holds_tau_comb_abs1_rx_reset",
-``!spi dr ds_abs1.
-(ref_rel ds_abs1 (dr, spi)) /\ (ds_abs1.state = abs1_rx_reset) /\
-(IS_STATE_REL ds_abs1 dr spi) ==>
-(?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ 
-(ref_rel (comb_abs1_rx_operations ds_abs1) (dr', spi'))) \/
-(?n dr' spi'. (n_tau_tr n local_tr (dr,spi) tau (dr',spi')) /\ 
-(ref_rel (comb_abs1_rx_operations ds_abs1) (dr',spi')))``,
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def] >>
-`(dr.state = dr_rx_reset_conf /\ spi.state = rx_channel_disabled) \/
-(dr.state = dr_rx_read_conf /\ spi.state = rx_channel_disabled) \/
-(dr.state = dr_rx_issue_disable /\ spi.state = rx_data_ready)` by fs [IS_STATE_REL_def] >| 
-[(* dr_rx_reset_conf and rx_rx_channel_disabled *)
-DISJ1_TAC >>
-rw [local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def, dr_write_state_def, 
-dr_write_value_def,dr_write_address_def, dr_write_def, dr_write_ch0conf_rx_def] >>
-`dr.dr_last_read_v = SOME (build_CH0CONF spi.regs.CH0CONF)` by fs [ref_rel_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) :word1 <> spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >> FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_PA_RANGE_def,
-SPI0_START_def, SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def,
-write_CH0CONF_comb_def, write_CH0CONF_rx_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def, IS_STATE_REL_def],
-(* dr_rx_read_conf and rx_channel_disabled *)
-DISJ2_TAC >>
-Q.EXISTS_TAC `SUC 0:num` >>
-rw [n_tau_tr_def, local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def] >>
-`dr_read dr = dr with <|state := dr_rx_reset_conf; 
-dr_last_read_ad := SOME SPI0_CH0CONF |>` by rw [dr_read_def,dr_read_ch0conf_def] >> fs [] >>
-`(read_SPI_regs_value SPI0_CH0CONF spi = build_CH0CONF spi.regs.CH0CONF) /\
-(read_SPI_regs_state SPI0_CH0CONF spi = spi)`
-by fs [read_SPI_regs_value_def,read_SPI_regs_state_def,read_SPI_regs_def,
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,SPI0_SYSSTATUS_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >> 
-fs [dr_write_state_def,dr_write_address_def,dr_write_value_def,
-dr_write_def, dr_write_ch0conf_rx_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) : word1 <> 
-spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = 
-spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, write_CH0CONF_comb_def, write_CH0CONF_rx_def, 
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def,IS_STATE_REL_def],
-(* dr_rx_issue_disable and rx_data_ready *)
-DISJ2_TAC >>
-Q.EXISTS_TAC `SUC 1:num` >>
-rw [n_tau_tr_def, n_tau_tr_SUC, local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def] >>
-`(dr_write_state dr = dr with state := dr_rx_read_conf) /\
-(dr_write_address dr = SOME SPI0_CH0CTRL) /\
-(dr_write_value dr = SOME (0w:word32))` 
-by rw [dr_write_state_def,dr_write_address_def,dr_write_value_def,dr_write_def, 
-dr_write_ch0ctrl_def] >> fs [] >>
-`write_SPI_regs SPI0_CH0CTRL 0w spi = 
-spi with <|regs := spi.regs with CH0CTRL := 0w;
-state := rx_channel_disabled|>` 
-by rw [write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, 
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CTRL_def, write_CH0CTRL_def] >> fs [] >>
-`dr_read (dr with state := dr_rx_read_conf) = dr with <|state := dr_rx_reset_conf; 
-dr_last_read_ad := SOME SPI0_CH0CONF |>` by rw [dr_read_def,dr_read_ch0conf_def] >> fs [] >>
-`(read_SPI_regs_value SPI0_CH0CONF (spi with <|state := rx_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>) = build_CH0CONF spi.regs.CH0CONF) /\
-(read_SPI_regs_state SPI0_CH0CONF (spi with <|state := rx_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>) = (spi with <|state := rx_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>))`
-by fs [read_SPI_regs_value_def,read_SPI_regs_state_def,read_SPI_regs_def,
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,SPI0_SYSSTATUS_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >> fs [] >>
-rw [dr_write_state_def,dr_write_address_def,dr_write_value_def,
-dr_write_def, dr_write_ch0conf_rx_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) 
-(spi with <|state := rx_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w|>))` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) : word1 <> 
-spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = 
-spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, write_CH0CONF_comb_def, write_CH0CONF_rx_def, 
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def,IS_STATE_REL_def]]);
-
 (* (ds',spi') exists for rx *)
 val abs1_comb_hold_ref_rel_tau_comb_rx = store_thm("abs1_comb_hold_ref_rel_tau_comb_rx",
 ``!spi dr ds_abs1.
@@ -1818,7 +1716,7 @@ val abs1_comb_hold_ref_rel_tau_comb_rx = store_thm("abs1_comb_hold_ref_rel_tau_c
 (ref_rel (comb_abs1_rx_operations ds_abs1) (dr',spi')))``,
 rw [COMB_ABS1_RX_ENABLE_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
-rw [ref_rel_holds_tau_comb_abs1_rx_read, ref_rel_holds_tau_comb_abs1_rx_reset]);
+rw [ref_rel_holds_tau_comb_abs1_rx_read]);
 
 
 (* related to xfer automaton *)
@@ -1990,108 +1888,6 @@ SPI0_CH0STAT_def, SPI0_CH0CTRL_def, SPI0_TX0_def, read_RX0_def, CHECK_RXS_BIT_de
 fs [ref_rel_def, IS_STATE_REL_def, SPI0_RX0_def] >>
 SIMP_TAC (std_ss++WORD_BIT_EQ_ss) []]]);
 
-(* ref_rel holds when ds_abs1 has tau_comb transition and ds_abs1.state = abs1_xfer_reset *)
-val ref_rel_holds_tau_comb_abs1_xfer_reset = store_thm("ref_rel_holds_tau_comb_abs1_xfer_reset",
-``!spi dr ds_abs1.
-(ref_rel ds_abs1 (dr, spi)) /\ (ds_abs1.state = abs1_xfer_reset) /\
-(IS_STATE_REL ds_abs1 dr spi) ==>
-(?dr' spi'. (local_tr (dr, spi) tau (dr', spi')) /\ 
-(ref_rel (comb_abs1_xfer_operations ds_abs1) (dr', spi'))) \/
-(?n dr' spi'. (n_tau_tr n local_tr (dr,spi) tau (dr',spi')) /\ 
-(ref_rel (comb_abs1_xfer_operations ds_abs1) (dr',spi')))``,
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def] >>
-`(dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled) \/
-(dr.state = dr_xfer_read_conf /\ spi.state = xfer_channel_disabled) \/
-(dr.state = dr_xfer_issue_disable /\ spi.state = xfer_ready_for_trans)` by fs [IS_STATE_REL_def] >|
-[(* dr_xfer_reset_conf and xfer_channel_disabled *)
-DISJ1_TAC >>
-rw [local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def, dr_write_state_def, 
-dr_write_value_def,dr_write_address_def, dr_write_def, dr_write_ch0conf_xfer_def] >>
-`dr.dr_last_read_v = SOME (build_CH0CONF spi.regs.CH0CONF)` by fs [ref_rel_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) :word1 <> spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >> FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_PA_RANGE_def,
-SPI0_START_def, SPI0_END_def, SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def,
-write_CH0CONF_comb_def, write_CH0CONF_xfer_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def, IS_STATE_REL_def],
-(* dr_xfer_read_conf and xfer_channel_disabled *)
-DISJ2_TAC >>
-Q.EXISTS_TAC `SUC 0:num` >>
-rw [n_tau_tr_def, local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def] >>
-`dr_read dr = dr with <|state := dr_xfer_reset_conf; 
-dr_last_read_ad := SOME SPI0_CH0CONF |>` by rw [dr_read_def,dr_read_ch0conf_def] >> fs [] >>
-`(read_SPI_regs_value SPI0_CH0CONF spi = build_CH0CONF spi.regs.CH0CONF) /\
-(read_SPI_regs_state SPI0_CH0CONF spi = spi)`
-by fs [read_SPI_regs_value_def,read_SPI_regs_state_def,read_SPI_regs_def,
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,SPI0_SYSSTATUS_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >> 
-fs [dr_write_state_def,dr_write_address_def,dr_write_value_def,
-dr_write_def, dr_write_ch0conf_xfer_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) : word1 <> 
-spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = 
-spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, write_CH0CONF_comb_def, write_CH0CONF_xfer_def, 
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def,IS_STATE_REL_def],
-(* dr_xfer_issue_disable and xfer_ready_for_trans_*)
-DISJ2_TAC >>
-Q.EXISTS_TAC `SUC 1:num` >>
-rw [n_tau_tr_def, n_tau_tr_SUC, local_tr_cases, driver_tr_cases, spi_tr_cases, DR_TAU_ENABLE_def, 
-SPI_TAU_ENABLE_def, DR_WR_ENABLE_def, DR_RD_ENABLE_def] >>
-`(dr_write_state dr = dr with state := dr_xfer_read_conf) /\
-(dr_write_address dr = SOME SPI0_CH0CTRL) /\
-(dr_write_value dr = SOME (0w:word32))` 
-by rw [dr_write_state_def,dr_write_address_def,dr_write_value_def,dr_write_def, 
-dr_write_ch0ctrl_def] >> fs [] >>
-`write_SPI_regs SPI0_CH0CTRL 0w spi = 
-spi with <|regs := spi.regs with CH0CTRL := 0w;
-state := xfer_channel_disabled|>` 
-by rw [write_SPI_regs_def, SPI0_CH0CONF_def, SPI0_PA_RANGE_def, SPI0_START_def, SPI0_END_def, 
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CTRL_def, write_CH0CTRL_def] >> fs [] >>
-`dr_read (dr with state := dr_xfer_read_conf) = dr with <|state := dr_xfer_reset_conf; 
-dr_last_read_ad := SOME SPI0_CH0CONF |>` by rw [dr_read_def,dr_read_ch0conf_def] >> fs [] >>
-`(read_SPI_regs_value SPI0_CH0CONF (spi with <|state := xfer_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>) = build_CH0CONF spi.regs.CH0CONF) /\
-(read_SPI_regs_state SPI0_CH0CONF (spi with <|state := xfer_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>) = (spi with <|state := xfer_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w |>))`
-by fs [read_SPI_regs_value_def,read_SPI_regs_state_def,read_SPI_regs_def,
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,SPI0_SYSSTATUS_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >> fs [] >>
-rw [dr_write_state_def,dr_write_address_def,dr_write_value_def,
-dr_write_def, dr_write_ch0conf_xfer_def] >>
-`~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) 
-(spi with <|state := xfer_channel_disabled;
-regs := spi.regs with CH0CTRL := 0w|>))` 
-by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-`spi.regs.CH0CONF.FORCE = 1w` by fs [ref_rel_def] >>
-`(20 >< 20) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) : word1 <> 
-spi.regs.CH0CONF.FORCE` by FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-`(13 >< 12) ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)): word2 = 
-spi.regs.CH0CONF.TRM` by (fs [build_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
-rw [write_SPI_regs_def, write_CH0CONF_comb_def, write_CH0CONF_xfer_def, 
-SPI0_CH0CTRL_def, SPI0_PA_RANGE_def, SPI0_END_def, SPI0_START_def,
-SPI0_SYSCONFIG_def, SPI0_MODULCTRL_def, SPI0_CH0CONF_def] >>
-FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) [] >>
-fs [ref_rel_def,IS_STATE_REL_def]]);
-
 (* (dr',spi') exists for xfer *)
 val abs1_comb_hold_ref_rel_tau_comb_xfer = store_thm("abs1_comb_hold_ref_rel_tau_comb_xfer",
 ``!spi dr ds_abs1.
@@ -2102,8 +1898,7 @@ val abs1_comb_hold_ref_rel_tau_comb_xfer = store_thm("abs1_comb_hold_ref_rel_tau
 (ref_rel (comb_abs1_xfer_operations ds_abs1) (dr',spi')))``,
 rw [COMB_ABS1_XFER_ENABLE_def] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
-rw [ref_rel_holds_tau_comb_abs1_xfer_prepare, ref_rel_holds_tau_comb_abs1_xfer_ready, 
-ref_rel_holds_tau_comb_abs1_xfer_reset]);
+rw [ref_rel_holds_tau_comb_abs1_xfer_prepare, ref_rel_holds_tau_comb_abs1_xfer_ready]);
 
 (* simulation: (dr',spi') exists and holds the ref_rel when ds_abs1 has tau_comb transitions *)
 val abs1_comb_hold_ref_rel_tau_comb = store_thm("abs1_comb_hold_ref_rel_tau_comb",

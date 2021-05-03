@@ -102,6 +102,6 @@ read_reg : word32 (* An arbitrary value *)|>`
 val _ = Datatype `global_lbl_type = 
 | tau | TX (word8 option) | RX (word8 option) | XFER (word8 option) (word8 option)
 | Write word32 word32 | Update word32 word32 | Read word32 word32 | Return word32 word32
-| call_init | call_tx (word8 list) | call_rx num | call_xfer (word8 list)`
+| call_init | call_tx (word8 list) | call_rx num | call_xfer (word8 list) | call_back (word8 list)`
 
 val _ = export_theory();

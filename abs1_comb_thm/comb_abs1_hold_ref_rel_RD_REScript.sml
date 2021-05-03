@@ -133,6 +133,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_issue_disable) /\
 (dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_rx_reset_conf) /\
+(dr.state <> dr_rx_sendback) /\
 (dr.state <> dr_xfer_idle) /\
 (dr.state <> dr_xfer_fetch_conf) /\
 (dr.state <> dr_xfer_conf_issued) /\
@@ -145,7 +146,8 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_xfer_fetch_dataI) /\
 (dr.state <> dr_xfer_issue_disable) /\
 (dr.state <> dr_xfer_read_conf) /\
-(dr.state <> dr_xfer_reset_conf)` by rw [] >>
+(dr.state <> dr_xfer_reset_conf) /\
+(dr.state <> dr_xfer_sendback)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exists and relation holds when driver state is dr_rx_read_rx0 *)
@@ -259,6 +261,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_fetch_data) /\
 (dr.state <> dr_rx_issue_disable) /\
 (dr.state <> dr_rx_reset_conf) /\
+(dr.state <> dr_rx_sendback) /\
 (dr.state <> dr_xfer_idle) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
@@ -274,7 +277,8 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_xfer_fetch_conf) /\
-(dr.state <> dr_xfer_read_conf)` by rw [] >>
+(dr.state <> dr_xfer_read_conf) /\
+(dr.state <> dr_xfer_sendback)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* ds_abs1' exists and relation holds when driver state is dr_xfer_read_rx0 *)

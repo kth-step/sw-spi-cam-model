@@ -12,12 +12,12 @@ val _ = Datatype `dr_general_state =
 | dr_tx_read_eot | dr_tx_check_eot | dr_tx_issue_disable 
 | dr_tx_read_conf | dr_tx_reset_conf
 | dr_rx_idle | dr_rx_fetch_conf | dr_rx_conf_issued 
-| dr_rx_read_rxs | dr_rx_check_rxs | dr_rx_read_rx0 
-| dr_rx_fetch_data | dr_rx_issue_disable | dr_rx_read_conf | dr_rx_reset_conf
+| dr_rx_read_rxs | dr_rx_check_rxs | dr_rx_read_rx0 | dr_rx_fetch_data 
+| dr_rx_issue_disable | dr_rx_read_conf | dr_rx_reset_conf | dr_rx_sendback
 | dr_xfer_idle | dr_xfer_fetch_conf | dr_xfer_conf_issued | dr_xfer_read_txs 
 | dr_xfer_check_txs | dr_xfer_write_dataO | dr_xfer_read_rxs 
 | dr_xfer_check_rxs | dr_xfer_read_rx0 | dr_xfer_fetch_dataI 
-| dr_xfer_issue_disable | dr_xfer_read_conf | dr_xfer_reset_conf`
+| dr_xfer_issue_disable | dr_xfer_read_conf | dr_xfer_reset_conf | dr_xfer_sendback`
 
 (* dr_init_state: contains boolean flags to record init process *)
 val _ = Datatype `dr_init_state = <|

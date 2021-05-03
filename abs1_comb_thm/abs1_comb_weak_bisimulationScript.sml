@@ -11,10 +11,10 @@ val comb_abs1_weak_simulation_lbl_not_tau = store_thm("comb_abs1_weak_simulation
 (lbl <> tau ==> 
 ?ds_abs1'. (ds_abs1_tr ds_abs1 lbl ds_abs1') /\ (ref_rel ds_abs1' (dr', spi')))``,
 rw [local_tr_cases] >>
-METIS_TAC [comb_abs1_hold_ref_rel_call_init, comb_abs1_hold_ref_rel_call_tx,
-comb_abs1_hold_ref_rel_call_rx, comb_abs1_hold_ref_rel_call_xfer, 
-comb_abs1_hold_ref_rel_TX, comb_abs1_hold_ref_rel_RX,
-comb_abs1_hold_ref_rel_XFER]);
+METIS_TAC [comb_abs1_hold_ref_rel_call_init,comb_abs1_hold_ref_rel_call_tx,
+comb_abs1_hold_ref_rel_call_rx,comb_abs1_hold_ref_rel_call_xfer,
+comb_abs1_hold_ref_rel_call_back,comb_abs1_hold_ref_rel_TX,
+comb_abs1_hold_ref_rel_RX,comb_abs1_hold_ref_rel_XFER]);
 
 (* simulation: ds_abs1 or ds_abs1' exists for ref_rel holding when lbl is tau *)
 val comb_abs1_weak_simulation_tau = store_thm("comb_abs1_weak_simulation_tau",
@@ -42,14 +42,18 @@ METIS_TAC [comb_abs1_weak_simulation_tau, comb_abs1_weak_simulation_lbl_not_tau]
 (* simulation: (dr', spi') exists when lbl is not tau *)
 val abs1_comb_weak_simulation_lbl_not_tau = store_thm("abs1_comb_weak_simulation_lbl_not_tau",
 ``!spi dr ds_abs1 lbl ds_abs1'.
-(ref_rel ds_abs1 (dr, spi)) /\ (ds_abs1_tr ds_abs1 lbl ds_abs1') ==>
-(lbl <> tau ==> ?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ 
+ref_rel ds_abs1 (dr, spi) /\ ds_abs1_tr ds_abs1 lbl ds_abs1' ==>
+lbl <> tau ==>
+(?dr' spi'. (local_tr (dr, spi) lbl (dr', spi')) /\ 
+(ref_rel ds_abs1' (dr', spi'))) \/
+(?n dr' spi'. (n_tau_tr n local_tr (dr, spi) lbl (dr', spi')) /\
 (ref_rel ds_abs1' (dr', spi')))``,
 rw [ds_abs1_tr_cases] >>
 rw [abs1_comb_hold_ref_rel_TX, abs1_comb_hold_ref_rel_RX, abs1_comb_hold_ref_rel_XFER] >>
 METIS_TAC [ds_abs1_tr_cases, abs1_comb_hold_ref_rel_call_init, 
-abs1_comb_hold_ref_rel_call_init, ds_abs1_tr_cases, abs1_comb_hold_ref_rel_call_tx,
-abs1_comb_hold_ref_rel_call_rx, abs1_comb_hold_ref_rel_call_xfer]);
+abs1_comb_hold_ref_rel_call_init, abs1_comb_hold_ref_rel_call_tx,
+abs1_comb_hold_ref_rel_call_rx, abs1_comb_hold_ref_rel_call_xfer,
+abs1_comb_hold_ref_rel_call_back]);
 
 (* simulation: (dr',spi') exists when lbl is tau *)
 val abs1_comb_weak_simulation_tau = store_thm("abs1_comb_weak_simulation_tau",

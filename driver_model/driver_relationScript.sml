@@ -25,7 +25,9 @@ driver_tr dr (call_tx buffer) (call_tx_dr dr buffer)) /\
 (!(dr:driver_state). (dr.state = dr_ready) /\ (length > 0) ==>
 driver_tr dr (call_rx length) (call_rx_dr dr length)) /\
 (!(dr:driver_state). (dr.state = dr_ready) /\ (buffer <> []) ==>
-driver_tr dr (call_xfer buffer) (call_xfer_dr dr buffer))`
+driver_tr dr (call_xfer buffer) (call_xfer_dr dr buffer)) /\
+(!(dr:driver_state). (dr.state = dr_rx_sendback) \/ (dr.state = dr_xfer_sendback) ==>
+driver_tr dr (call_back (call_back_dr_data dr)) (call_back_dr_state dr))`
 
 (* local_tr: a driver and an SPI conroller transition *)
 val (local_tr_rules, local_tr_ind, local_tr_cases) = Hol_reln `
@@ -42,6 +44,9 @@ local_tr (dr, spi) (call_rx length) (dr', spi)) /\
 (!(dr:driver_state) (spi:spi_state).
 (driver_tr dr (call_xfer buffer) dr') ==>
 local_tr (dr, spi) (call_xfer buffer) (dr', spi)) /\
+(!(dr:driver_state) (spi:spi_state).
+(driver_tr dr (call_back buffer) dr') ==>
+local_tr (dr, spi) (call_back buffer) (dr', spi)) /\
 (* driver and spi internal operations *)
 (!(dr:driver_state) (spi:spi_state).
 driver_tr dr tau dr' ==> local_tr (dr, spi) tau (dr', spi)) /\
@@ -90,6 +95,12 @@ local_tr (dr1, spi1) (call_xfer buffer) (dr1', spi1') ==>
 global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr2, spi2) (call_xfer buffer) (dr2', spi2') ==>
+global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
+(!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
+local_tr (dr1, spi1) (call_back buffer) (dr1', spi1') ==>
+global_tr (dr1, spi1, dr2, spi2) tau (dr1', spi1', dr2, spi2)) /\
+(!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
+local_tr (dr2, spi2) (call_back buffer) (dr2', spi2') ==>
 global_tr (dr1, spi1, dr2, spi2) tau (dr1, spi1, dr2', spi2')) /\
 (!(dr1:driver_state) (spi1:spi_state) (dr2:driver_state) (spi2:spi_state).
 local_tr (dr1, spi1) tau (dr1', spi1') ==>

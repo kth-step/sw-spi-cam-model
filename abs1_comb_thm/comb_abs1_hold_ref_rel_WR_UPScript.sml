@@ -298,20 +298,16 @@ val ref_rel_hold_dr_rx_reset_conf_WR = store_thm("ref_rel_hold_dr_rx_reset_conf_
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state).
 (ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_rx_reset_conf) /\
 (spi_tr spi (Update (THE (dr_write_address dr)) (THE (dr_write_value dr))) spi') ==>
-?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ref_rel ds_abs1' ((dr_write_state dr), spi'))``,
+ref_rel ds_abs1 ((dr_write_state dr), spi')``,
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
 Cases_on `dr.state` >> rw [] >>
 Cases_on `ds_abs1.state` >> rw [] >>
 Cases_on `spi.state` >> rw [] >>
-EXISTS_TAC ``comb_abs1_rx_operations ds_abs1`` >>
-rw [COMB_ABS1_RX_ENABLE_def] >>
-rw [comb_abs1_rx_operations_def, comb_abs1_rx_reset_op_def, dr_write_state_def, 
-dr_write_value_def,dr_write_address_def, dr_write_def, dr_write_ch0conf_rx_def, 
-write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def, SPI0_START_def, 
-SPI0_END_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
+rw [dr_write_state_def, dr_write_value_def,dr_write_address_def, dr_write_def,
+dr_write_ch0conf_rx_def, write_SPI_regs_def, SPI0_SYSCONFIG_def,SPI0_PA_RANGE_def,
+SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def, SPI0_MODULCTRL_def] >>
 `dr.dr_last_read_v = SOME (build_CH0CONF spi.regs.CH0CONF)` by fs [ref_rel_def] >>
 `~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` by (fs [build_CH0CONF_def,ch0conf_changed_def] >>
 FULL_SIMP_TAC (std_ss++WORD_ss++WORD_BIT_EQ_ss) []) >>
@@ -416,20 +412,16 @@ val ref_rel_hold_dr_xfer_reset_conf_WR = store_thm("ref_rel_hold_dr_xfer_reset_c
 ``!(spi:spi_state) (dr:driver_state) (ds_abs1:ds_abs1_state) (spi':spi_state).
 (ref_rel ds_abs1 (dr, spi)) /\ (dr.state = dr_xfer_reset_conf) /\
 (spi_tr spi (Update (THE (dr_write_address dr)) (THE (dr_write_value dr))) spi') ==>
-?ds_abs1'. (ds_abs1_tr ds_abs1 tau ds_abs1') /\
-(ref_rel ds_abs1' ((dr_write_state dr), spi'))``,
+ref_rel ds_abs1 ((dr_write_state dr), spi')``,
 rw [spi_tr_cases, ds_abs1_tr_cases, ds_abs1_comb_tr_cases] >>
 `IS_STATE_REL ds_abs1 dr spi` by fs [ref_rel_def] >>
 fs [IS_STATE_REL_def] >>
 Cases_on `dr.state` >> rw [] >>
 Cases_on `ds_abs1.state` >> rw [] >>
 Cases_on `spi.state` >> rw [] >>
-EXISTS_TAC ``comb_abs1_xfer_operations ds_abs1`` >>
-rw [COMB_ABS1_XFER_ENABLE_def] >>
-rw [comb_abs1_xfer_operations_def, comb_abs1_xfer_reset_op_def, dr_write_state_def, 
-dr_write_value_def,dr_write_address_def, dr_write_def, dr_write_ch0conf_xfer_def, 
-write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def, SPI0_START_def, 
-SPI0_END_def, SPI0_CH0CONF_def,SPI0_MODULCTRL_def] >>
+rw [dr_write_state_def,dr_write_value_def,dr_write_address_def, dr_write_def,
+dr_write_ch0conf_xfer_def, write_SPI_regs_def, SPI0_SYSCONFIG_def, SPI0_PA_RANGE_def,
+SPI0_START_def, SPI0_END_def, SPI0_CH0CONF_def,SPI0_MODULCTRL_def] >>
 `dr.dr_last_read_v = SOME (build_CH0CONF spi.regs.CH0CONF)` by fs [ref_rel_def] >>
 `~ (ch0conf_changed ((4293918719w:word32) && (build_CH0CONF spi.regs.CH0CONF)) spi)` 
 by (fs [build_CH0CONF_def,ch0conf_changed_def] >>

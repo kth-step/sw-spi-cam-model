@@ -117,6 +117,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_read_rx0) /\
 (dr.state <> dr_rx_issue_disable) /\
 (dr.state <> dr_rx_reset_conf) /\
+(dr.state <> dr_rx_sendback) /\
 (dr.state <> dr_xfer_idle) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
@@ -133,7 +134,8 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_xfer_fetch_conf) /\
-(dr.state <> dr_xfer_read_conf)` by rw [] >>
+(dr.state <> dr_xfer_read_conf) /\
+(dr.state <> dr_xfer_sendback)` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 register for rx automaton *)
@@ -219,6 +221,7 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_fetch_data) /\
 (dr.state <> dr_rx_issue_disable) /\
 (dr.state <> dr_rx_reset_conf) /\
+(dr.state <> dr_rx_sendback) /\
 (dr.state <> dr_xfer_idle) /\
 (dr.state <> dr_xfer_conf_issued) /\
 (dr.state <> dr_xfer_read_txs) /\
@@ -234,7 +237,8 @@ Cases_on `spi.state` >> rw [] >>
 (dr.state <> dr_rx_fetch_conf) /\
 (dr.state <> dr_rx_read_conf) /\
 (dr.state <> dr_xfer_fetch_conf) /\
-(dr.state <> dr_xfer_read_conf)` by rw [] >>
+(dr.state <> dr_xfer_read_conf) /\
+(dr.state <> dr_xfer_sendback) ` by rw [] >>
 Cases_on `ds_abs1.state` >> rw []);
 
 (* driver tau transition to check RX0 for xfer automaton *)
