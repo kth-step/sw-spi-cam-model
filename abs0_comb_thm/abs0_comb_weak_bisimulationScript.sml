@@ -30,7 +30,7 @@ Q.EXISTS_TAC `s'''` >> rw [] >>
 `SUC n1 + SUC n2 = SUC (SUC n1 + n2)` by rw [] >>
 METIS_TAC []]);
 
-val n_tau_tr_exsists = store_thm ("n_tau_tr_exsists",
+val n_tau_tr_exists = store_thm ("n_tau_tr_exists",
 ``!dr spi n ds_abs1' lbl ds_abs1.
 n_tau_tr n ds_abs1_tr ds_abs1 lbl ds_abs1' /\ ref_rel ds_abs1 (dr,spi) ==>
 ?n1 dr' spi'. n_tau_tr n1 local_tr (dr,spi) lbl (dr',spi') /\ ref_rel ds_abs1' (dr',spi')``,
@@ -293,7 +293,7 @@ Q.EXISTS_TAC `s2'` >>
 Cases_on `s2'` >>
 rw [abs0_comb_rel_def] >>
 Q.EXISTS_TAC `ds_abs1'` >> rw []) >>
-`?n1 dr' spi'. n_tau_tr n1 local_tr (q,r) lbl (dr',spi') /\ ref_rel ds_abs1' (dr',spi')` by METIS_TAC [n_tau_tr_exsists] >>
+`?n1 dr' spi'. n_tau_tr n1 local_tr (q,r) lbl (dr',spi') /\ ref_rel ds_abs1' (dr',spi')` by METIS_TAC [n_tau_tr_exists] >>
 Q.EXISTS_TAC `(dr',spi')` >>
 rw [abs0_comb_rel_def, weak_tr_def] >-
 (REPEAT DISJ2_TAC >>
