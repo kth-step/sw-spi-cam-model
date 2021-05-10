@@ -3,6 +3,23 @@ open SPI_stateTheory ds_abs1_stateTheory ds_abs1_initTheory ds_abs1_txTheory ds_
 
 val _ = new_theory "ds_abs1_rel"
 
+(* call_back_ds_abs1: return the recevied data *)
+val call_back_ds_abs1_def = Define `
+call_back_ds_abs1 (ds_abs1:ds_abs1_state) =
+if ds_abs1.state = abs1_rx_reset
+then (ds_abs1 with state := abs1_ready, ds_abs1.ds_abs1_rx.rx_data_buffer)
+else if ds_abs1.state = abs1_xfer_reset
+then (ds_abs1 with state := abs1_ready, ds_abs1.ds_abs1_xfer.xfer_dataIN_buffer)
+else (ds_abs1 with err := T,[])`
+
+val call_back_ds_abs1_state_def = Define `
+call_back_ds_abs1_state (ds_abs1:ds_abs1_state) =
+let (ds_abs1',l) = call_back_ds_abs1 ds_abs1 in ds_abs1'`
+
+val call_back_ds_abs1_data_def = Define `
+call_back_ds_abs1_data (ds_abs1:ds_abs1_state) =
+let (ds_abs1',l) = call_back_ds_abs1 ds_abs1 in l`
+
 (* ds_abs1_spi_tr: ds_abs1 spi internal transtion *)
 val (ds_abs1_spi_tr_rules, ds_abs1_spi_tr_ind, ds_abs1_spi_tr_cases) = Hol_reln `
 (!(ds_abs1:ds_abs1_state). (SPI_ABS1_TX_ENABLE ds_abs1) ==>
@@ -44,6 +61,8 @@ ds_abs1_tr ds_abs1 (call_tx buffer) (call_tx_ds_abs1 ds_abs1 buffer)) /\
 ds_abs1_tr ds_abs1 (call_rx length) (call_rx_ds_abs1 ds_abs1 length)) /\
 (!(ds_abs1:ds_abs1_state). (ds_abs1.state = abs1_ready) /\ (buffer <> []) ==>
 ds_abs1_tr ds_abs1 (call_xfer buffer) (call_xfer_ds_abs1 ds_abs1 buffer)) /\
+(!(ds_abs1:ds_abs1_state). (ds_abs1.state = abs1_rx_reset) \/ (ds_abs1.state = abs1_xfer_reset) ==>
+ds_abs1_tr ds_abs1 (call_back (call_back_ds_abs1_data ds_abs1)) (call_back_ds_abs1_state ds_abs1)) /\
 (* tau transition in the model *)
 (!(ds_abs1:ds_abs1_state). ds_abs1_spi_tr ds_abs1 tau_spi ds_abs1' ==>
 ds_abs1_tr ds_abs1 tau ds_abs1') /\

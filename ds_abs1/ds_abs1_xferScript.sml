@@ -19,8 +19,7 @@ DRIVER_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
 val COMB_ABS1_XFER_ENABLE_def = Define `
 COMB_ABS1_XFER_ENABLE (ds_abs1:ds_abs1_state) =
 ((ds_abs1.state = abs1_xfer_prepare) \/
-(ds_abs1.state = abs1_xfer_ready) \/
-(ds_abs1.state = abs1_xfer_reset))`
+(ds_abs1.state = abs1_xfer_ready))`
 
 
 (* SPI controller related internal xfer functions *)
@@ -76,18 +75,12 @@ val comb_abs1_xfer_ready_op_def = Define `
 comb_abs1_xfer_ready_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with state := abs1_xfer_fetch_data`
 
-val comb_abs1_xfer_reset_op_def = Define `
-comb_abs1_xfer_reset_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with state := abs1_ready`
-
 val comb_abs1_xfer_operations_def = Define `
 comb_abs1_xfer_operations (ds_abs1:ds_abs1_state) =
 if ds_abs1.state = abs1_xfer_prepare 
 then (comb_abs1_xfer_prepare_op ds_abs1)
 else if (ds_abs1.state = abs1_xfer_ready)
 then (comb_abs1_xfer_ready_op ds_abs1)
-else if (ds_abs1.state = abs1_xfer_reset)
-then (comb_abs1_xfer_reset_op ds_abs1)
 else ds_abs1 with err := T`
 
 (* XFER label related functions *)

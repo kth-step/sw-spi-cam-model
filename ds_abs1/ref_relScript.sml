@@ -86,7 +86,8 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((ds_abs1.state = abs1_rx_reset) =
 ((dr.state = dr_rx_issue_disable /\ spi.state = rx_data_ready) \/
 (dr.state = dr_rx_read_conf /\ spi.state = rx_channel_disabled) \/
-(dr.state = dr_rx_reset_conf /\ spi.state = rx_channel_disabled))) /\
+(dr.state = dr_rx_reset_conf /\ spi.state = rx_channel_disabled) \/
+(dr.state = dr_rx_sendback /\ spi.state = spi_ready))) /\
 ((ds_abs1.state = abs1_xfer_idle) =
 ((dr.state = dr_xfer_idle /\ spi.state = spi_ready) \/
 (dr.state = dr_xfer_fetch_conf /\ spi.state = spi_ready) \/
@@ -115,7 +116,8 @@ IS_STATE_REL (ds_abs1:ds_abs1_state) (dr:driver_state) (spi:spi_state) =
 ((ds_abs1.state = abs1_xfer_reset) =
 ((dr.state = dr_xfer_issue_disable /\ spi.state = xfer_ready_for_trans) \/
 (dr.state = dr_xfer_read_conf /\ spi.state = xfer_channel_disabled) \/
-(dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled))))`
+(dr.state = dr_xfer_reset_conf /\ spi.state = xfer_channel_disabled) \/
+(dr.state = dr_xfer_sendback /\ spi.state = spi_ready))))`
 
 (* ref_rel: refinement relation for the ds_abs1 and (dr,spi). *)
 val ref_rel_def = Define `

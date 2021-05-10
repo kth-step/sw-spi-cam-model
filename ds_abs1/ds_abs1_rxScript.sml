@@ -21,8 +21,7 @@ DRIVER_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
 (* COMB_ABS1_RX_ENABLE: ds_abs1's state is permitted to perform other internal rx operations. *)
 val COMB_ABS1_RX_ENABLE_def = Define `
 COMB_ABS1_RX_ENABLE (ds_abs1:ds_abs1_state) =
-((ds_abs1.state = abs1_rx_read) \/
-(ds_abs1.state = abs1_rx_reset))`
+(ds_abs1.state = abs1_rx_read)`
 
 (* ABS1_RX_LBL_ENABLE: ds_abs1's state is permitted to perform RX label operations. *)
 val ABS1_RX_LBL_ENABLE_def = Define `
@@ -98,16 +97,10 @@ comb_abs1_rx_read_op (ds_abs1:ds_abs1_state) =
 ds_abs1 with <| state := abs1_rx_fetch_data;
 ds_abs1_rx := ds_abs1.ds_abs1_rx with temp_value := ds_abs1.spi_abs1.RX_SHIFT_REG |>`
 
-val comb_abs1_rx_reset_op_def = Define `
-comb_abs1_rx_reset_op (ds_abs1:ds_abs1_state) =
-ds_abs1 with state := abs1_ready`
-
 val comb_abs1_rx_operations_def = Define `
 comb_abs1_rx_operations (ds_abs1:ds_abs1_state) =
 if ds_abs1.state = abs1_rx_read 
 then (comb_abs1_rx_read_op ds_abs1)
-else if ds_abs1.state = abs1_rx_reset
-then (comb_abs1_rx_reset_op ds_abs1)
 else ds_abs1 with err := T`
 
 (* call_rx_ds_abs1: call ds_abs1 to apply rx mode. *)
