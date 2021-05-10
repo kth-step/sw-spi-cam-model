@@ -8,7 +8,7 @@ val abs0_invar_def = Define `
 abs0_invar (ds_abs0:ds_abs0_state) = ~ds_abs0.err`
 
 (* the invariant holds during state transitions *)
-val abs0_init_correct = store_thm("abs0_init_correct",
+val abs0_invar_holds = store_thm("abs0_invar_holds",
 ``!ds_abs0 lbl ds_abs0'.
 abs0_invar ds_abs0 ==> 
 ds_abs0_tr ds_abs0 lbl ds_abs0' ==>
