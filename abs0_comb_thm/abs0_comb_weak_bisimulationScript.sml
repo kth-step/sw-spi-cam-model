@@ -757,7 +757,7 @@ Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `x'` >> fs [],
 Q.EXISTS_TAC `n'` >> Q.EXISTS_TAC `x'` >> fs [n_tau_tr_def]]);
              
 (* weak_bisim is transitivity *)
-val weak_bisim_trans = store_thm("weak_bisim_trans",
+val weak_bisim_transitivity = store_thm("weak_bisim_transitivity",
 ``!r1 r2 tr1 tr2 tr3. weak_bisim r1 tr1 tr2 ==>
 weak_bisim r2 tr2 tr3 ==>
 weak_bisim (\x y. ?z. r1 x z /\ r2 z y) tr1 tr3``, 
