@@ -691,4 +691,91 @@ METIS_TAC [],
 Q.EXISTS_TAC `ds_abs1''` >> rw [],
 Q.EXISTS_TAC `ds_abs1'''` >> rw []]]);
 
+(* lemmas *)
+val n_tau_tr_imply_new_state_1 = store_thm("n_tau_tr_imply_new_state_1",
+``!(n:num) (tr2:'b -> global_lbl_type -> 'b -> bool)
+   (tr3:'c -> global_lbl_type -> 'c -> bool) (z:'b) (z':'b) (y:'c)
+   (lbl:global_lbl_type) (r2:'b -> 'c -> bool).
+(!s1 s2. r2 s1 s2 ==>
+(!lbl s1'.
+tr2 s1 lbl s1' ==> ?s2'. weak_tr tr3 s2 lbl s2' /\ r2 s1' s2') /\
+!lbl s2'.
+tr3 s2 lbl s2' ==> ?s1'. weak_tr tr2 s1 lbl s1' /\ r2 s1' s2') /\
+n_tau_tr n tr2 z lbl z' /\ r2 z y ==>
+?n1 y'. (n_tau_tr n1 tr3 y lbl y' /\ r2 z' y') \/ (y = y' /\ lbl = tau /\ r2 z' y')``,
+Induct_on `n` >>
+rw [n_tau_tr_def] >-
+(`?s2'. weak_tr tr3 y lbl s2' /\ r2 z' s2'` by METIS_TAC [] >>
+ fs [weak_tr_def] >|[
+    Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `s2'` >> fs [n_tau_tr_def],
+    Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `s2'` >> fs [],
+    Q.EXISTS_TAC `n` >> Q.EXISTS_TAC `s2'` >> fs []]) >>
+`?s2'. weak_tr tr3 y tau s2' /\ r2 s'' s2'` by METIS_TAC [] >>
+`?n1 y'. (n_tau_tr n1 tr3 s2' lbl y' \/ (s2' = y' /\ lbl = tau)) /\ r2 z' y'`
+by METIS_TAC [] >>   
+fs [weak_tr_def] >|[
+Q.EXISTS_TAC `SUC n1` >> Q.EXISTS_TAC `y'` >>
+fs [n_tau_tr_def] >> DISJ1_TAC >>
+Q.EXISTS_TAC `s2'` >> fs [],
+Q.EXISTS_TAC `n1` >> Q.EXISTS_TAC `y'` >> fs [],
+Q.EXISTS_TAC `SUC (n1+n')` >> Q.EXISTS_TAC `y'` >>
+METIS_TAC [n_tau_tr_plus],
+Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `y'` >> fs [n_tau_tr_def],
+Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `y'` >> fs [],
+Q.EXISTS_TAC `n'` >> Q.EXISTS_TAC `y'` >> fs [n_tau_tr_def]]);
+
+val n_tau_tr_imply_new_state_2 = store_thm("n_tau_tr_imply_new_state_2",
+``!(n:num) (tr1:'a -> global_lbl_type -> 'a -> bool)
+   (tr2:'b -> global_lbl_type -> 'b -> bool) (z:'b) (z':'b) (x:'a)
+   (lbl:global_lbl_type) (r1:'a -> 'b -> bool).
+(!s1 s2. r1 s1 s2 ==>
+(!lbl s1'.
+tr1 s1 lbl s1' ==> ?s2'. weak_tr tr2 s2 lbl s2' /\ r1 s1' s2') /\
+!lbl s2'.
+tr2 s2 lbl s2' ==> ?s1'. weak_tr tr1 s1 lbl s1' /\ r1 s1' s2') /\
+n_tau_tr n tr2 z lbl z' /\ r1 x z ==>
+?n1 x'. (n_tau_tr n1 tr1 x lbl x' /\ r1 x' z') \/ (x = x' /\ lbl = tau /\ r1 x' z')``,
+Induct_on `n` >>
+rw [n_tau_tr_def] >-
+(`?s1'. weak_tr tr1 x lbl s1' /\ r1 s1' z'` by METIS_TAC [] >>
+ fs [weak_tr_def] >|[
+    Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `s1'` >> fs [n_tau_tr_def],
+    Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `s1'` >> fs [],
+    Q.EXISTS_TAC `n` >> Q.EXISTS_TAC `s1'` >> fs []]) >>
+`?s1'. weak_tr tr1 x tau s1' /\ r1 s1' s''` by METIS_TAC [] >>
+`?n1 x'. n_tau_tr n1 tr1 s1' lbl x' /\ r1 x' z' \/ s1' = x' /\ lbl = tau /\ r1 x' z'`
+by METIS_TAC [] >>   
+fs [weak_tr_def] >|[
+Q.EXISTS_TAC `SUC n1` >> Q.EXISTS_TAC `x'` >>
+fs [n_tau_tr_def] >> DISJ1_TAC >>
+Q.EXISTS_TAC `s1'` >> fs [],
+Q.EXISTS_TAC `n1` >> Q.EXISTS_TAC `x'` >> fs [],
+Q.EXISTS_TAC `SUC (n1+n')` >> Q.EXISTS_TAC `x'` >>
+METIS_TAC [n_tau_tr_plus],
+Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `x'` >> fs [n_tau_tr_def],
+Q.EXISTS_TAC `0` >> Q.EXISTS_TAC `x'` >> fs [],
+Q.EXISTS_TAC `n'` >> Q.EXISTS_TAC `x'` >> fs [n_tau_tr_def]]);
+             
+(* weak_bisim is transitivity *)
+val weak_bisim_trans = store_thm("weak_bisim_trans",
+``!r1 r2 tr1 tr2 tr3. weak_bisim r1 tr1 tr2 ==>
+weak_bisim r2 tr2 tr3 ==>
+weak_bisim (\x y. ?z. r1 x z /\ r2 z y) tr1 tr3``, 
+rw [weak_bisim_def] >|[
+`?z'.weak_tr tr2 z lbl z' /\ r1 x' z'` by METIS_TAC [] >>
+`(tr2 z lbl z') \/ (z = z' /\ lbl = tau) \/ (?n. n_tau_tr n tr2 z lbl z')`
+by METIS_TAC [weak_tr_def] >|
+[METIS_TAC [],
+Q.EXISTS_TAC `y` >> METIS_TAC [weak_tr_def],
+`?n1 y'. (n_tau_tr n1 tr3 y lbl y' /\ r2 z' y') \/ (y = y' /\ lbl = tau /\ r2 z' y')`
+by metisTools.HO_METIS_TAC [n_tau_tr_imply_new_state_1] >>
+Q.EXISTS_TAC `y'` >> METIS_TAC [weak_tr_def]],
+`?z'.weak_tr tr2 z lbl z' /\ r2 z' y'` by METIS_TAC [] >>
+`(tr2 z lbl z') \/ (z = z' /\ lbl = tau) \/ (?n. n_tau_tr n tr2 z lbl z')`
+by METIS_TAC [weak_tr_def] >|             
+[METIS_TAC [],
+Q.EXISTS_TAC `x` >> METIS_TAC [weak_tr_def],
+`?n1 x'. (n_tau_tr n1 tr1 x lbl x' /\ r1 x' z') \/ (x = x' /\ lbl = tau /\ r1 x' z')` by metisTools.HO_METIS_TAC [n_tau_tr_imply_new_state_2] >>
+Q.EXISTS_TAC `x'` >> METIS_TAC [weak_tr_def]]]);
+
 val _ = export_theory();
