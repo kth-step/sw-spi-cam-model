@@ -243,7 +243,15 @@ d1 with <|state := abs0_xfer_done;
 ds_abs0_xfer := <|xfer_dataIN_buffer := []; xfer_dataOUT_buffer := [b];
 xfer_cur_length := 1; xfer_RSR := a|> |>)` >>
 rw []);
- 
+
+(* the received data is replied in state abs0_xfer_reply *)
+val abs0_xfer_reply_buffer = store_thm("abs0_xfer_reply_buffer",
+``!d0 l1.
+d0.state = abs0_xfer_reply /\ d0.ds_abs0_xfer.xfer_dataIN_buffer = l1 ==>
+?d0'. ds_abs0_tr d0 (call_back l1) d0'``,
+rw [ds_abs0_tr_cases,call_back_ds_abs0_data_def,call_back_ds_abs0_def,
+call_back_ds_abs0_xfer_def]);
+   
 (* abs0 xfer mode is correct: 
    if two devices are called with xfer mode,
    the data buffer will be received by another device *)
@@ -255,10 +263,12 @@ ds_abs0_tr d0 (call_xfer l1) d0' /\
 ds_abs0_tr d1 (call_xfer l2) d1' ==>
 ?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
 d0''.ds_abs0_xfer.xfer_dataIN_buffer = l2 /\
-d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1``,
+d0''.state = abs0_xfer_reply /\              
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\
+d1''.state = abs0_xfer_reply``,
 rw [] >> Cases_on `l1` >> Cases_on `l2` >> fs [] >>
 `t = [] \/ ?x l'. t = SNOC x l'` by rw [SNOC_CASES] >-
-(`t' = []` by fs [] >> fs [] >>
+(`t' = []` by fs [] >> rw [] >>
 METIS_TAC [abs0_xfer_singleton_correct]) >>
 `t' = [] \/ ?x' l''. t' = SNOC x' l''`by rw [SNOC_CASES] >>
 fs [SNOC_APPEND] >>
@@ -293,5 +303,27 @@ Q.EXISTS_TAC `SUC (2 + n1)` >>
 Q.EXISTS_TAC `d0'''` >>
 Q.EXISTS_TAC `d1'''` >>
 METIS_TAC [n_tau_tr_plus]);
+
+val abs0_xfer_correct_with_reply = store_thm("abs0_xfer_correct_with_reply",
+``!d0 d1 l1 l2 d0' d1'.
+d0.state = abs0_ready /\ d1.state = abs0_ready /\ 
+LENGTH l1 = LENGTH l2 /\ l1 <> [] /\ l2 <> [] ==>
+ds_abs0_tr d0 (call_xfer l1) d0' /\
+ds_abs0_tr d1 (call_xfer l2) d1' ==>
+?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = l2 /\
+d0''.state = abs0_xfer_reply /\              
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\
+d1''.state = abs0_xfer_reply ==>
+?d0''' d1'''. ds_abs0_tr d0'' (call_back l2) d0''' /\
+ds_abs0_tr d1'' (call_back l1) d1'''``,
+rw [] >>
+`?n d0'' d1''. n_tau_tr n abs0_global_tr (d0',d1') tau (d0'',d1'') /\
+d0''.ds_abs0_xfer.xfer_dataIN_buffer = l2 /\
+d0''.state = abs0_xfer_reply /\              
+d1''.ds_abs0_xfer.xfer_dataIN_buffer = l1 /\
+d1''.state = abs0_xfer_reply` by METIS_TAC [abs0_xfer_correct] >>
+Q.EXISTS_TAC `n` >> Q.EXISTS_TAC `d0''` >> Q.EXISTS_TAC `d1''` >> fs [] >>
+METIS_TAC [abs0_xfer_reply_buffer]);                              
 
 val _ = export_theory();

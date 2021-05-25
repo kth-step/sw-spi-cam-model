@@ -140,7 +140,9 @@ d1.state = abs0_rx_idle /\ d1.ds_abs0_rx.rx_left_length = n - LENGTH l1 /\
 d1.ds_abs0_rx.rx_data_buffer = l1 /\ n > LENGTH l1 /\ l1 <> [] ==>
 ?d0' d1'.
 n_tau_tr 2 abs0_global_tr (d0,d1) tau (d0',d1') /\
-d1'.ds_abs0_rx.rx_data_buffer = l1 ++ [a]``,
+d1'.ds_abs0_rx.rx_data_buffer = l1 ++ [a] /\
+d1'.state = abs0_rx_idle /\
+d1'.ds_abs0_rx.rx_left_length = n - (LENGTH l1 + 1)``,
 REPEAT STRIP_TAC >>
 fs [n_tau_tr_def, n_tau_tr_SUC, abs0_global_tr_cases, ds_abs0_tr_cases,
 ABS0_RX_LBL_ENABLE_def, abs0_tx_op_value_def, abs0_tx_op_state_def,
@@ -159,7 +161,7 @@ ds_abs0_tx := d0.ds_abs0_tx with tx_cur_length := LENGTH l1 + 1|>,
 d1 with <|state := abs0_rx_reading;
 ds_abs0_rx := d1.ds_abs0_rx with temp_RSR := a|>)` >>
 rw []);
-
+        
 (* theorem 3-2, applying tx and rx modes to tranmit a singeton *)
 val abs0_tx_rx_correct_single = store_thm("abs0_tx_rx_correct_single",
 ``!d0 d1 d0' d1' a.
@@ -167,7 +169,9 @@ d0.state = abs0_ready /\ d1.state = abs0_ready  ==>
 ds_abs0_tr d0 (call_tx [a]) d0' /\ ds_abs0_tr d1 (call_rx 1) d1' ==>
 ?d0'' d1''.
 n_tau_tr 2 abs0_global_tr (d0', d1') tau (d0'', d1'') /\
-d1''.ds_abs0_rx.rx_data_buffer = [a]``,
+d1''.ds_abs0_rx.rx_data_buffer = [a] /\
+d1''.state = abs0_rx_idle /\
+d1''.ds_abs0_rx.rx_left_length = 0``,
 rw [ds_abs0_tr_cases, call_tx_ds_abs0_def, call_rx_ds_abs0_def, 
 n_tau_tr_def, n_tau_tr_SUC, abs0_global_tr_cases, 
 ABS0_RX_LBL_ENABLE_def, abs0_tx_op_value_def, abs0_tx_op_state_def,
@@ -187,6 +191,22 @@ ds_abs0_rx := d1.ds_abs0_rx with
 <|rx_data_buffer := []; rx_left_length := 1; temp_RSR := a|> |>)` >>
 rw [abs0_rx_reading_tau_op_def]);
 
+(* the received data is replied from state abs0_rx_idle to state abs0_rx_reply *)
+val abs0_rx_reply_buffer = store_thm("abs0_rx_reply_buffer",
+``!d0 l1 v.
+d0.state = abs0_rx_idle /\ d0.ds_abs0_rx.rx_data_buffer = l1 /\
+d0.ds_abs0_rx.rx_left_length = 0 ==>
+?d0'. ds_abs0_tr d0 (RX (SOME v)) d0' ==>
+?d0''. ds_abs0_tr d0' tau d0'' ==>      
+?d0'''. ds_abs0_tr d0'' (call_back l1) d0'''``,
+rw [ds_abs0_tr_cases,ABS0_RX_LBL_ENABLE_def,abs0_rx_op_def,abs0_rx_idle_op_def] >>
+Q.EXISTS_TAC `d0 with <|state := abs0_rx_update;
+ds_abs0_rx := d0.ds_abs0_rx with temp_RSR := v |>` >>
+rw [abs0_tau_op_def,abs0_rx_update_tau_op_def,ABS0_TAU_LBL_ENABLE_def] >>
+Q.EXISTS_TAC `d0 with  <|state := abs0_rx_reply;
+ds_abs0_rx := d0.ds_abs0_rx with temp_RSR := v|>` >>
+rw [call_back_ds_abs0_data_def,call_back_ds_abs0_def,call_back_ds_abs0_rx_def]);
+   
 (* abs0 tx and rx modes are correct: 
    if two devices apply tx and rx mode respectively, 
    the data buffer can be transmitted from d0 to d1 *)
@@ -196,7 +216,9 @@ d0.state = abs0_ready /\ d1.state = abs0_ready  ==>
 ds_abs0_tr d0 (call_tx l) d0' /\ ds_abs0_tr d1 (call_rx n) d1' /\ l <> [] /\ n = LENGTH l ==>
 ?n' d0'' d1''.
 n_tau_tr n' abs0_global_tr (d0', d1') tau (d0'', d1'') /\
-d1''.ds_abs0_rx.rx_data_buffer = l``,
+d1''.ds_abs0_rx.rx_data_buffer = l /\
+d1''.state = abs0_rx_idle /\
+d1''.ds_abs0_rx.rx_left_length = 0``,
 rw [] >> Cases_on `l` >> fs [] >>
 `t = [] \/ ?x l'. t = SNOC x l'` by rw [SNOC_CASES] >-
 (fs [] >> METIS_TAC [abs0_tx_rx_correct_single]) >>
@@ -220,7 +242,9 @@ d1''.ds_abs0_rx.rx_left_length = (SUC (LENGTH l' + 1)) - (LENGTH (h::l')) /\
 d1''.ds_abs0_rx.rx_data_buffer = h::l'` by METIS_TAC [abs0_tx_rx_data_left_last_one] >>
 `?d0''' d1'''.
 n_tau_tr 2 abs0_global_tr (d0'',d1'') tau (d0''',d1''') /\
-d1'''.ds_abs0_rx.rx_data_buffer = h::l' ++ [x]` by METIS_TAC [abs0_tx_rx_finish_last_one] >>
+d1'''.ds_abs0_rx.rx_data_buffer = h::l' ++ [x] /\
+d1'''.state = abs0_rx_idle /\
+d1'''.ds_abs0_rx.rx_left_length = SUC (LENGTH l' + 1) -(LENGTH (h::l') + 1)` by METIS_TAC [abs0_tx_rx_finish_last_one] >>
 Q.EXISTS_TAC `SUC (2 + n1)` >>
 Q.EXISTS_TAC `d0'''` >>
 Q.EXISTS_TAC `d1'''` >>
@@ -228,4 +252,25 @@ fs [] >>
 `n1 + 2 = 2 + n1` by rw [] >>
 METIS_TAC [n_tau_tr_plus]);
 
+val abs0_tx_rx_correct_with_reply = ("abs0_tx_rx_correct_with_reply",
+``!d0 d1 d0' d1' l n v.
+d0.state = abs0_ready /\ d1.state = abs0_ready  ==> 
+ds_abs0_tr d0 (call_tx l) d0' /\ ds_abs0_tr d1 (call_rx n) d1' /\ l <> [] /\ n = LENGTH l ==>
+?n' d0'' d1''.
+n_tau_tr n' abs0_global_tr (d0', d1') tau (d0'', d1'') /\
+d1''.ds_abs0_rx.rx_data_buffer = l /\
+d1''.state = abs0_rx_idle /\
+d1''.ds_abs0_rx.rx_left_length = 0 ==>
+?d1'''. ds_abs0_tr d1'' (RX (SOME v)) d1''' ==>
+?d1''''. ds_abs0_tr d1''' tau d1'''' ==>
+?d1'''''.ds_abs0_tr d1'''' (call_back l) d1'''''``,
+rw [] >>                             
+`?n' d0'' d1''.
+n_tau_tr n' abs0_global_tr (d0', d1') tau (d0'', d1'') /\
+d1''.ds_abs0_rx.rx_data_buffer = l /\
+d1''.state = abs0_rx_idle /\
+d1''.ds_abs0_rx.rx_left_length = 0` by METIS_TAC [abs0_tx_rx_correct] >>
+Q.EXISTS_TAC `n` >> Q.EXISTS_TAC `d0''` >> Q.EXISTS_TAC `d1''` >> fs [] >>
+METIS_TAC [abs0_rx_reply_buffer]);
+                               
 val _ = export_theory();
