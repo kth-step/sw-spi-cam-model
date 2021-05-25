@@ -1,21 +1,7 @@
-The abstract (level 1) model.
+The intermediate model B (we call ds_abs1 in HOL4).
 
-### State transition
-
-As the figures are too large, welcome to visit the source documents.
-
-ABS_init:
-
-https://drive.google.com/file/d/1VGQsbBi_EgdgppSIqcnQLv2-cQRQzlcq/view?usp=sharing
-
-ABS_tx:
-
-https://drive.google.com/file/d/1o88HfS6mhoqlb3RelUOSpYf53a7kmS9P/view?usp=sharing
-
-ABS_rx:
-
-https://drive.google.com/file/d/1Nez91Goq814rdJbsvTvnW2nNbSD9U5VP/view?usp=sharing
-
-ABS_xfer:
-
-https://drive.google.com/file/d/1o4rar2MD_KSAFu4ZqmWWleFMaLQpmgfN/view?usp=sharing
+### Files
+- `ds_abs1_init/tx/rx/xferScript.sml`: defines the functions belong to the corresponding sub-automata.
+- `ds_abs1_stateScript.sml`: defines the state of model B.
+- `ds_abs1_relScript.sml`: defines the relation for model B's state transitions.
+- `ref_relScript.sml`: the binary relation R1 for the SPI subsystem and model B. 
