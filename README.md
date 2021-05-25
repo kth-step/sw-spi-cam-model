@@ -2,7 +2,9 @@
 
 Refinement-Based Verification of Device-to-Device Information Flow
 
-Definitions and proofs in HOL4
+Definitions and proofs in HOL4: 
+
+please install the lastest [HOL4 kananaskis-14](https://hol-theorem-prover.org/) interactive theorem prover and use the `Holmake` to build the definitions and proofs.
 
 ### Folder
 - `spi_model`: definitions for SPI hardware model.
